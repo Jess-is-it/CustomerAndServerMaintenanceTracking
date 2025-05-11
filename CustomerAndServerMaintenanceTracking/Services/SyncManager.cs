@@ -1,61 +1,112 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Windows.Forms;
 using CustomerAndServerMaintenanceTracking.DataAccess;
 using CustomerAndServerMaintenanceTracking.Models;
+using CustomerAndServerMaintenanceTracking.Services;
+using tik4net;
+using tik4net.Objects;
 using tik4net.Objects.Ppp;
 
 namespace CustomerAndServerMaintenanceTracking.Services
 {
     public class SyncManager
     {
-        private MikrotikService mikrotikService;
+
         private CustomerRepository customerRepository;
+        public static event EventHandler DataSynced;
 
         public SyncManager()
         {
-            mikrotikService = new MikrotikService();
             customerRepository = new CustomerRepository();
         }
 
-        public void SyncCustomers(string host, string username, string password)
+        // This method now uses the persistent connection from MikrotikClientManager.
+        public Dictionary<string, string> GetPPPActiveConnections()
         {
-            // Retrieve current accounts from Mikrotik
-            List<PppSecret> accounts = mikrotikService.GetPPPoeAccounts(host, username, password);
+            Dictionary<string, string> activeDict = new Dictionary<string, string>();
 
-            // Create a list of account names currently active on Mikrotik
+            try
+            {
+                // Retrieve the connection from MikrotikClientManager.
+                // This connection is maintained persistently, so you no longer pass host/username/password.
+                ITikConnection connection = MikrotikClientManager.Instance.GetConnection();
+
+                // Execute "/ppp/active/print" to list active PPP connections
+                var cmd = connection.CreateCommand("/ppp/active/print");
+                var response = cmd.ExecuteList();
+
+                foreach (var item in response)
+                {
+                    // Assume the attributes are named "name" and "address" (or "remote-address" if applicable)
+                    string pppName = item.GetAttributeValue("name");
+                    string remoteIP = item.GetAttributeValue("address");
+
+
+                    if (!string.IsNullOrEmpty(pppName) && !string.IsNullOrEmpty(remoteIP))
+                    {
+                        activeDict[pppName] = remoteIP;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving PPP active connections", ex);
+            }
+
+            return activeDict;
+        }
+
+
+        public void SyncCustomers()
+        {
+            // 1) Get an ITikConnection from MikrotikClientManager
+            var connection = MikrotikClientManager.Instance.GetConnection();
+
+            // 2) Load PPP secrets from Mikrotik (PPPoe accounts)
+            var accounts = connection.LoadAll<PppSecret>();
+
+            // Retrieve the active connections dictionary
+            Dictionary<string, string> activeDict = GetPPPActiveConnections();
+
+            // .Name is the PPP secret name
+
+            // 3) (Optional) If you need active connections, do:
+            // var activeConns = connection.LoadAll<PppActive>();
+
             var activeAccountNames = accounts.Select(a => a.Name).ToList();
 
-            // For each account retrieved, update or insert it as active
+            // 4) Insert/Update each account in DB
             foreach (var account in accounts)
             {
-                Customer customer = new Customer()
+                activeDict.TryGetValue(account.Name, out string ip);
+
+                Customer cust = new Customer
                 {
                     AccountName = account.Name,
-                    // You can add additional mapping here.
-                    IsArchived = false  // Always active if found in Mikrotik
+                    IPAddress = ip, // or from PppActive if needed
+                    IsArchived = false
                 };
-
-                customerRepository.InsertOrUpdateCustomer(customer);
+                customerRepository.InsertOrUpdateCustomer(cust);
             }
 
-            // Now, retrieve all customers from the database
-            List<Customer> allCustomers = customerRepository.GetCustomers();
-
-            // For each customer that is currently active in our system,
-            // if it is not found in the list of activeAccountNames, mark it as archived.
-            foreach (var customer in allCustomers)
+            // 5) Archive or unarchive based on active list
+            var allCustomers = customerRepository.GetCustomers();
+            foreach (var cust in allCustomers)
             {
-                if (!activeAccountNames.Contains(customer.AccountName) && !customer.IsArchived)
-                {
-                    customerRepository.ArchiveCustomer(customer.AccountName);
-                }
-                else if (activeAccountNames.Contains(customer.AccountName) && customer.IsArchived)
-                {
-                    // If an archived customer reappears on Mikrotik, mark it as active
-                    customerRepository.MarkActiveCustomer(customer.AccountName);
-                }
+                bool isActive = activeAccountNames.Contains(cust.AccountName);
+                if (!isActive && !cust.IsArchived)
+                    customerRepository.ArchiveCustomer(cust.AccountName);
+                else if (isActive && cust.IsArchived)
+                    customerRepository.MarkActiveCustomer(cust.AccountName);
             }
+
+            // Raise the event to notify that data has been synced.
+            DataSynced?.Invoke(this, EventArgs.Empty);
+            // 6) Keep the connection alive
+            MikrotikClientManager.Instance.UpdateLastActivity();
         }
     }
 }

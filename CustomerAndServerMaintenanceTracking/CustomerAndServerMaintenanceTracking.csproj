@@ -33,9 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,8 +54,94 @@
     <Reference Include="tik4net.objects, Version=3.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\tik4net.3.5.0\lib\net462\tik4net.objects.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModalForms\AddPingTask_NetworkCluster.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddPingTask_NetworkCluster.Designer.cs">
+      <DependentUpon>AddPingTask_NetworkCluster.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AssignDeviceIP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AssignDeviceIP.Designer.cs">
+      <DependentUpon>AssignDeviceIP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomCells\TagsDataGridViewMultiButtonCell.cs" />
+    <Compile Include="DataAccess\DeviceIPRepository.cs" />
+    <Compile Include="DataAccess\MikrotikRouterRepository.cs" />
+    <Compile Include="DataAccess\NetworkClusterRepository.cs" />
+    <Compile Include="DataAccess\PingTaskRepository.cs" />
+    <Compile Include="DataAccess\SyncSettingsRepository.cs" />
+    <Compile Include="DataAccess\TagHierarchyMappingRepository.cs" />
+    <Compile Include="ModalForms\EditDeviceIPTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\EditDeviceIPTag.Designer.cs">
+      <DependentUpon>EditDeviceIPTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddDeviceIPTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddDeviceIPTag.Designer.cs">
+      <DependentUpon>AddDeviceIPTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\EditDeviceIP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\EditDeviceIP.Designer.cs">
+      <DependentUpon>EditDeviceIP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddParentTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddParentTag.Designer.cs">
+      <DependentUpon>AddParentTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\EditNetworkCluster.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\EditNetworkCluster.Designer.cs">
+      <DependentUpon>EditNetworkCluster.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddNetworkCluster.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddNetworkCluster.Designer.cs">
+      <DependentUpon>AddNetworkCluster.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddDeviceIP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddDeviceIP.Designer.cs">
+      <DependentUpon>AddDeviceIP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddPingTags.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddPingTags.Designer.cs">
+      <DependentUpon>AddPingTags.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddPingDeviceIP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddPingDeviceIP.Designer.cs">
+      <DependentUpon>AddPingDeviceIP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddPingCustomers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddPingCustomers.Designer.cs">
+      <DependentUpon>AddPingCustomers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AssignCustomerTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AssignCustomerTag.Designer.cs">
+      <DependentUpon>AssignCustomerTag.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dashboard.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -68,24 +157,210 @@
       <DependentUpon>Customers.cs</DependentUpon>
     </Compile>
     <Compile Include="DataAccess\TagRepository.cs" />
-    <Compile Include="Models\Customer.cs" />
-    <Compile Include="Models\Tag.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\MikrotikService.cs" />
-    <Compile Include="Services\SyncManager.cs" />
-    <Compile Include="Services\TikSentenceExtensions.cs" />
-    <Compile Include="Tag.cs">
+    <Compile Include="DeviceIPForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Tag.Designer.cs">
-      <DependentUpon>Tag.cs</DependentUpon>
+    <Compile Include="DeviceIPForm.Designer.cs">
+      <DependentUpon>DeviceIPForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ModalForms\ViewTaggedDeviceIP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\ViewTaggedDeviceIP.Designer.cs">
+      <DependentUpon>ViewTaggedDeviceIP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DeviceIP.cs" />
+    <Compile Include="Models\NetworkCluster.cs" />
+    <Compile Include="Models\TagAssignment.cs" />
+    <Compile Include="Models\TagDisplayModel.cs" />
+    <Compile Include="Models\TagHierarchyGroup.cs" />
+    <Compile Include="Models\TagHierarchyMapping.cs" />
+    <Compile Include="Models\TagPingDisplay.cs" />
+    <Compile Include="NetworkClusterTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NetworkClusterTag.Designer.cs">
+      <DependentUpon>NetworkClusterTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PingIP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PingIP.Designer.cs">
+      <DependentUpon>PingIP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\EditRouter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\EditRouter.Designer.cs">
+      <DependentUpon>EditRouter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddRouter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddRouter.Designer.cs">
+      <DependentUpon>AddRouter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\ViewCustomerTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\ViewCustomerTag.Designer.cs">
+      <DependentUpon>ViewCustomerTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\EditTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\EditTag.Designer.cs">
+      <DependentUpon>EditTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\AddCustomerTag.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddCustomerTag.Designer.cs">
+      <DependentUpon>AddCustomerTag.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\MikrotikRouter.cs" />
+    <Compile Include="Models\PingTask.cs" />
+    <Compile Include="OverlayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OverlayForm.Designer.cs">
+      <DependentUpon>OverlayForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Customer.cs" />
+    <Compile Include="Models\TagClass.cs" />
+    <Compile Include="PingIPTaskList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PingIPTaskList.Designer.cs">
+      <DependentUpon>PingIPTaskList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PingIPTaskView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PingIPTaskView.Designer.cs">
+      <DependentUpon>PingIPTaskView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PingTerminalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PingTerminalForm.Designer.cs">
+      <DependentUpon>PingTerminalForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\MikrotikClientManager.cs" />
+    <Compile Include="Services\PingService.cs" />
+    <Compile Include="Services\SyncManager.cs" />
+    <Compile Include="Services\TagPingAggregator.cs" />
+    <Compile Include="Services\TikSentenceExtensions.cs" />
+    <Compile Include="Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TagForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TagForm.Designer.cs">
+      <DependentUpon>TagForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageTagTree.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageTagTree.Designer.cs">
+      <DependentUpon>ManageTagTree.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControl\UC_NetworkCluster_Ping.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControl\UC_NetworkCluster_Ping.Designer.cs">
+      <DependentUpon>UC_NetworkCluster_Ping.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ModalForms\AddPingTask_NetworkCluster.resx">
+      <DependentUpon>AddPingTask_NetworkCluster.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AssignDeviceIP.resx">
+      <DependentUpon>AssignDeviceIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\EditDeviceIPTag.resx">
+      <DependentUpon>EditDeviceIPTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddDeviceIPTag.resx">
+      <DependentUpon>AddDeviceIPTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\EditDeviceIP.resx">
+      <DependentUpon>EditDeviceIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddParentTag.resx">
+      <DependentUpon>AddParentTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\EditNetworkCluster.resx">
+      <DependentUpon>EditNetworkCluster.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddNetworkCluster.resx">
+      <DependentUpon>AddNetworkCluster.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddDeviceIP.resx">
+      <DependentUpon>AddDeviceIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddPingTags.resx">
+      <DependentUpon>AddPingTags.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddPingDeviceIP.resx">
+      <DependentUpon>AddPingDeviceIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddPingCustomers.resx">
+      <DependentUpon>AddPingCustomers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AssignCustomerTag.resx">
+      <DependentUpon>AssignCustomerTag.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dashboard.resx">
       <DependentUpon>Dashboard.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Customers.resx">
       <DependentUpon>Customers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DeviceIPForm.resx">
+      <DependentUpon>DeviceIPForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\ViewTaggedDeviceIP.resx">
+      <DependentUpon>ViewTaggedDeviceIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NetworkClusterTag.resx">
+      <DependentUpon>NetworkClusterTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PingIP.resx">
+      <DependentUpon>PingIP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\EditRouter.resx">
+      <DependentUpon>EditRouter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddRouter.resx">
+      <DependentUpon>AddRouter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\ViewCustomerTag.resx">
+      <DependentUpon>ViewCustomerTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\EditTag.resx">
+      <DependentUpon>EditTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddCustomerTag.resx">
+      <DependentUpon>AddCustomerTag.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OverlayForm.resx">
+      <DependentUpon>OverlayForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PingIPTaskList.resx">
+      <DependentUpon>PingIPTaskList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PingIPTaskView.resx">
+      <DependentUpon>PingIPTaskView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PingTerminalForm.resx">
+      <DependentUpon>PingTerminalForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -96,8 +371,18 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Tag.resx">
-      <DependentUpon>Tag.cs</DependentUpon>
+    <EmbeddedResource Include="Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TagForm.resx">
+      <DependentUpon>TagForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageTagTree.resx">
+      <DependentUpon>ManageTagTree.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControl\UC_NetworkCluster_Ping.resx">
+      <DependentUpon>UC_NetworkCluster_Ping.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -113,5 +398,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

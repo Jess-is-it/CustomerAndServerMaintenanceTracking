@@ -9,5 +9,6 @@
         public string Email { get; set; }           // Optional
         public string Location { get; set; }        // Optional
         public bool IsArchived { get; set; }
+        public string IPAddress { get; set; }
     }
 }

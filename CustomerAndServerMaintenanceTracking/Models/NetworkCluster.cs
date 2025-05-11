@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace CustomerAndServerMaintenanceTracking.Models
 {
-    public class Tag
+    public class NetworkCluster
     {
         public int Id { get; set; }
-        public string TagName { get; set; }
+        public string ClusterName { get; set; }
+        public string ClusterDescription { get; set; }
     }
 }

@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class Tag: Form
+    public partial class PingIPTaskList : Form
     {
-        public Tag()
+        public PingIPTaskList()
         {
             InitializeComponent();
         }
