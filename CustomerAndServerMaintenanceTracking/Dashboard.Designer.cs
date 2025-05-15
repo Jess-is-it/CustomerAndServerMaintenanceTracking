@@ -36,8 +36,8 @@
             this.assignCustomerTagToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.NetworkClusterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Ping = new System.Windows.Forms.ToolStripMenuItem();
-            this.pingIPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pingTaskListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pingAddNetwatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pingNetwatchListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.iP = new System.Windows.Forms.ToolStripMenuItem();
             this.DeviceIP = new System.Windows.Forms.ToolStripMenuItem();
             this.Settings = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,16 +46,23 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblSyncStatusPPPoe = new System.Windows.Forms.Label();
             this.lblMikrotikStatus = new System.Windows.Forms.Label();
+            this.autoRefreshTimer = new System.Windows.Forms.Timer(this.components);
+            this.tableLayoutRightPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnCloseDetailsPanel = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStripSystemTray.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.flowLayoutPanel2.SuspendLayout();
+            this.tableLayoutRightPanel.SuspendLayout();
+            this.flowLayoutPanel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.btnCloseDetailsPanel)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -116,27 +123,27 @@
             // Ping
             // 
             this.Ping.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pingIPToolStripMenuItem,
-            this.pingTaskListToolStripMenuItem});
+            this.pingAddNetwatchToolStripMenuItem,
+            this.pingNetwatchListToolStripMenuItem});
             this.Ping.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Ping.Name = "Ping";
             this.Ping.Size = new System.Drawing.Size(175, 29);
-            this.Ping.Text = "Ping";
+            this.Ping.Text = "Tools";
             this.Ping.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // pingIPToolStripMenuItem
+            // pingAddNetwatchToolStripMenuItem
             // 
-            this.pingIPToolStripMenuItem.Name = "pingIPToolStripMenuItem";
-            this.pingIPToolStripMenuItem.Size = new System.Drawing.Size(195, 30);
-            this.pingIPToolStripMenuItem.Text = "Ping IP";
-            this.pingIPToolStripMenuItem.Click += new System.EventHandler(this.pingIPToolStripMenuItem_Click);
+            this.pingAddNetwatchToolStripMenuItem.Name = "pingAddNetwatchToolStripMenuItem";
+            this.pingAddNetwatchToolStripMenuItem.Size = new System.Drawing.Size(203, 30);
+            this.pingAddNetwatchToolStripMenuItem.Text = "Add Netwatch";
+            this.pingAddNetwatchToolStripMenuItem.Click += new System.EventHandler(this.pingAddNetwatchToolStripMenuItem_Click);
             // 
-            // pingTaskListToolStripMenuItem
+            // pingNetwatchListToolStripMenuItem
             // 
-            this.pingTaskListToolStripMenuItem.Name = "pingTaskListToolStripMenuItem";
-            this.pingTaskListToolStripMenuItem.Size = new System.Drawing.Size(195, 30);
-            this.pingTaskListToolStripMenuItem.Text = "Ping Task List";
-            this.pingTaskListToolStripMenuItem.Click += new System.EventHandler(this.pingTaskListToolStripMenuItem_Click);
+            this.pingNetwatchListToolStripMenuItem.Name = "pingNetwatchListToolStripMenuItem";
+            this.pingNetwatchListToolStripMenuItem.Size = new System.Drawing.Size(203, 30);
+            this.pingNetwatchListToolStripMenuItem.Text = "Netwatch List";
+            this.pingNetwatchListToolStripMenuItem.Click += new System.EventHandler(this.pingNetwatchListToolStripMenuItem_Click);
             // 
             // iP
             // 
@@ -214,17 +221,6 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(194, 74);
             this.flowLayoutPanel1.TabIndex = 3;
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(24, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(58, 80);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 4;
-            this.pictureBox1.TabStop = false;
-            // 
             // flowLayoutPanel2
             // 
             this.flowLayoutPanel2.Controls.Add(this.lblSyncStatusPPPoe);
@@ -256,11 +252,67 @@
             this.lblMikrotikStatus.TabIndex = 4;
             this.lblMikrotikStatus.Text = "Loading...";
             // 
+            // autoRefreshTimer
+            // 
+            this.autoRefreshTimer.Enabled = true;
+            this.autoRefreshTimer.Interval = 1000;
+            this.autoRefreshTimer.Tick += new System.EventHandler(this.autoRefreshTimer_Tick);
+            // 
+            // tableLayoutRightPanel
+            // 
+            this.tableLayoutRightPanel.ColumnCount = 1;
+            this.tableLayoutRightPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutRightPanel.Controls.Add(this.flowLayoutPanel3, 0, 0);
+            this.tableLayoutRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.tableLayoutRightPanel.Location = new System.Drawing.Point(632, 0);
+            this.tableLayoutRightPanel.Name = "tableLayoutRightPanel";
+            this.tableLayoutRightPanel.Padding = new System.Windows.Forms.Padding(0, 16, 0, 0);
+            this.tableLayoutRightPanel.RowCount = 3;
+            this.tableLayoutRightPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutRightPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutRightPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutRightPanel.Size = new System.Drawing.Size(280, 619);
+            this.tableLayoutRightPanel.TabIndex = 5;
+            // 
+            // flowLayoutPanel3
+            // 
+            this.flowLayoutPanel3.Controls.Add(this.btnCloseDetailsPanel);
+            this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(0, 16);
+            this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
+            this.flowLayoutPanel3.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(280, 40);
+            this.flowLayoutPanel3.TabIndex = 0;
+            // 
+            // btnCloseDetailsPanel
+            // 
+            this.btnCloseDetailsPanel.Image = global::CustomerAndServerMaintenanceTracking.Properties.Resources.Close_black;
+            this.btnCloseDetailsPanel.Location = new System.Drawing.Point(237, 3);
+            this.btnCloseDetailsPanel.Name = "btnCloseDetailsPanel";
+            this.btnCloseDetailsPanel.Size = new System.Drawing.Size(32, 32);
+            this.btnCloseDetailsPanel.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.btnCloseDetailsPanel.TabIndex = 0;
+            this.btnCloseDetailsPanel.TabStop = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(24, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(58, 80);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 4;
+            this.pictureBox1.TabStop = false;
+            // 
             // Dashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(912, 619);
+            this.Controls.Add(this.tableLayoutRightPanel);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
@@ -276,9 +328,12 @@
             this.contextMenuStripSystemTray.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
+            this.tableLayoutRightPanel.ResumeLayout(false);
+            this.flowLayoutPanel3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.btnCloseDetailsPanel)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -303,7 +358,11 @@
         private System.Windows.Forms.ToolStripMenuItem DeviceIP;
         private System.Windows.Forms.ToolStripMenuItem assignCustomerTagToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem NetworkClusterToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem pingIPToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem pingTaskListToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pingAddNetwatchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pingNetwatchListToolStripMenuItem;
+        private System.Windows.Forms.Timer autoRefreshTimer;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutRightPanel;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
+        private System.Windows.Forms.PictureBox btnCloseDetailsPanel;
     }
 }

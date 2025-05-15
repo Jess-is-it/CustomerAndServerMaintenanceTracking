@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CustomerAndServerMaintenanceTracking.Models
 {
-    public class TagPingDisplay
+    public class NetwatchDisplay
     {
         public string TagName { get; set; }
         public string Entity { get; set; }

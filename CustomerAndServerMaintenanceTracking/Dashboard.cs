@@ -1,6 +1,7 @@
 ﻿using CustomerAndServerMaintenanceTracking.DataAccess;
 using CustomerAndServerMaintenanceTracking.ModalForms;
 using CustomerAndServerMaintenanceTracking.Services;
+using CustomerAndServerMaintenanceTracking.UserControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +19,7 @@ namespace CustomerAndServerMaintenanceTracking
     {
         private System.Timers.Timer timerPPPoe;
         private SyncManager syncManager;
-
+        private Control _currentDetailControl = null;
 
         public Dashboard()
         {
@@ -34,6 +35,30 @@ namespace CustomerAndServerMaintenanceTracking
             catch (Exception ex)
             {
                 MessageBox.Show("Error connecting to Mikrotik: " + ex.Message);
+            }
+
+            if (this.tableLayoutRightPanel != null)
+            {
+                this.tableLayoutRightPanel.Visible = false; // Start hidden
+
+                // Find the close button if it's a direct child of the panel or within a sub-panel
+                // For this example, let's assume btnCloseDetailsPanel is directly accessible by its name.
+                // If btnCloseDetailsPanel is on the Dashboard form itself but logically part of this panel's UI:
+                if (this.btnCloseDetailsPanel != null) // Make sure this button exists on your Dashboard form
+                {
+                    this.btnCloseDetailsPanel.Click -= CloseRightDetailPanel_Click; // Prevent multiple subscriptions
+                    this.btnCloseDetailsPanel.Click += CloseRightDetailPanel_Click;
+                }
+                else
+                {
+                    // If btnCloseDetailsPanel is dynamically added or deeply nested, you'd find it differently.
+                    // For now, assuming it's a named control on the Dashboard form.
+                    Console.WriteLine("WARNING: btnCloseDetailsPanel not found on Dashboard. Close functionality for right panel might not work.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("WARNING: tableLayoutRightPanel not found on Dashboard. Detail view cannot be shown.");
             }
 
 
@@ -94,6 +119,7 @@ namespace CustomerAndServerMaintenanceTracking
             {
                 timerPPPoe.Stop();
                 timerPPPoe.Dispose();
+                autoRefreshTimer.Stop();
             }
 
 
@@ -189,11 +215,6 @@ namespace CustomerAndServerMaintenanceTracking
             }
         }
 
-        private void Ping_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void assignTagToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Check if the form is already open; if so, focus it.
@@ -274,11 +295,12 @@ namespace CustomerAndServerMaintenanceTracking
             }
         }
 
-        private void pingIPToolStripMenuItem_Click(object sender, EventArgs e)
+        private void pingAddNetwatchToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Check if the form is already open; if so, focus it.
             foreach (Form child in this.MdiChildren)
             {
-                if (child is PingIP)
+                if (child is NetwatchAdd)
                 {
                     child.Activate();
                     return;
@@ -286,16 +308,17 @@ namespace CustomerAndServerMaintenanceTracking
             }
 
             // Create a new instance of the TagForm and set its MdiParent.
-            PingIP ping = new PingIP();
-            ping.MdiParent = this;
-            ping.Show();
+            NetwatchAdd Netwatch = new NetwatchAdd();
+            Netwatch.MdiParent = this;
+            Netwatch.Show();
         }
 
-        private void pingTaskListToolStripMenuItem_Click(object sender, EventArgs e)
+        private void pingNetwatchListToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Check if the form is already open; if so, focus it.
             foreach (Form child in this.MdiChildren)
             {
-                if (child is PingIPTaskList)
+                if (child is NetwatchList)
                 {
                     child.Activate();
                     return;
@@ -303,9 +326,100 @@ namespace CustomerAndServerMaintenanceTracking
             }
 
             // Create a new instance of the TagForm and set its MdiParent.
-            PingIPTaskList pingtask = new PingIPTaskList();
-            pingtask.MdiParent = this;
-            pingtask.Show();
+            NetwatchList netwatchlist = new NetwatchList();
+            netwatchlist.MdiParent = this;
+            netwatchlist.Show();
         }
+
+        private void autoRefreshTimer_Tick(object sender, EventArgs e)
+        {
+            // Get the currently active MDI child form
+            Form activeChildForm = this.ActiveMdiChild;
+
+            if (activeChildForm != null && !activeChildForm.IsDisposed && activeChildForm.Visible)
+            {
+                // Check if the active child form implements IRefreshableForm
+                if (activeChildForm is IRefreshableForm refreshableForm)
+                {
+                    try
+                    {
+                        // Call its refresh method
+                        refreshableForm.RefreshDataViews();
+                        // You can add a Debug.WriteLine here if you want to see when refreshes happen
+                        // System.Diagnostics.Debug.WriteLine($"Dashboard: Auto-refreshed active MDI child '{activeChildForm.Name}' at {DateTime.Now}");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log or handle exceptions that might occur during the refresh
+                        // to prevent the timer from stopping or the application from crashing.
+                        Console.WriteLine($"Error during auto-refresh of form {activeChildForm.Name}: {ex.Message}");
+                        // Consider stopping the timer or logging to a more persistent place if errors are frequent.
+                    }
+                }
+            }
+        }
+
+
+        #region Right Side Panel
+        public void ShowDetailViewInRightPanel(Control detailUserControl)
+        {
+            if (this.tableLayoutRightPanel == null) return;
+
+            // Clear previous control from the target cell (e.g., Row 1, Column 0)
+            Control targetCellContent = this.tableLayoutRightPanel.GetControlFromPosition(0, 1); // Assuming Col 0, Row 1 for the UC
+            if (targetCellContent != null)
+            {
+                this.tableLayoutRightPanel.Controls.Remove(targetCellContent);
+                targetCellContent.Dispose();
+            }
+
+            // Dispose of the globally tracked current detail control if it exists
+            if (_currentDetailControl != null && !_currentDetailControl.IsDisposed)
+            {
+                _currentDetailControl.Dispose();
+            }
+
+            _currentDetailControl = detailUserControl; // Store reference to the new UC
+
+            if (_currentDetailControl != null)
+            {
+                _currentDetailControl.Dock = DockStyle.Fill;
+                // Add to the second row (index 1), first column (index 0)
+                this.tableLayoutRightPanel.Controls.Add(_currentDetailControl, 0, 1);
+                this.tableLayoutRightPanel.Visible = true;
+            }
+            else // If null is passed, effectively hide the panel
+            {
+                this.tableLayoutRightPanel.Visible = false;
+            }
+        }
+        public void ShowNetwatchDetailInPanel(int netwatchConfigId, string netwatchConfigName)
+        {
+            UC_NetwatchDetailedStatus netwatchDetailUC = new UC_NetwatchDetailedStatus(netwatchConfigId, netwatchConfigName);
+            ShowDetailViewInRightPanel(netwatchDetailUC);
+        }
+        private void CloseRightDetailPanel_Click(object sender, EventArgs e)
+        {
+            if (this.tableLayoutRightPanel == null) return;
+
+            this.tableLayoutRightPanel.Visible = false;
+
+            // Clear and dispose the control in the target cell
+            Control targetCellContent = this.tableLayoutRightPanel.GetControlFromPosition(0, 1); // Col 0, Row 1
+            if (targetCellContent != null)
+            {
+                this.tableLayoutRightPanel.Controls.Remove(targetCellContent);
+                targetCellContent.Dispose();
+            }
+
+            if (_currentDetailControl != null && !_currentDetailControl.IsDisposed)
+            {
+                // _currentDetailControl should be the same as targetCellContent if managed correctly
+                _currentDetailControl.Dispose();
+                _currentDetailControl = null;
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace CustomerAndServerMaintenanceTracking
+﻿namespace CustomerAndServerMaintenanceTracking.UserControl
 {
-    partial class UC_NetworkCluster_Ping
+    partial class UC_NetworkCluster_Netwatch
     {
         /// <summary> 
         /// Required designer variable.
@@ -33,7 +33,7 @@
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.txtSearchTags = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel4 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnAddPingTask = new System.Windows.Forms.Button();
+            this.btnAddNetwatch = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
@@ -100,7 +100,7 @@
             // 
             // flowLayoutPanel4
             // 
-            this.flowLayoutPanel4.Controls.Add(this.btnAddPingTask);
+            this.flowLayoutPanel4.Controls.Add(this.btnAddNetwatch);
             this.flowLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel4.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flowLayoutPanel4.Location = new System.Drawing.Point(396, 0);
@@ -109,18 +109,18 @@
             this.flowLayoutPanel4.Size = new System.Drawing.Size(397, 40);
             this.flowLayoutPanel4.TabIndex = 1;
             // 
-            // btnAddPingTask
+            // btnAddNetwatch
             // 
-            this.btnAddPingTask.BackColor = System.Drawing.Color.DeepSkyBlue;
-            this.btnAddPingTask.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAddPingTask.ForeColor = System.Drawing.Color.Black;
-            this.btnAddPingTask.Location = new System.Drawing.Point(277, 0);
-            this.btnAddPingTask.Margin = new System.Windows.Forms.Padding(0);
-            this.btnAddPingTask.Name = "btnAddPingTask";
-            this.btnAddPingTask.Size = new System.Drawing.Size(120, 26);
-            this.btnAddPingTask.TabIndex = 3;
-            this.btnAddPingTask.Text = "Add Ping Task";
-            this.btnAddPingTask.UseVisualStyleBackColor = false;
+            this.btnAddNetwatch.BackColor = System.Drawing.Color.DeepSkyBlue;
+            this.btnAddNetwatch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAddNetwatch.ForeColor = System.Drawing.Color.Black;
+            this.btnAddNetwatch.Location = new System.Drawing.Point(277, 0);
+            this.btnAddNetwatch.Margin = new System.Windows.Forms.Padding(0);
+            this.btnAddNetwatch.Name = "btnAddNetwatch";
+            this.btnAddNetwatch.Size = new System.Drawing.Size(120, 26);
+            this.btnAddNetwatch.TabIndex = 3;
+            this.btnAddNetwatch.Text = "Add Netwatch";
+            this.btnAddNetwatch.UseVisualStyleBackColor = false;
             // 
             // tableLayoutPanel1
             // 
@@ -173,7 +173,7 @@
             this.Controls.Add(this.tableLayoutPanel3);
             this.Name = "UC_NetworkCluster_Ping";
             this.Size = new System.Drawing.Size(793, 676);
-            this.Load += new System.EventHandler(this.UC_NetworkCluster_Ping_Load);
+            this.Load += new System.EventHandler(this.UC_NetworkCluster_Netwatch_Load);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
@@ -191,7 +191,7 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.TextBox txtSearchTags;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel4;
-        private System.Windows.Forms.Button btnAddPingTask;
+        private System.Windows.Forms.Button btnAddNetwatch;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel6;

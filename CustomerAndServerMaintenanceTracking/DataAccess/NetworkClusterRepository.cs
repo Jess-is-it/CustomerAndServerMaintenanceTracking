@@ -112,6 +112,31 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 conn.Close();
             }
         }
-
+        public NetworkCluster GetClusterById(int clusterId)
+        {
+            NetworkCluster cluster = null;
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(
+                    "SELECT Id, ClusterName, ClusterDescription FROM NetworkClusters WHERE Id = @Id",
+                    conn);
+                cmd.Parameters.AddWithValue("@Id", clusterId);
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read()) // Expecting only one row
+                    {
+                        cluster = new NetworkCluster
+                        {
+                            Id = Convert.ToInt32(reader["Id"]),
+                            ClusterName = reader["ClusterName"].ToString(),
+                            ClusterDescription = reader["ClusterDescription"].ToString()
+                        };
+                    }
+                }
+                conn.Close();
+            }
+            return cluster; // Will return null if not found
+        }
     }
 }

@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class PingIPTaskList : Form
+    public partial class MyUniqueControl123 : UserControl
     {
-        public PingIPTaskList()
+        public MyUniqueControl123()
         {
             InitializeComponent();
         }

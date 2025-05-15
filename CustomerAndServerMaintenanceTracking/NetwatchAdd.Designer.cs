@@ -1,6 +1,6 @@
 ﻿namespace CustomerAndServerMaintenanceTracking
 {
-    partial class PingIP
+    partial class NetwatchAdd
     {
         /// <summary>
         /// Required designer variable.
@@ -30,13 +30,11 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabControlNetworkCluster = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.tabControlNetworkCluster = new System.Windows.Forms.TabControl();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.tabControlNetworkCluster.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -63,6 +61,15 @@
             this.tabPage1.Text = "Network Cluster";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // tabControlNetworkCluster
+            // 
+            this.tabControlNetworkCluster.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControlNetworkCluster.Location = new System.Drawing.Point(3, 3);
+            this.tabControlNetworkCluster.Name = "tabControlNetworkCluster";
+            this.tabControlNetworkCluster.SelectedIndex = 0;
+            this.tabControlNetworkCluster.Size = new System.Drawing.Size(827, 628);
+            this.tabControlNetworkCluster.TabIndex = 0;
+            // 
             // tabPage2
             // 
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
@@ -82,38 +89,17 @@
             this.tabPage3.Text = "Device IP";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // tabControlNetworkCluster
-            // 
-            this.tabControlNetworkCluster.Controls.Add(this.tabPage4);
-            this.tabControlNetworkCluster.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControlNetworkCluster.Location = new System.Drawing.Point(3, 3);
-            this.tabControlNetworkCluster.Name = "tabControlNetworkCluster";
-            this.tabControlNetworkCluster.SelectedIndex = 0;
-            this.tabControlNetworkCluster.Size = new System.Drawing.Size(827, 628);
-            this.tabControlNetworkCluster.TabIndex = 0;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.Location = new System.Drawing.Point(4, 25);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(819, 599);
-            this.tabPage4.TabIndex = 0;
-            this.tabPage4.Text = "tabPage4";
-            this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // PingIP
+            // NetwatchAdd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(841, 663);
             this.Controls.Add(this.tabControl1);
-            this.Name = "PingIP";
-            this.Text = "Ping IP";
-            this.Load += new System.EventHandler(this.Ping_Load);
+            this.Name = "NetwatchAdd";
+            this.Text = "Add Netwatch";
+            this.Load += new System.EventHandler(this.Netwatch_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabControlNetworkCluster.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -125,6 +111,5 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.TabControl tabControlNetworkCluster;
-        private System.Windows.Forms.TabPage tabPage4;
     }
 }

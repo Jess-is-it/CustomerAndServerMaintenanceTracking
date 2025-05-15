@@ -3,6 +3,7 @@ using CustomerAndServerMaintenanceTracking.DataAccess;
 using CustomerAndServerMaintenanceTracking.ModalForms;
 using CustomerAndServerMaintenanceTracking.Models;
 using CustomerAndServerMaintenanceTracking.Services;
+using CustomerAndServerMaintenanceTracking.UserControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,12 +16,13 @@ using System.Windows.Forms;
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class PingIP: Form
+    public partial class NetwatchAdd: Form
     {
         private OverlayForm overlayForm;
         private NetworkClusterRepository _networkClusterRepository;
+        public event EventHandler ConfigSaved;
 
-        public PingIP()
+        public NetwatchAdd()
         {
             InitializeComponent();
             _networkClusterRepository = new NetworkClusterRepository();
@@ -39,7 +41,7 @@ namespace CustomerAndServerMaintenanceTracking
             overlayForm.Bounds = this.Bounds;
             overlayForm.Show();
         }
-        private void Ping_Load(object sender, EventArgs e)
+        private void Netwatch_Load(object sender, EventArgs e)
         {
             // --- Start: Dynamic Tab Creation ---
             tabControlNetworkCluster.TabPages.Clear(); // Clear any tabs potentially added in the designer
@@ -57,7 +59,7 @@ namespace CustomerAndServerMaintenanceTracking
 
                     // --- Start: Add User Control ---
                     // Create an instance of your User Control
-                    UC_NetworkCluster_Ping clusterPingControl = new UC_NetworkCluster_Ping();
+                    UC_NetworkCluster_Netwatch clusterPingControl = new UC_NetworkCluster_Netwatch();
 
                     // Set its Dock property to fill the TabPage
                     clusterPingControl.Dock = DockStyle.Fill;
@@ -81,7 +83,6 @@ namespace CustomerAndServerMaintenanceTracking
             }
             LoadTags();
             SetupTagsGrid();
-            LoadTagAggregates();
         }
         private void SetupTagsGrid()
         {
@@ -132,14 +133,7 @@ namespace CustomerAndServerMaintenanceTracking
             };
            // dgvTags.Columns.Add(actionCol);
         }
-        private void LoadTagAggregates()
-        {
-            TagPingAggregator aggregator = new TagPingAggregator();
-            List<TagPingDisplay> data = aggregator.GetTagPingDisplays();
-
-           // dgvTags.DataSource = null;
-           // dgvTags.DataSource = data;
-        }
+     
         private void LoadTags(string searchTerm = "")
         {
             TagRepository tagRepo = new TagRepository();

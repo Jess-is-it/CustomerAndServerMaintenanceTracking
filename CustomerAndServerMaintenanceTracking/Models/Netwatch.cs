@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CustomerAndServerMaintenanceTracking.Models
 {
-    public class PingTask
+    public class Netwatch
     {
         public int Id { get; set; }
         public string PingName { get; set; }

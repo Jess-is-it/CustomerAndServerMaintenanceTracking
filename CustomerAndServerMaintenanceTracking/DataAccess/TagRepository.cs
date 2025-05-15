@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using CustomerAndServerMaintenanceTracking.Models;
 
 namespace CustomerAndServerMaintenanceTracking.DataAccess
@@ -516,8 +517,78 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
         }
         #endregion
 
-        #region Method ManageTagTree
+        #region Method for ICMP Ping Service
+        public List<string> GetIpAddressesForMonitoredTags(List<int> monitoredTagIds)
+        {
+            var ipAddresses = new HashSet<string>(); // Use HashSet to ensure uniqueness automatically
 
+            if (monitoredTagIds == null || !monitoredTagIds.Any())
+            {
+                return new List<string>();
+            }
+
+            // Create a comma-separated string of tag IDs for the IN clause
+            string tagIdsParameter = string.Join(",", monitoredTagIds);
+
+            using (SqlConnection conn = dbHelper.GetConnection()) // Assuming dbHelper is your DatabaseHelper instance
+            {
+                conn.Open();
+
+                // 1. Get IPs from Customers linked to the monitored tags
+                // Updated to handle a list of tag IDs properly in the SQL query
+                string customerIpQuery = $@"
+            SELECT DISTINCT c.IPAddress
+            FROM Customers c
+            INNER JOIN CustomerTags ct ON c.Id = ct.CustomerId
+            WHERE ct.TagId IN ({tagIdsParameter}) AND c.IPAddress IS NOT NULL AND c.IPAddress <> '';";
+
+                // It's generally safer to use parameterized queries to prevent SQL injection,
+                // especially if tagIdsParameter could ever come from less trusted input.
+                // For multiple IN values, creating parameters dynamically or using TVP is better.
+                // However, for internal list of ints, direct injection into IN clause is common for simplicity.
+                // Let's proceed with this for now, but be mindful for wider use.
+
+                using (SqlCommand cmd = new SqlCommand(customerIpQuery, conn))
+                {
+                    // If parameterizing:
+                    // int i = 0;
+                    // foreach (int tagId in monitoredTagIds)
+                    // {
+                    //    cmd.Parameters.AddWithValue($"@TagId{i}", tagId);
+                    //    i++;
+                    // }
+                    // And modify query to use @TagId0, @TagId1 etc.
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ipAddresses.Add(reader["IPAddress"].ToString());
+                        }
+                    }
+                }
+
+                // 2. Get IPs from DeviceIPs linked to the monitored tags
+                string deviceIpQuery = $@"
+            SELECT DISTINCT dip.IPAddress
+            FROM DeviceIPs dip
+            INNER JOIN DeviceIPTags dt ON dip.Id = dt.DeviceIPId
+            WHERE dt.TagId IN ({tagIdsParameter}) AND dip.IPAddress IS NOT NULL AND dip.IPAddress <> '';";
+
+                using (SqlCommand cmd = new SqlCommand(deviceIpQuery, conn))
+                {
+                    // Similar parameterization note as above
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ipAddresses.Add(reader["IPAddress"].ToString());
+                        }
+                    }
+                }
+            }
+            return ipAddresses.ToList();
+        }
         #endregion
 
         #region Method for Device IP
@@ -634,6 +705,80 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
         }
         #endregion
 
+        #region METHOD for Detailed IP Status Popup/Form
+        public List<MonitoredIpDetail> GetMonitoredIpDetailsForTags(List<int> monitoredTagIds)
+        {
+            var ipDetails = new List<MonitoredIpDetail>();
+            var uniqueIpTracker = new HashSet<string>(); // To avoid duplicate IPs if tagged multiple ways
+
+            if (monitoredTagIds == null || !monitoredTagIds.Any())
+            {
+                return ipDetails;
+            }
+
+            string tagIdsParameter = string.Join(",", monitoredTagIds.Distinct());
+
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                conn.Open();
+
+                // 1. Get IPs and Names from Customers linked to the monitored tags
+                string customerIpQuery = $@"
+            SELECT DISTINCT c.IPAddress, c.AccountName 
+            FROM Customers c
+            INNER JOIN CustomerTags ct ON c.Id = ct.CustomerId
+            WHERE ct.TagId IN ({tagIdsParameter}) AND c.IPAddress IS NOT NULL AND c.IPAddress <> '';";
+
+                using (SqlCommand cmd = new SqlCommand(customerIpQuery, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string ip = reader["IPAddress"].ToString();
+                            if (!string.IsNullOrWhiteSpace(ip) && uniqueIpTracker.Add(ip)) // Ensure IP is unique
+                            {
+                                ipDetails.Add(new MonitoredIpDetail
+                                {
+                                    IpAddress = ip,
+                                    EntityName = reader["AccountName"].ToString(),
+                                    EntityType = "Customer"
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // 2. Get IPs and Names from DeviceIPs linked to the monitored tags
+                string deviceIpQuery = $@"
+            SELECT DISTINCT dip.IPAddress, dip.DeviceName 
+            FROM DeviceIPs dip
+            INNER JOIN DeviceIPTags dt ON dip.Id = dt.DeviceIPId
+            WHERE dt.TagId IN ({tagIdsParameter}) AND dip.IPAddress IS NOT NULL AND dip.IPAddress <> '';";
+
+                using (SqlCommand cmd = new SqlCommand(deviceIpQuery, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string ip = reader["IPAddress"].ToString();
+                            if (!string.IsNullOrWhiteSpace(ip) && uniqueIpTracker.Add(ip)) // Ensure IP is unique
+                            {
+                                ipDetails.Add(new MonitoredIpDetail
+                                {
+                                    IpAddress = ip,
+                                    EntityName = reader["DeviceName"].ToString(),
+                                    EntityType = "DeviceIP"
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            return ipDetails;
+        }
+        #endregion
 
     }
 }

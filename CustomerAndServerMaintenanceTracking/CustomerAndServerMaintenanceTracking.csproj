@@ -57,11 +57,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModalForms\AddPingTask_NetworkCluster.cs">
+    <Compile Include="CustomCells\ActionDataGridViewMultiButtonCell.cs" />
+    <Compile Include="CustomCells\ActionDataGridViewMultiButtonColumn.cs" />
+    <Compile Include="IRefreshableForm.cs" />
+    <Compile Include="ModalForms\AddNetwatchConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ModalForms\AddPingTask_NetworkCluster.Designer.cs">
-      <DependentUpon>AddPingTask_NetworkCluster.cs</DependentUpon>
+    <Compile Include="ModalForms\AddNetwatchConfigForm.Designer.cs">
+      <DependentUpon>AddNetwatchConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ModalForms\AssignDeviceIP.cs">
       <SubType>Form</SubType>
@@ -73,7 +76,7 @@
     <Compile Include="DataAccess\DeviceIPRepository.cs" />
     <Compile Include="DataAccess\MikrotikRouterRepository.cs" />
     <Compile Include="DataAccess\NetworkClusterRepository.cs" />
-    <Compile Include="DataAccess\PingTaskRepository.cs" />
+    <Compile Include="DataAccess\NetwatchConfigRepository.cs" />
     <Compile Include="DataAccess\SyncSettingsRepository.cs" />
     <Compile Include="DataAccess\TagHierarchyMappingRepository.cs" />
     <Compile Include="ModalForms\EditDeviceIPTag.cs">
@@ -118,24 +121,6 @@
     <Compile Include="ModalForms\AddDeviceIP.Designer.cs">
       <DependentUpon>AddDeviceIP.cs</DependentUpon>
     </Compile>
-    <Compile Include="ModalForms\AddPingTags.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ModalForms\AddPingTags.Designer.cs">
-      <DependentUpon>AddPingTags.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ModalForms\AddPingDeviceIP.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ModalForms\AddPingDeviceIP.Designer.cs">
-      <DependentUpon>AddPingDeviceIP.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ModalForms\AddPingCustomers.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ModalForms\AddPingCustomers.Designer.cs">
-      <DependentUpon>AddPingCustomers.cs</DependentUpon>
-    </Compile>
     <Compile Include="ModalForms\AssignCustomerTag.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -163,6 +148,12 @@
     <Compile Include="DeviceIPForm.Designer.cs">
       <DependentUpon>DeviceIPForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ModalForms\NetwatchDetailedStatusForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\NetwatchDetailedStatusForm.Designer.cs">
+      <DependentUpon>NetwatchDetailedStatusForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ModalForms\ViewTaggedDeviceIP.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -170,23 +161,27 @@
       <DependentUpon>ViewTaggedDeviceIP.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\DeviceIP.cs" />
+    <Compile Include="Models\IndividualIpStatus.cs" />
+    <Compile Include="Models\MonitoredIpDetail.cs" />
+    <Compile Include="Models\NetwatchConfig.cs" />
+    <Compile Include="Models\NetwatchConfigDisplay.cs" />
     <Compile Include="Models\NetworkCluster.cs" />
     <Compile Include="Models\TagAssignment.cs" />
     <Compile Include="Models\TagDisplayModel.cs" />
     <Compile Include="Models\TagHierarchyGroup.cs" />
     <Compile Include="Models\TagHierarchyMapping.cs" />
-    <Compile Include="Models\TagPingDisplay.cs" />
+    <Compile Include="Models\NetwatchDisplay.cs" />
     <Compile Include="NetworkClusterTag.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="NetworkClusterTag.Designer.cs">
       <DependentUpon>NetworkClusterTag.cs</DependentUpon>
     </Compile>
-    <Compile Include="PingIP.cs">
+    <Compile Include="NetwatchAdd.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PingIP.Designer.cs">
-      <DependentUpon>PingIP.cs</DependentUpon>
+    <Compile Include="NetwatchAdd.Designer.cs">
+      <DependentUpon>NetwatchAdd.cs</DependentUpon>
     </Compile>
     <Compile Include="ModalForms\EditRouter.cs">
       <SubType>Form</SubType>
@@ -219,7 +214,7 @@
       <DependentUpon>AddCustomerTag.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\MikrotikRouter.cs" />
-    <Compile Include="Models\PingTask.cs" />
+    <Compile Include="Models\Netwatch.cs" />
     <Compile Include="OverlayForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -228,17 +223,17 @@
     </Compile>
     <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\TagClass.cs" />
-    <Compile Include="PingIPTaskList.cs">
+    <Compile Include="NetwatchList.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PingIPTaskList.Designer.cs">
-      <DependentUpon>PingIPTaskList.cs</DependentUpon>
+    <Compile Include="NetwatchList.Designer.cs">
+      <DependentUpon>NetwatchList.cs</DependentUpon>
     </Compile>
-    <Compile Include="PingIPTaskView.cs">
+    <Compile Include="NetwatchTaskView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PingIPTaskView.Designer.cs">
-      <DependentUpon>PingIPTaskView.cs</DependentUpon>
+    <Compile Include="NetwatchTaskView.Designer.cs">
+      <DependentUpon>NetwatchTaskView.cs</DependentUpon>
     </Compile>
     <Compile Include="PingTerminalForm.cs">
       <SubType>Form</SubType>
@@ -249,9 +244,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\MikrotikClientManager.cs" />
-    <Compile Include="Services\PingService.cs" />
     <Compile Include="Services\SyncManager.cs" />
-    <Compile Include="Services\TagPingAggregator.cs" />
     <Compile Include="Services\TikSentenceExtensions.cs" />
     <Compile Include="Settings.cs">
       <SubType>Form</SubType>
@@ -271,14 +264,20 @@
     <Compile Include="ManageTagTree.Designer.cs">
       <DependentUpon>ManageTagTree.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserControl\UC_NetworkCluster_Ping.cs">
+    <Compile Include="UserControl\UC_NetwatchDetailedStatus.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControl\UC_NetworkCluster_Ping.Designer.cs">
-      <DependentUpon>UC_NetworkCluster_Ping.cs</DependentUpon>
+    <Compile Include="UserControl\UC_NetwatchDetailedStatus.Designer.cs">
+      <DependentUpon>UC_NetwatchDetailedStatus.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="ModalForms\AddPingTask_NetworkCluster.resx">
-      <DependentUpon>AddPingTask_NetworkCluster.cs</DependentUpon>
+    <Compile Include="UserControl\UC_NetworkCluster_Netwatch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControl\UC_NetworkCluster_Netwatch.Designer.cs">
+      <DependentUpon>UC_NetworkCluster_Netwatch.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="ModalForms\AddNetwatchConfigForm.resx">
+      <DependentUpon>AddNetwatchConfigForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\AssignDeviceIP.resx">
       <DependentUpon>AssignDeviceIP.cs</DependentUpon>
@@ -304,15 +303,6 @@
     <EmbeddedResource Include="ModalForms\AddDeviceIP.resx">
       <DependentUpon>AddDeviceIP.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ModalForms\AddPingTags.resx">
-      <DependentUpon>AddPingTags.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ModalForms\AddPingDeviceIP.resx">
-      <DependentUpon>AddPingDeviceIP.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ModalForms\AddPingCustomers.resx">
-      <DependentUpon>AddPingCustomers.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\AssignCustomerTag.resx">
       <DependentUpon>AssignCustomerTag.cs</DependentUpon>
     </EmbeddedResource>
@@ -326,14 +316,17 @@
     <EmbeddedResource Include="DeviceIPForm.resx">
       <DependentUpon>DeviceIPForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\NetwatchDetailedStatusForm.resx">
+      <DependentUpon>NetwatchDetailedStatusForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\ViewTaggedDeviceIP.resx">
       <DependentUpon>ViewTaggedDeviceIP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NetworkClusterTag.resx">
       <DependentUpon>NetworkClusterTag.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PingIP.resx">
-      <DependentUpon>PingIP.cs</DependentUpon>
+    <EmbeddedResource Include="NetwatchAdd.resx">
+      <DependentUpon>NetwatchAdd.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\EditRouter.resx">
       <DependentUpon>EditRouter.cs</DependentUpon>
@@ -353,11 +346,11 @@
     <EmbeddedResource Include="OverlayForm.resx">
       <DependentUpon>OverlayForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PingIPTaskList.resx">
-      <DependentUpon>PingIPTaskList.cs</DependentUpon>
+    <EmbeddedResource Include="NetwatchList.resx">
+      <DependentUpon>NetwatchList.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PingIPTaskView.resx">
-      <DependentUpon>PingIPTaskView.cs</DependentUpon>
+    <EmbeddedResource Include="NetwatchTaskView.resx">
+      <DependentUpon>NetwatchTaskView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PingTerminalForm.resx">
       <DependentUpon>PingTerminalForm.cs</DependentUpon>
@@ -370,6 +363,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
@@ -381,8 +375,11 @@
     <EmbeddedResource Include="ManageTagTree.resx">
       <DependentUpon>ManageTagTree.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UserControl\UC_NetworkCluster_Ping.resx">
-      <DependentUpon>UC_NetworkCluster_Ping.cs</DependentUpon>
+    <EmbeddedResource Include="UserControl\UC_NetwatchDetailedStatus.resx">
+      <DependentUpon>UC_NetwatchDetailedStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControl\UC_NetworkCluster_Netwatch.resx">
+      <DependentUpon>UC_NetworkCluster_Netwatch.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -398,6 +395,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\icons8-close-48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Close black.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,6 +1,6 @@
 ﻿namespace CustomerAndServerMaintenanceTracking
 {
-    partial class PingIPTaskList
+    partial class NetwatchList
     {
         /// <summary>
         /// Required designer variable.
@@ -30,8 +30,7 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabControlNetworkCluster = new System.Windows.Forms.TabControl();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.dgvNetwatchConfigs = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
@@ -46,15 +45,25 @@
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
             this.treeViewCluster = new System.Windows.Forms.TreeView();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.txtSearch = new System.Windows.Forms.TextBox();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnAddNetwatch = new System.Windows.Forms.Button();
+            this.btnStopAll = new System.Windows.Forms.Button();
+            this.btnStartAll = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.tabControlNetworkCluster.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvNetwatchConfigs)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
             this.flowLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -67,39 +76,28 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(758, 620);
+            this.tabControl1.Size = new System.Drawing.Size(1127, 620);
             this.tabControl1.TabIndex = 1;
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.tabControlNetworkCluster);
+            this.tabPage1.Controls.Add(this.tableLayoutPanel2);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(750, 591);
+            this.tabPage1.Size = new System.Drawing.Size(1119, 591);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Network Cluster";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // tabControlNetworkCluster
+            // dgvNetwatchConfigs
             // 
-            this.tabControlNetworkCluster.Controls.Add(this.tabPage4);
-            this.tabControlNetworkCluster.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControlNetworkCluster.Location = new System.Drawing.Point(3, 3);
-            this.tabControlNetworkCluster.Name = "tabControlNetworkCluster";
-            this.tabControlNetworkCluster.SelectedIndex = 0;
-            this.tabControlNetworkCluster.Size = new System.Drawing.Size(744, 585);
-            this.tabControlNetworkCluster.TabIndex = 0;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.Location = new System.Drawing.Point(4, 25);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(736, 556);
-            this.tabPage4.TabIndex = 0;
-            this.tabPage4.Text = "tabPage4";
-            this.tabPage4.UseVisualStyleBackColor = true;
+            this.dgvNetwatchConfigs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvNetwatchConfigs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvNetwatchConfigs.Location = new System.Drawing.Point(3, 33);
+            this.dgvNetwatchConfigs.Name = "dgvNetwatchConfigs";
+            this.dgvNetwatchConfigs.Size = new System.Drawing.Size(1107, 529);
+            this.dgvNetwatchConfigs.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -261,22 +259,112 @@
             // 
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(833, 634);
+            this.tabPage3.Size = new System.Drawing.Size(750, 591);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Device IP";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // PingIPTaskList
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 1;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel5, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.dgvNetwatchConfigs, 0, 1);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 3;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1113, 585);
+            this.tableLayoutPanel2.TabIndex = 3;
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.ColumnCount = 2;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel5.Controls.Add(this.txtSearch, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.flowLayoutPanel1, 1, 0);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 1;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(1113, 30);
+            this.tableLayoutPanel5.TabIndex = 4;
+            // 
+            // txtSearch
+            // 
+            this.txtSearch.Location = new System.Drawing.Point(3, 3);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(214, 22);
+            this.txtSearch.TabIndex = 2;
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.btnAddNetwatch);
+            this.flowLayoutPanel1.Controls.Add(this.btnStopAll);
+            this.flowLayoutPanel1.Controls.Add(this.btnStartAll);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(556, 0);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(557, 30);
+            this.flowLayoutPanel1.TabIndex = 3;
+            // 
+            // btnAddNetwatch
+            // 
+            this.btnAddNetwatch.Location = new System.Drawing.Point(442, 3);
+            this.btnAddNetwatch.Name = "btnAddNetwatch";
+            this.btnAddNetwatch.Size = new System.Drawing.Size(112, 23);
+            this.btnAddNetwatch.TabIndex = 1;
+            this.btnAddNetwatch.Text = "Add Netwatch";
+            this.btnAddNetwatch.UseVisualStyleBackColor = true;
+            this.btnAddNetwatch.Click += new System.EventHandler(this.btnAddNetwatch_Click);
+            // 
+            // btnStopAll
+            // 
+            this.btnStopAll.BackColor = System.Drawing.Color.Coral;
+            this.btnStopAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStopAll.Location = new System.Drawing.Point(375, 0);
+            this.btnStopAll.Margin = new System.Windows.Forms.Padding(0);
+            this.btnStopAll.Name = "btnStopAll";
+            this.btnStopAll.Size = new System.Drawing.Size(64, 26);
+            this.btnStopAll.TabIndex = 6;
+            this.btnStopAll.Text = "Stop all";
+            this.btnStopAll.UseVisualStyleBackColor = false;
+            this.btnStopAll.Click += new System.EventHandler(this.btnStopAll_Click);
+            // 
+            // btnStartAll
+            // 
+            this.btnStartAll.BackColor = System.Drawing.Color.Turquoise;
+            this.btnStartAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStartAll.Location = new System.Drawing.Point(302, 0);
+            this.btnStartAll.Margin = new System.Windows.Forms.Padding(0);
+            this.btnStartAll.Name = "btnStartAll";
+            this.btnStartAll.Size = new System.Drawing.Size(73, 26);
+            this.btnStartAll.TabIndex = 7;
+            this.btnStartAll.Text = "Start all";
+            this.btnStartAll.UseVisualStyleBackColor = false;
+            this.btnStartAll.Click += new System.EventHandler(this.btnStartAll_Click);
+            // 
+            // NetwatchList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(758, 620);
+            this.ClientSize = new System.Drawing.Size(1127, 620);
             this.Controls.Add(this.tabControl1);
-            this.Name = "PingIPTaskList";
-            this.Text = "Ping IP Task List";
+            this.Name = "NetwatchList";
+            this.Text = "Netwatch List";
+            this.Load += new System.EventHandler(this.NetwatchList_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabControlNetworkCluster.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvNetwatchConfigs)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
@@ -284,6 +372,10 @@
             this.flowLayoutPanel3.PerformLayout();
             this.flowLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -292,8 +384,6 @@
 
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabControl tabControlNetworkCluster;
-        private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
@@ -308,5 +398,13 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel6;
         private System.Windows.Forms.TreeView treeViewCluster;
         private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.DataGridView dgvNetwatchConfigs;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Button btnAddNetwatch;
+        private System.Windows.Forms.Button btnStopAll;
+        private System.Windows.Forms.Button btnStartAll;
     }
 }
