@@ -43,31 +43,17 @@ namespace CustomerAndServerMaintenanceTracking.UserControl
 
         }
 
-        private void NetwatchDetailedStatusForm_Load(object sender, EventArgs e)
+        private void UC_NetwatchDetailedStatus_Load(object sender, EventArgs e)
         {
-            if (lblNetwatchNameTitle != null) // Check if the label exists
-            {
-                lblNetwatchNameTitle.Text = $"Status Details for: {_initialNetwatchConfigName}";
-            }
-            this.Text = $"Details: {_initialNetwatchConfigName}"; // Set form title
-
-            SetupDataGridViewColumns();
-            LoadDetailedStatuses();
-        }
-        public void LoadStatusDetails(int netwatchConfigId, string netwatchConfigName)
-        {
-            _netwatchConfigId = netwatchConfigId;
-            _initialNetwatchConfigName = netwatchConfigName; // Store the name
-
             if (lblNetwatchNameTitle != null)
             {
                 lblNetwatchNameTitle.Text = $"Details for: {_initialNetwatchConfigName}";
             }
-            // this.Text doesn't apply to UserControl title in the same way as Form
-
-            // Data is loaded here after ID and Name are set
+            // Make sure columns are set up before loading data that relies on those columns.
+            SetupDataGridViewColumns();
             LoadDetailedStatuses();
         }
+      
         // SetupDataGridViewColumns should only be called once.
         private bool _columnsSetup = false; // Flag to ensure columns are set up only once
         private void SetupDataGridViewColumns()
@@ -141,5 +127,7 @@ namespace CustomerAndServerMaintenanceTracking.UserControl
                 }
             }
         }
+
+
     }
 }

@@ -31,27 +31,27 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.lbltitle = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.txtTimeout = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel9 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnSaveNetwatch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.chkRunNetwatchUponSave = new System.Windows.Forms.CheckBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.txtInterval = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.txtPingName = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.txtTimeout = new System.Windows.Forms.TextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkRunNetwatchUponSave = new System.Windows.Forms.CheckBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.txtInterval = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.flowLayoutPanel9.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.groupBox5.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -108,6 +108,27 @@
             this.tableLayoutPanel2.Size = new System.Drawing.Size(385, 567);
             this.tableLayoutPanel2.TabIndex = 6;
             // 
+            // groupBox5
+            // 
+            this.groupBox5.BackColor = System.Drawing.Color.White;
+            this.groupBox5.Controls.Add(this.txtTimeout);
+            this.groupBox5.Location = new System.Drawing.Point(3, 183);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(379, 54);
+            this.groupBox5.TabIndex = 13;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Per IP Ping Timeout (ms):";
+            // 
+            // txtTimeout
+            // 
+            this.txtTimeout.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtTimeout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtTimeout.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtTimeout.Location = new System.Drawing.Point(3, 16);
+            this.txtTimeout.Name = "txtTimeout";
+            this.txtTimeout.Size = new System.Drawing.Size(373, 24);
+            this.txtTimeout.TabIndex = 0;
+            // 
             // flowLayoutPanel9
             // 
             this.flowLayoutPanel9.Controls.Add(this.btnSaveNetwatch);
@@ -141,47 +162,6 @@
             this.btnCancel.TabIndex = 2;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = false;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.BackColor = System.Drawing.Color.White;
-            this.groupBox1.Controls.Add(this.chkRunNetwatchUponSave);
-            this.groupBox1.Location = new System.Drawing.Point(3, 243);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(186, 54);
-            this.groupBox1.TabIndex = 12;
-            this.groupBox1.TabStop = false;
-            // 
-            // chkRunNetwatchUponSave
-            // 
-            this.chkRunNetwatchUponSave.AutoSize = true;
-            this.chkRunNetwatchUponSave.Location = new System.Drawing.Point(18, 22);
-            this.chkRunNetwatchUponSave.Name = "chkRunNetwatchUponSave";
-            this.chkRunNetwatchUponSave.Size = new System.Drawing.Size(154, 17);
-            this.chkRunNetwatchUponSave.TabIndex = 1;
-            this.chkRunNetwatchUponSave.Text = "Run netwatch upon saving";
-            this.chkRunNetwatchUponSave.UseVisualStyleBackColor = true;
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.BackColor = System.Drawing.Color.White;
-            this.groupBox3.Controls.Add(this.txtInterval);
-            this.groupBox3.Location = new System.Drawing.Point(3, 123);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(379, 54);
-            this.groupBox3.TabIndex = 11;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Interval (In seconds)";
-            // 
-            // txtInterval
-            // 
-            this.txtInterval.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtInterval.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtInterval.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtInterval.Location = new System.Drawing.Point(3, 16);
-            this.txtInterval.Name = "txtInterval";
-            this.txtInterval.Size = new System.Drawing.Size(373, 24);
-            this.txtInterval.TabIndex = 0;
             // 
             // groupBox2
             // 
@@ -225,26 +205,46 @@
             this.comboBox1.Size = new System.Drawing.Size(373, 32);
             this.comboBox1.TabIndex = 1;
             // 
-            // groupBox5
+            // groupBox1
             // 
-            this.groupBox5.BackColor = System.Drawing.Color.White;
-            this.groupBox5.Controls.Add(this.txtTimeout);
-            this.groupBox5.Location = new System.Drawing.Point(3, 183);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(379, 54);
-            this.groupBox5.TabIndex = 13;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Timeout (In milliseconds)";
+            this.groupBox1.BackColor = System.Drawing.Color.White;
+            this.groupBox1.Controls.Add(this.chkRunNetwatchUponSave);
+            this.groupBox1.Location = new System.Drawing.Point(3, 243);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(186, 54);
+            this.groupBox1.TabIndex = 12;
+            this.groupBox1.TabStop = false;
             // 
-            // txtTimeout
+            // chkRunNetwatchUponSave
             // 
-            this.txtTimeout.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtTimeout.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtTimeout.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtTimeout.Location = new System.Drawing.Point(3, 16);
-            this.txtTimeout.Name = "txtTimeout";
-            this.txtTimeout.Size = new System.Drawing.Size(373, 24);
-            this.txtTimeout.TabIndex = 0;
+            this.chkRunNetwatchUponSave.AutoSize = true;
+            this.chkRunNetwatchUponSave.Location = new System.Drawing.Point(18, 22);
+            this.chkRunNetwatchUponSave.Name = "chkRunNetwatchUponSave";
+            this.chkRunNetwatchUponSave.Size = new System.Drawing.Size(154, 17);
+            this.chkRunNetwatchUponSave.TabIndex = 1;
+            this.chkRunNetwatchUponSave.Text = "Run netwatch upon saving";
+            this.chkRunNetwatchUponSave.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.BackColor = System.Drawing.Color.White;
+            this.groupBox3.Controls.Add(this.txtInterval);
+            this.groupBox3.Location = new System.Drawing.Point(3, 123);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(379, 54);
+            this.groupBox3.TabIndex = 11;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Per IP Ping Interval (s):";
+            // 
+            // txtInterval
+            // 
+            this.txtInterval.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtInterval.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtInterval.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtInterval.Location = new System.Drawing.Point(3, 16);
+            this.txtInterval.Name = "txtInterval";
+            this.txtInterval.Size = new System.Drawing.Size(373, 24);
+            this.txtInterval.TabIndex = 0;
             // 
             // AddNetwatchConfigForm
             // 
@@ -259,16 +259,16 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.flowLayoutPanel9.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
 
         }

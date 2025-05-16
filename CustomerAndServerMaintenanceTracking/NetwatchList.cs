@@ -302,22 +302,37 @@ namespace CustomerAndServerMaintenanceTracking
             // Check if the click is on the "LastStatus" column
             if (dgvNetwatchConfigs.Columns[e.ColumnIndex].Name == "LastStatus")
             {
-                // Get the MDI Parent (Dashboard) and call its method to show details
-                if (this.MdiParent is Dashboard mainDashboard) // Check if MdiParent is actually Dashboard
+                if (this.MdiParent is Dashboard mainDashboard)
                 {
-                    mainDashboard.ShowNetwatchDetailInPanel(selectedConfig.Id, selectedConfig.NetwatchName);
+                    if (selectedConfig != null) // Ensure selectedConfig is not null
+                    {
+                        string statusToSend;
+
+                        // --- KEY CHANGE: Determine statusToSend based on IsEnabled first ---
+                        if (!selectedConfig.IsEnabled)
+                        {
+                            statusToSend = "Disabled"; // If not enabled, treat as "Disabled"
+                        }
+                        else
+                        {
+                            // If enabled, use its LastStatus, ensuring it's not null
+                            statusToSend = selectedConfig.LastStatus ?? "Unknown";
+                        }
+                        // --- END KEY CHANGE ---
+
+                        // Now pass statusToSend to the Dashboard
+                        mainDashboard.ShowNetwatchDetailInPanel(selectedConfig.Id, selectedConfig.NetwatchName, statusToSend);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Cannot display details: Selected item data is missing.", "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
                 else
                 {
-                    // Fallback or error if not running in the expected MDI context
                     MessageBox.Show("Could not display details: NetwatchList is not parented by the Dashboard.", "UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    // As a simple fallback if you still have the old form and want to test:
-                    // using (var detailForm = new CustomerAndServerMaintenanceTracking.ModalForms.NetwatchDetailedStatusForm(selectedConfig.Id, selectedConfig.NetwatchName))
-                    // {
-                    //     detailForm.ShowDialog(this); 
-                    // }
                 }
-                return; // Important: Stop further processing for this click if status cell was handled
+                return; // Important: Stop further processing
             }
 
             // --- Existing Action Button Logic ---
@@ -380,87 +395,7 @@ namespace CustomerAndServerMaintenanceTracking
                     }
                 }
             }
-            //// ... (your existing dgvNetwatchConfigs_CellClick logic for Start/Stop and Delete buttons)
-            //// Make sure it operates on _allNetwatchConfigsBindingList for deletions
-            //// and invalidates dgvNetwatchConfigs.
-            //if (e.RowIndex < 0 || e.ColumnIndex < 0 || dgvNetwatchConfigs.Rows.Count <= e.RowIndex) return;
-
-            //if (dgvNetwatchConfigs.Columns[e.ColumnIndex] is ActionDataGridViewMultiButtonColumn)
-            //{
-            //    var cell = dgvNetwatchConfigs[e.ColumnIndex, e.RowIndex] as ActionDataGridViewMultiButtonCell;
-            //    if (cell != null)
-            //    {
-            //        Rectangle cellDisplayRectangle = dgvNetwatchConfigs.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
-            //        Point mousePositionInControl = dgvNetwatchConfigs.PointToClient(Cursor.Position);
-            //        Point cellRelativeMousePosition = new Point(
-            //            mousePositionInControl.X - cellDisplayRectangle.Left,
-            //            mousePositionInControl.Y - cellDisplayRectangle.Top);
-
-            //        ActionDataGridViewMultiButtonCell.ActionButtonType clickedButton = cell.GetButtonAt(cellRelativeMousePosition);
-
-            //        NetwatchConfigDisplay selectedConfig = dgvNetwatchConfigs.Rows[e.RowIndex].DataBoundItem as NetwatchConfigDisplay;
-            //        if (selectedConfig == null) return;
-
-            //        switch (clickedButton)
-            //        {
-            //            case ActionDataGridViewMultiButtonCell.ActionButtonType.StartStop:
-            //                selectedConfig.IsEnabled = !selectedConfig.IsEnabled;
-            //                try
-            //                {
-            //                    _netwatchConfigRepository.UpdateNetwatchConfigEnabledStatus(selectedConfig.Id, selectedConfig.IsEnabled);
-            //                    dgvNetwatchConfigs.InvalidateCell(e.ColumnIndex, e.RowIndex);
-            //                    if (dgvNetwatchConfigs.Columns["IsEnabledCol"] != null)
-            //                    {
-            //                        dgvNetwatchConfigs.InvalidateCell(dgvNetwatchConfigs.Columns["IsEnabledCol"].Index, e.RowIndex);
-            //                    }
-            //                    if (dgvNetwatchConfigs.Columns["LastStatus"] != null)
-            //                    {
-            //                        dgvNetwatchConfigs.InvalidateCell(dgvNetwatchConfigs.Columns["LastStatus"].Index, e.RowIndex);
-            //                    }
-            //                }
-            //                catch (Exception ex)
-            //                {
-            //                    MessageBox.Show($"Error updating Netwatch status for '{selectedConfig.NetwatchName}': {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //                    selectedConfig.IsEnabled = !selectedConfig.IsEnabled;
-            //                    dgvNetwatchConfigs.InvalidateCell(e.ColumnIndex, e.RowIndex);
-            //                    if (dgvNetwatchConfigs.Columns["IsEnabledCol"] != null)
-            //                    {
-            //                        dgvNetwatchConfigs.InvalidateCell(dgvNetwatchConfigs.Columns["IsEnabledCol"].Index, e.RowIndex);
-            //                    }
-            //                    if (dgvNetwatchConfigs.Columns["LastStatus"] != null)
-            //                    {
-            //                        dgvNetwatchConfigs.InvalidateCell(dgvNetwatchConfigs.Columns["LastStatus"].Index, e.RowIndex);
-            //                    }
-            //                }
-            //                break;
-
-            //            case ActionDataGridViewMultiButtonCell.ActionButtonType.Delete:
-            //                if (MessageBox.Show($"Are you sure you want to delete Netwatch config '{selectedConfig.NetwatchName}'?",
-            //                                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-            //                {
-            //                    try
-            //                    {
-            //                        bool success = _netwatchConfigRepository.DeleteNetwatchConfigById(selectedConfig.Id);
-            //                        if (success)
-            //                        {
-            //                            // Remove from master list as well, then re-filter
-            //                            _allNetwatchConfigsMasterList.RemoveAll(item => item.Id == selectedConfig.Id);
-            //                            ApplyFilterAndRefreshGrid(); // Re-apply filter which will refresh BindingList
-            //                        }
-            //                        else
-            //                        {
-            //                            MessageBox.Show($"Failed to delete Netwatch config '{selectedConfig.NetwatchName}'.", "Deletion Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //                        }
-            //                    }
-            //                    catch (Exception ex)
-            //                    {
-            //                        MessageBox.Show($"Error deleting Netwatch config '{selectedConfig.NetwatchName}': {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //                    }
-            //                }
-            //                break;
-            //        }
-            //    }
-            //}
+            
         }
 
         // --- CellFormatting Event Handler for dgvNetwatchConfigs (ensure it's present and correct) ---

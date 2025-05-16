@@ -50,18 +50,12 @@
             this.lblSyncStatusPPPoe = new System.Windows.Forms.Label();
             this.lblMikrotikStatus = new System.Windows.Forms.Label();
             this.autoRefreshTimer = new System.Windows.Forms.Timer(this.components);
-            this.tableLayoutRightPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnCloseDetailsPanel = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStripSystemTray.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
-            this.tableLayoutRightPanel.SuspendLayout();
-            this.flowLayoutPanel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.btnCloseDetailsPanel)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -209,7 +203,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(200, 619);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(200, 652);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // flowLayoutPanel1
@@ -226,7 +220,7 @@
             this.flowLayoutPanel2.Controls.Add(this.lblSyncStatusPPPoe);
             this.flowLayoutPanel2.Controls.Add(this.lblMikrotikStatus);
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 519);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 552);
             this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(200, 100);
@@ -258,44 +252,6 @@
             this.autoRefreshTimer.Interval = 1000;
             this.autoRefreshTimer.Tick += new System.EventHandler(this.autoRefreshTimer_Tick);
             // 
-            // tableLayoutRightPanel
-            // 
-            this.tableLayoutRightPanel.ColumnCount = 1;
-            this.tableLayoutRightPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutRightPanel.Controls.Add(this.flowLayoutPanel3, 0, 0);
-            this.tableLayoutRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutRightPanel.Location = new System.Drawing.Point(632, 0);
-            this.tableLayoutRightPanel.Name = "tableLayoutRightPanel";
-            this.tableLayoutRightPanel.Padding = new System.Windows.Forms.Padding(0, 16, 0, 0);
-            this.tableLayoutRightPanel.RowCount = 3;
-            this.tableLayoutRightPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutRightPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutRightPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.tableLayoutRightPanel.Size = new System.Drawing.Size(280, 619);
-            this.tableLayoutRightPanel.TabIndex = 5;
-            // 
-            // flowLayoutPanel3
-            // 
-            this.flowLayoutPanel3.Controls.Add(this.btnCloseDetailsPanel);
-            this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(0, 16);
-            this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(280, 40);
-            this.flowLayoutPanel3.TabIndex = 0;
-            // 
-            // btnCloseDetailsPanel
-            // 
-            this.btnCloseDetailsPanel.Image = global::CustomerAndServerMaintenanceTracking.Properties.Resources.Close_black;
-            this.btnCloseDetailsPanel.Location = new System.Drawing.Point(237, 3);
-            this.btnCloseDetailsPanel.Name = "btnCloseDetailsPanel";
-            this.btnCloseDetailsPanel.Size = new System.Drawing.Size(32, 32);
-            this.btnCloseDetailsPanel.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.btnCloseDetailsPanel.TabIndex = 0;
-            this.btnCloseDetailsPanel.TabStop = false;
-            // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
@@ -311,8 +267,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(912, 619);
-            this.Controls.Add(this.tableLayoutRightPanel);
+            this.ClientSize = new System.Drawing.Size(1148, 652);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
@@ -330,9 +285,6 @@
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
-            this.tableLayoutRightPanel.ResumeLayout(false);
-            this.flowLayoutPanel3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.btnCloseDetailsPanel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
@@ -361,8 +313,5 @@
         private System.Windows.Forms.ToolStripMenuItem pingAddNetwatchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pingNetwatchListToolStripMenuItem;
         private System.Windows.Forms.Timer autoRefreshTimer;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutRightPanel;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
-        private System.Windows.Forms.PictureBox btnCloseDetailsPanel;
     }
 }

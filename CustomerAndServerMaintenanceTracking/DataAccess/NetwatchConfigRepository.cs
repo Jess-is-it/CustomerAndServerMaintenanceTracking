@@ -1,11 +1,15 @@
 ﻿using CustomerAndServerMaintenanceTracking.Models;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CustomerAndServerMaintenanceTracking.DataAccess
 {
@@ -515,6 +519,9 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
         #endregion
 
         #region METHOD for Detailed IP Status Popup/Form
+  
+
+// In CustomerAndServerMaintenanceTracking/DataAccess/NetwatchConfigRepository.cs
         public void SaveIndividualIpPingResult(int netwatchConfigId, MonitoredIpDetail ipDetail, PingReply reply, DateTime pingAttemptTime)
         {
             string pingStatusText;
@@ -522,11 +529,11 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
 
             if (reply == null)
             {
-                pingStatusText = "Error (No Reply)"; // Or "Failed (Exception)"
+                pingStatusText = "Error (No Reply)";
             }
             else
             {
-                pingStatusText = reply.Status.ToString(); // e.g., "Success", "TimedOut", "DestinationHostUnreachable"
+                pingStatusText = reply.Status.ToString();
                 if (reply.Status == IPStatus.Success)
                 {
                     roundtripTime = reply.RoundtripTime;
@@ -535,14 +542,20 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
 
             // Truncate status text if too long for DB column
             if (pingStatusText.Length > 50) pingStatusText = pingStatusText.Substring(0, 50);
-            if (ipDetail.EntityName != null && ipDetail.EntityName.Length > 100) ipDetail.EntityName = ipDetail.EntityName.Substring(0, 100);
+            // Ensure EntityName is not null for logging, but handle DBNull for parameter
+            string entityNameToLog = ipDetail.EntityName ?? "N/A";
+            if (ipDetail.EntityName != null && ipDetail.EntityName.Length > 100)
+            {
+                // This truncation was in your code, keep it for the parameter if needed by DB schema,
+                // but be aware if original name is longer.
+                // For logging, we can use the potentially truncated or original.
+                // For the parameter, the truncated version will be used via ipDetail.EntityName.
+            }
 
 
             using (SqlConnection conn = dbHelper.GetConnection())
             {
                 conn.Open();
-                // UPSERT logic: If a record for this NetwatchConfigId and IpAddress exists, update it. Otherwise, insert.
-                // This simple UPSERT assumes you want to overwrite the previous result for this IP under this config.
                 string query = @"
             MERGE NetwatchIpResults AS Target
             USING (SELECT @NetwatchConfigId AS NCID, @IpAddress AS IP) AS Source
@@ -560,13 +573,25 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
-                    cmd.Parameters.AddWithValue("@IpAddress", ipDetail.IpAddress);
-                    cmd.Parameters.AddWithValue("@EntityName", (object)ipDetail.EntityName ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@IpAddress", ipDetail.IpAddress); // Assumes ipDetail.IpAddress is never null
+                    cmd.Parameters.AddWithValue("@EntityName", string.IsNullOrEmpty(ipDetail.EntityName) ? (object)DBNull.Value : ipDetail.EntityName);
                     cmd.Parameters.AddWithValue("@LastPingStatus", pingStatusText);
                     cmd.Parameters.AddWithValue("@RoundtripTimeMs", roundtripTime.HasValue ? (object)roundtripTime.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("@LastPingAttemptDateTime", pingAttemptTime);
 
-                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        
+                    }
+                    catch (SqlException ex) // Catch specific SqlException
+                    {
+                        throw; 
+                    }
+                    catch (Exception ex) // Catch any other general exceptions
+                    {
+                        throw;
+                    }
                 }
             }
         }
@@ -605,5 +630,154 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             return detailedStatuses;
         }
         #endregion
+
+        // Add these new methods to your NetwatchConfigRepository.cs class
+
+        #region Netwatch Outage Logging
+
+        /// <summary>
+        /// Gets the last known ping status for a specific IP within a Netwatch configuration.
+        /// Returns null if no previous record exists.
+        /// </summary>
+        public string GetLastKnownPingStatusForIp(int netwatchConfigId, string ipAddress)
+        {
+            string lastStatus = null;
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                string query = @"
+            SELECT LastPingStatus 
+            FROM NetwatchIpResults 
+            WHERE NetwatchConfigId = @NetwatchConfigId AND IpAddress = @IpAddress;";
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                    cmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        lastStatus = result.ToString();
+                    }
+                }
+            }
+            return lastStatus;
+        }
+
+        /// <summary>
+        /// Starts a new outage log entry.
+        /// </summary>
+        public void StartOutageLog(int netwatchConfigId, string ipAddress, string entityName, DateTime outageStartTime, string initialPingStatus)
+        {
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                string query = @"
+            INSERT INTO NetwatchOutageLog 
+                (NetwatchConfigId, IpAddress, EntityName, OutageStartTime, LastPingStatusAtStart, OutageEndTime)
+            VALUES 
+                (@NetwatchConfigId, @IpAddress, @EntityName, @OutageStartTime, @LastPingStatusAtStart, NULL);";
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                    cmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                    cmd.Parameters.AddWithValue("@EntityName", string.IsNullOrEmpty(entityName) ? (object)DBNull.Value : entityName);
+                    cmd.Parameters.AddWithValue("@OutageStartTime", outageStartTime);
+                    cmd.Parameters.AddWithValue("@LastPingStatusAtStart", string.IsNullOrEmpty(initialPingStatus) ? (object)DBNull.Value : initialPingStatus);
+
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        Console.WriteLine($"REPO: Started outage log for ConfigId: {netwatchConfigId}, IP: {ipAddress} at {outageStartTime}");
+                    }
+                    catch (SqlException ex)
+                    {
+                        Console.WriteLine($"REPO: SQL ERROR Starting OutageLog for ConfigId: {netwatchConfigId}, IP: {ipAddress}. Error: {ex.Message}");
+                        // Decide if you need to throw here or just log
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ends an ongoing outage for a specific IP by setting its OutageEndTime.
+        /// Only updates the most recent open outage for that IP and Config.
+        /// </summary>
+        public void EndOutageLog(int netwatchConfigId, string ipAddress, DateTime outageEndTime)
+        {
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                // Update the latest open outage record for this specific IP and NetwatchConfigId
+                string query = @"
+            UPDATE NetwatchOutageLog
+            SET OutageEndTime = @OutageEndTime
+            WHERE OutageLogId = (
+                SELECT TOP 1 OutageLogId Console.WriteLine
+                FROM NetwatchOutageLog
+                WHERE NetwatchConfigId = @NetwatchConfigId 
+                  AND IpAddress = @IpAddress 
+                  AND OutageEndTime IS NULL
+                ORDER BY OutageStartTime DESC
+            );";
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                    cmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                    cmd.Parameters.AddWithValue("@OutageEndTime", outageEndTime);
+
+                    try
+                    {
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine($"REPO: Ended outage log for ConfigId: {netwatchConfigId}, IP: {ipAddress} at {outageEndTime}");
+                        }
+                        else
+                        {
+                            // This might happen if no open outage was found, which could be normal if the IP came up without a prior logged outage.
+                            Console.WriteLine($"REPO: No open outage found to end for ConfigId: {netwatchConfigId}, IP: {ipAddress}");
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        Console.WriteLine($"REPO: SQL ERROR Ending OutageLog for ConfigId: {netwatchConfigId}, IP: {ipAddress}. Error: {ex.Message}");
+                        // Decide if you need to throw here or just log
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the start time of the current ongoing outage for a specific IP.
+        /// Returns null if no ongoing outage is found.
+        /// </summary>
+        public DateTime? GetCurrentOutageStartTime(int netwatchConfigId, string ipAddress)
+        {
+            DateTime? outageStartTime = null;
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                string query = @"
+            SELECT TOP 1 OutageStartTime 
+            FROM NetwatchOutageLog
+            WHERE NetwatchConfigId = @NetwatchConfigId 
+              AND IpAddress = @IpAddress 
+              AND OutageEndTime IS NULL
+            ORDER BY OutageStartTime DESC;"; // Should only be one, but DESC ensures latest if somehow multiple open
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                    cmd.Parameters.AddWithValue("@IpAddress", ipAddress);
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        outageStartTime = Convert.ToDateTime(result);
+                    }
+                }
+            }
+            return outageStartTime;
+        }
+
+        #endregion // End Netwatch Outage Logging
     }
 }

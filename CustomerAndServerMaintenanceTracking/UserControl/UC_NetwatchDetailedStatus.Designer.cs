@@ -82,7 +82,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "UC_NetwatchDetailedStatus";
             this.Size = new System.Drawing.Size(395, 508);
-            this.Load += new System.EventHandler(this.NetwatchDetailedStatusForm_Load);
+            this.Load += new System.EventHandler(this.UC_NetwatchDetailedStatus_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDetailedStatus)).EndInit();

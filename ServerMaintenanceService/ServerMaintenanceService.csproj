@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\MonitoredIpState.cs" />
     <Compile Include="Services\NetwatchJob.cs" />
     <Compile Include="Services\NetwatchServiceManager.cs" />
     <Compile Include="Services\Pinger.cs" />

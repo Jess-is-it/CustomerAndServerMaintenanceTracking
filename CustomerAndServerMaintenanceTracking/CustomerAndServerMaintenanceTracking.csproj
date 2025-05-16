@@ -148,12 +148,6 @@
     <Compile Include="DeviceIPForm.Designer.cs">
       <DependentUpon>DeviceIPForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ModalForms\NetwatchDetailedStatusForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ModalForms\NetwatchDetailedStatusForm.Designer.cs">
-      <DependentUpon>NetwatchDetailedStatusForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="ModalForms\ViewTaggedDeviceIP.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -252,6 +246,12 @@
     <Compile Include="Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
+    <Compile Include="SidePanelForms\NetwatchDetailedStatus.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SidePanelForms\NetwatchDetailedStatus.Designer.cs">
+      <DependentUpon>NetwatchDetailedStatus.cs</DependentUpon>
+    </Compile>
     <Compile Include="TagForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -316,9 +316,6 @@
     <EmbeddedResource Include="DeviceIPForm.resx">
       <DependentUpon>DeviceIPForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ModalForms\NetwatchDetailedStatusForm.resx">
-      <DependentUpon>NetwatchDetailedStatusForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\ViewTaggedDeviceIP.resx">
       <DependentUpon>ViewTaggedDeviceIP.cs</DependentUpon>
     </EmbeddedResource>
@@ -368,6 +365,9 @@
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SidePanelForms\NetwatchDetailedStatus.resx">
+      <DependentUpon>NetwatchDetailedStatus.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TagForm.resx">
       <DependentUpon>TagForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -401,5 +401,6 @@
   <ItemGroup>
     <None Include="Resources\Close black.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

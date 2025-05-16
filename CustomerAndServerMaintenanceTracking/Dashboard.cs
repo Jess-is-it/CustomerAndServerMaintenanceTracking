@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using CustomerAndServerMaintenanceTracking.SidePanelForms;
+
 
 namespace CustomerAndServerMaintenanceTracking
 {
@@ -20,7 +22,7 @@ namespace CustomerAndServerMaintenanceTracking
         private System.Timers.Timer timerPPPoe;
         private SyncManager syncManager;
         private Control _currentDetailControl = null;
-
+        private Dictionary<int, NetwatchDetailedStatus> _openNetwatchDetailForms = new Dictionary<int, NetwatchDetailedStatus>();
         public Dashboard()
         {
             InitializeComponent();
@@ -35,30 +37,6 @@ namespace CustomerAndServerMaintenanceTracking
             catch (Exception ex)
             {
                 MessageBox.Show("Error connecting to Mikrotik: " + ex.Message);
-            }
-
-            if (this.tableLayoutRightPanel != null)
-            {
-                this.tableLayoutRightPanel.Visible = false; // Start hidden
-
-                // Find the close button if it's a direct child of the panel or within a sub-panel
-                // For this example, let's assume btnCloseDetailsPanel is directly accessible by its name.
-                // If btnCloseDetailsPanel is on the Dashboard form itself but logically part of this panel's UI:
-                if (this.btnCloseDetailsPanel != null) // Make sure this button exists on your Dashboard form
-                {
-                    this.btnCloseDetailsPanel.Click -= CloseRightDetailPanel_Click; // Prevent multiple subscriptions
-                    this.btnCloseDetailsPanel.Click += CloseRightDetailPanel_Click;
-                }
-                else
-                {
-                    // If btnCloseDetailsPanel is dynamically added or deeply nested, you'd find it differently.
-                    // For now, assuming it's a named control on the Dashboard form.
-                    Console.WriteLine("WARNING: btnCloseDetailsPanel not found on Dashboard. Close functionality for right panel might not work.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("WARNING: tableLayoutRightPanel not found on Dashboard. Detail view cannot be shown.");
             }
 
 
@@ -361,62 +339,64 @@ namespace CustomerAndServerMaintenanceTracking
 
 
         #region Right Side Panel
-        public void ShowDetailViewInRightPanel(Control detailUserControl)
+
+        public void ShowNetwatchDetailInPanel(int netwatchConfigId, string netwatchConfigName, string currentStatus)
         {
-            if (this.tableLayoutRightPanel == null) return;
-
-            // Clear previous control from the target cell (e.g., Row 1, Column 0)
-            Control targetCellContent = this.tableLayoutRightPanel.GetControlFromPosition(0, 1); // Assuming Col 0, Row 1 for the UC
-            if (targetCellContent != null)
+            if (currentStatus != null && currentStatus.Equals("Disabled", StringComparison.OrdinalIgnoreCase))
             {
-                this.tableLayoutRightPanel.Controls.Remove(targetCellContent);
-                targetCellContent.Dispose();
+                // Optional: You might want to give some feedback to the user, though it's not strictly required.
+                // MessageBox.Show("Details are not available for a disabled Netwatch configuration.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return; // Exit the method, do not show the form
             }
 
-            // Dispose of the globally tracked current detail control if it exists
-            if (_currentDetailControl != null && !_currentDetailControl.IsDisposed)
+            // Check if a detail form for this specific netwatchConfigId is already open
+            if (_openNetwatchDetailForms.TryGetValue(netwatchConfigId, out NetwatchDetailedStatus existingForm))
             {
-                _currentDetailControl.Dispose();
+                if (existingForm != null && !existingForm.IsDisposed)
+                {
+                    // Form already exists, bring it to the front and activate
+                    existingForm.WindowState = FormWindowState.Normal; // Ensure it's not minimized
+                    existingForm.Activate();
+                    return; // Exit the method
+                }
+                else
+                {
+                    // Form exists in dictionary but is disposed, remove it
+                    _openNetwatchDetailForms.Remove(netwatchConfigId);
+                }
             }
 
-            _currentDetailControl = detailUserControl; // Store reference to the new UC
+            // Create a new instance of the NetwatchDetailedStatus form
+            // Make sure you have: using CustomerAndServerMaintenanceTracking.SidePanelForms; at the top
+            NetwatchDetailedStatus netwatchDetailForm = new NetwatchDetailedStatus();
 
-            if (_currentDetailControl != null)
-            {
-                _currentDetailControl.Dock = DockStyle.Fill;
-                // Add to the second row (index 1), first column (index 0)
-                this.tableLayoutRightPanel.Controls.Add(_currentDetailControl, 0, 1);
-                this.tableLayoutRightPanel.Visible = true;
-            }
-            else // If null is passed, effectively hide the panel
-            {
-                this.tableLayoutRightPanel.Visible = false;
-            }
+            // Set its MdiParent to this Dashboard instance
+            netwatchDetailForm.MdiParent = this;
+
+            // Pass necessary data to the form
+            netwatchDetailForm.InitializeAndLoadDetails(netwatchConfigId, netwatchConfigName);
+
+            // Important: Give the form a way to identify itself for removal from the dictionary
+            netwatchDetailForm.Tag = netwatchConfigId;
+
+            // Subscribe to the FormClosed event to remove it from our tracking dictionary
+            netwatchDetailForm.FormClosed += NetwatchDetailForm_FormClosed;
+
+            // Add to our dictionary of open forms
+            _openNetwatchDetailForms.Add(netwatchConfigId, netwatchDetailForm);
+
+            // Show the form
+            netwatchDetailForm.Show();
         }
-        public void ShowNetwatchDetailInPanel(int netwatchConfigId, string netwatchConfigName)
+        // Add this new event handler method to the Dashboard class
+        private void NetwatchDetailForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            UC_NetwatchDetailedStatus netwatchDetailUC = new UC_NetwatchDetailedStatus(netwatchConfigId, netwatchConfigName);
-            ShowDetailViewInRightPanel(netwatchDetailUC);
-        }
-        private void CloseRightDetailPanel_Click(object sender, EventArgs e)
-        {
-            if (this.tableLayoutRightPanel == null) return;
-
-            this.tableLayoutRightPanel.Visible = false;
-
-            // Clear and dispose the control in the target cell
-            Control targetCellContent = this.tableLayoutRightPanel.GetControlFromPosition(0, 1); // Col 0, Row 1
-            if (targetCellContent != null)
+            if (sender is NetwatchDetailedStatus closedForm && closedForm.Tag is int netwatchConfigId)
             {
-                this.tableLayoutRightPanel.Controls.Remove(targetCellContent);
-                targetCellContent.Dispose();
-            }
-
-            if (_currentDetailControl != null && !_currentDetailControl.IsDisposed)
-            {
-                // _currentDetailControl should be the same as targetCellContent if managed correctly
-                _currentDetailControl.Dispose();
-                _currentDetailControl = null;
+                // Remove the form from the dictionary when it's closed
+                _openNetwatchDetailForms.Remove(netwatchConfigId);
+                // Unsubscribe to prevent memory leaks, though the sender is being disposed
+                closedForm.FormClosed -= NetwatchDetailForm_FormClosed;
             }
         }
 
