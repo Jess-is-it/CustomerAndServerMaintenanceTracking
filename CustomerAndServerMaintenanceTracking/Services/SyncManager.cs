@@ -9,6 +9,8 @@ using CustomerAndServerMaintenanceTracking.Services;
 using tik4net;
 using tik4net.Objects;
 using tik4net.Objects.Ppp;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 namespace CustomerAndServerMaintenanceTracking.Services
 {

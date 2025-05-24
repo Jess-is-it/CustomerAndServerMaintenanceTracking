@@ -9,347 +9,436 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CustomerAndServerMaintenanceTracking.Services;
 using CustomerAndServerMaintenanceTracking.DataAccess;
+using SharedLibrary.DataAccess;
 
 
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class Customers: Form
+    public partial class Customers : Form, IRefreshableForm
     {
-        private SyncManager syncManager;
+        private DateTime? _lastSuccessfulSyncTimestamp = null;
+        private NetwatchConfigRepository _netwatchConfigRepo;
+        private ServiceLogRepository _serviceLogRepoForForm;
+
+        public void RefreshDataViews()
+        {
+            RefreshDataGridViewWithScrollPreservation();
+        }
 
         public Customers()
         {
             InitializeComponent();
+
+            try
+            {
+                _serviceLogRepoForForm = new ServiceLogRepository(); // Instantiate the logger
+                                                                     // The NetwatchConfigRepository from SharedLibrary needs at least a ServiceLogRepository
+                                                                     // If you don't need TagRepository for this form's _netwatchConfigRepo instance:
+                _netwatchConfigRepo = new NetwatchConfigRepository(_serviceLogRepoForForm);
+                // Or if you do need TagRepository for other potential uses of _netwatchConfigRepo:
+                // TagRepository tagRepoForForm = new TagRepository();
+                // _netwatchConfigRepo = new NetwatchConfigRepository(_serviceLogRepoForForm, tagRepoForForm);
+            }
+            catch (Exception ex)
+            {
+                LogStatus($"CustomersForm Error: Could not initialize NetwatchConfigRepository. Sync time display might be affected. {ex.Message}");
+                _netwatchConfigRepo = null; // Ensure it's null if init fails
+            }
+
             InitializeCustomerDataGridView();
             InitializeArchivedCustomersDataGridView();
-
-            // Subscribe to the DataSynced event
-            SyncManager.DataSynced += SyncManager_DataSynced;
-
-            // Subscribe to the event. Use Invoke if needed to ensure the update happens on the UI thread.
-            CustomerRepository.CustomerUpdated += (s, e) =>
-            {
-                this.Invoke((MethodInvoker)delegate
-                {
-                    LoadActiveCustomers();
-                });
-            };
+            CustomerRepository.CustomerUpdated += OnCustomerDataUpdated;
         }
 
-        //TABLE COLUMNS
+        // --- MODIFIED: InitializeCustomerDataGridView ---
         private void InitializeCustomerDataGridView()
         {
-            // Clear any existing columns.
             dataGridViewActiveCustomers.Columns.Clear();
-
-            // Set AutoGenerateColumns to false since we're adding columns manually.
             dataGridViewActiveCustomers.AutoGenerateColumns = false;
 
-            // Create and add the ID column.
+            // --- NEW: Router Column (First Column) ---
+            DataGridViewTextBoxColumn routerColumn = new DataGridViewTextBoxColumn();
+            routerColumn.DataPropertyName = "RouterName"; // From Customer model (populated by CustomerRepository)
+            routerColumn.HeaderText = "Router";
+            routerColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells; // Or Fill, adjust as needed
+            routerColumn.DisplayIndex = 0; // Ensure it's first
+            dataGridViewActiveCustomers.Columns.Add(routerColumn);
+
+            // ID column (Hidden)
             DataGridViewTextBoxColumn idColumn = new DataGridViewTextBoxColumn();
-            idColumn.DataPropertyName = "Id"; // Must match the property in Customer
+            idColumn.DataPropertyName = "Id";
             idColumn.HeaderText = "ID";
             idColumn.Width = 50;
+            idColumn.Visible = false; // --- MODIFIED: Hide ID column ---
+            idColumn.DisplayIndex = 1;
             dataGridViewActiveCustomers.Columns.Add(idColumn);
 
-            // Create and add the Account Name column.
+            // Account Name column
             DataGridViewTextBoxColumn accountNameColumn = new DataGridViewTextBoxColumn();
             accountNameColumn.DataPropertyName = "AccountName";
             accountNameColumn.HeaderText = "Account Name";
             accountNameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            accountNameColumn.FillWeight = 150; // Give it more weight if using Fill
+            accountNameColumn.DisplayIndex = 2;
             dataGridViewActiveCustomers.Columns.Add(accountNameColumn);
 
-            // Create and add the Additional Name column.
+            // Additional Name column
             DataGridViewTextBoxColumn additionalNameColumn = new DataGridViewTextBoxColumn();
             additionalNameColumn.DataPropertyName = "AdditionalName";
             additionalNameColumn.HeaderText = "Additional Name";
             additionalNameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            additionalNameColumn.FillWeight = 100;
+            additionalNameColumn.DisplayIndex = 3;
             dataGridViewActiveCustomers.Columns.Add(additionalNameColumn);
 
-            // Create and add the Contact Number column.
+            // --- NEW: MAC Address Column ---
+            DataGridViewTextBoxColumn macAddressColumn = new DataGridViewTextBoxColumn();
+            macAddressColumn.DataPropertyName = "MacAddress"; // From Customer model
+            macAddressColumn.HeaderText = "MAC Address";
+            macAddressColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells; // Or set a fixed width
+            macAddressColumn.Width = 130;
+            macAddressColumn.DisplayIndex = 4;
+            dataGridViewActiveCustomers.Columns.Add(macAddressColumn);
+
+            // IP Address column
+            DataGridViewTextBoxColumn ipColumn = new DataGridViewTextBoxColumn();
+            ipColumn.DataPropertyName = "IPAddress";
+            ipColumn.HeaderText = "IP Address";
+            ipColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            ipColumn.Width = 120;
+            ipColumn.DisplayIndex = 5;
+            dataGridViewActiveCustomers.Columns.Add(ipColumn);
+
+            // Contact Number column
             DataGridViewTextBoxColumn contactNumberColumn = new DataGridViewTextBoxColumn();
             contactNumberColumn.DataPropertyName = "ContactNumber";
             contactNumberColumn.HeaderText = "Contact Number";
-            contactNumberColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            contactNumberColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            contactNumberColumn.Width = 120;
+            contactNumberColumn.DisplayIndex = 6;
             dataGridViewActiveCustomers.Columns.Add(contactNumberColumn);
 
-            // Create and add the Email column.
+            // Email column
             DataGridViewTextBoxColumn emailColumn = new DataGridViewTextBoxColumn();
             emailColumn.DataPropertyName = "Email";
             emailColumn.HeaderText = "Email";
             emailColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            emailColumn.FillWeight = 100;
+            emailColumn.DisplayIndex = 7;
             dataGridViewActiveCustomers.Columns.Add(emailColumn);
 
-            // Create and add the Location column.
+            // Location column
             DataGridViewTextBoxColumn locationColumn = new DataGridViewTextBoxColumn();
             locationColumn.DataPropertyName = "Location";
             locationColumn.HeaderText = "Location";
             locationColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            locationColumn.FillWeight = 100;
+            locationColumn.DisplayIndex = 8;
             dataGridViewActiveCustomers.Columns.Add(locationColumn);
 
-            //// Create and add the IsArchived column.
-            //DataGridViewCheckBoxColumn archivedColumn = new DataGridViewCheckBoxColumn();
-            //archivedColumn.DataPropertyName = "IsArchived";
-            //archivedColumn.HeaderText = "Archived";
-            //archivedColumn.Width = 70;
-            //dataGridViewActiveCustomers.Columns.Add(archivedColumn);
-
-            // Create and add the IP Address column.
-            DataGridViewTextBoxColumn ipColumn = new DataGridViewTextBoxColumn();
-            ipColumn.DataPropertyName = "IPAddress"; // Must match the property in Customer
-            ipColumn.HeaderText = "IP Address";
-            ipColumn.Width = 120; // Adjust width as needed
-            dataGridViewActiveCustomers.Columns.Add(ipColumn);
+            // Optional: Apply default sort order if desired
+            // dataGridViewActiveCustomers.Sort(dataGridViewActiveCustomers.Columns["RouterName"], ListSortDirection.Ascending);
         }
+
+        // --- MODIFIED: InitializeArchivedCustomersDataGridView ---
         private void InitializeArchivedCustomersDataGridView()
         {
             dataGridViewArchivedCustomers.Columns.Clear();
             dataGridViewArchivedCustomers.AutoGenerateColumns = false;
 
-            // (1) ID column.
+            // --- NEW: Router Column (First Column) ---
+            DataGridViewTextBoxColumn routerColumn = new DataGridViewTextBoxColumn();
+            routerColumn.DataPropertyName = "RouterName";
+            routerColumn.HeaderText = "Router";
+            routerColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            routerColumn.DisplayIndex = 0;
+            dataGridViewArchivedCustomers.Columns.Add(routerColumn);
+
+            // ID column (Hidden)
             DataGridViewTextBoxColumn idColumn = new DataGridViewTextBoxColumn();
             idColumn.DataPropertyName = "Id";
             idColumn.HeaderText = "ID";
             idColumn.Width = 50;
+            idColumn.Visible = false; // --- MODIFIED: Hide ID column ---
+            idColumn.DisplayIndex = 1;
             dataGridViewArchivedCustomers.Columns.Add(idColumn);
 
-            // (2) Account Name column.
+            // Account Name column
             DataGridViewTextBoxColumn accountNameColumn = new DataGridViewTextBoxColumn();
             accountNameColumn.DataPropertyName = "AccountName";
             accountNameColumn.HeaderText = "Account Name";
             accountNameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            accountNameColumn.FillWeight = 150;
+            accountNameColumn.DisplayIndex = 2;
             dataGridViewArchivedCustomers.Columns.Add(accountNameColumn);
 
-            // (3) Additional Name column.
+            // Additional Name column
             DataGridViewTextBoxColumn additionalNameColumn = new DataGridViewTextBoxColumn();
             additionalNameColumn.DataPropertyName = "AdditionalName";
             additionalNameColumn.HeaderText = "Additional Name";
             additionalNameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            additionalNameColumn.FillWeight = 100;
+            additionalNameColumn.DisplayIndex = 3;
             dataGridViewArchivedCustomers.Columns.Add(additionalNameColumn);
 
-            // (4) Contact Number column.
+            // --- NEW: MAC Address Column ---
+            DataGridViewTextBoxColumn macAddressColumn = new DataGridViewTextBoxColumn();
+            macAddressColumn.DataPropertyName = "MacAddress";
+            macAddressColumn.HeaderText = "MAC Address";
+            macAddressColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            macAddressColumn.Width = 130;
+            macAddressColumn.DisplayIndex = 4;
+            dataGridViewArchivedCustomers.Columns.Add(macAddressColumn);
+
+            // IP Address column
+            DataGridViewTextBoxColumn ipColumn = new DataGridViewTextBoxColumn();
+            ipColumn.DataPropertyName = "IPAddress";
+            ipColumn.HeaderText = "IP Address";
+            ipColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            ipColumn.Width = 120;
+            ipColumn.DisplayIndex = 5;
+            dataGridViewArchivedCustomers.Columns.Add(ipColumn);
+
+            // Contact Number column
             DataGridViewTextBoxColumn contactNumberColumn = new DataGridViewTextBoxColumn();
             contactNumberColumn.DataPropertyName = "ContactNumber";
             contactNumberColumn.HeaderText = "Contact Number";
-            contactNumberColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            contactNumberColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            contactNumberColumn.Width = 120;
+            contactNumberColumn.DisplayIndex = 6;
             dataGridViewArchivedCustomers.Columns.Add(contactNumberColumn);
 
-            // (5) Email column.
+            // Email column
             DataGridViewTextBoxColumn emailColumn = new DataGridViewTextBoxColumn();
             emailColumn.DataPropertyName = "Email";
             emailColumn.HeaderText = "Email";
             emailColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            emailColumn.FillWeight = 100;
+            emailColumn.DisplayIndex = 7;
             dataGridViewArchivedCustomers.Columns.Add(emailColumn);
 
-            // (6) Location column.
+            // Location column
             DataGridViewTextBoxColumn locationColumn = new DataGridViewTextBoxColumn();
             locationColumn.DataPropertyName = "Location";
             locationColumn.HeaderText = "Location";
             locationColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            locationColumn.FillWeight = 100;
+            locationColumn.DisplayIndex = 8;
             dataGridViewArchivedCustomers.Columns.Add(locationColumn);
 
-            //// (7) IsArchived column.
-            //DataGridViewCheckBoxColumn archivedColumn = new DataGridViewCheckBoxColumn();
-            //archivedColumn.DataPropertyName = "IsArchived";
-            //archivedColumn.HeaderText = "Archived";
-            //archivedColumn.Width = 70;
-            //dataGridViewArchivedCustomers.Columns.Add(archivedColumn);
-
-            // (8) IP Address column.
-            DataGridViewTextBoxColumn ipColumn = new DataGridViewTextBoxColumn();
-            ipColumn.DataPropertyName = "IPAddress";
-            ipColumn.HeaderText = "IP Address";
-            ipColumn.Width = 120;
-            dataGridViewArchivedCustomers.Columns.Add(ipColumn);
+            // Optional: Apply default sort order
+            // dataGridViewArchivedCustomers.Sort(dataGridViewArchivedCustomers.Columns["RouterName"], ListSortDirection.Ascending);
         }
 
-
-        private void SyncManager_DataSynced(object sender, EventArgs e)
+        // Event handler for CustomerRepository.CustomerUpdated
+        private void OnCustomerDataUpdated(object sender, EventArgs e)
         {
-            // Use Invoke or BeginInvoke to update the UI on the main thread.
-            this.BeginInvoke((MethodInvoker)delegate {
-                // Refresh Datagridview and preserve scroll
+            if (this.InvokeRequired)
+            {
+                this.Invoke((MethodInvoker)delegate {
+                    RefreshDataGridViewWithScrollPreservation();
+                });
+            }
+            else
+            {
                 RefreshDataGridViewWithScrollPreservation();
-            });
+            }
         }
 
         private void RefreshDataGridViewWithScrollPreservation()
         {
-            // Save the current scroll position
-            int firstDisplayedIndex = dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex;
+            int firstDisplayedIndexActive = -1;
+            if (dataGridViewActiveCustomers.Rows.Count > 0)
+                firstDisplayedIndexActive = dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex;
 
-            int secondDisplayedIndex = dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex;
+            int firstDisplayedIndexArchived = -1;
+            if (dataGridViewArchivedCustomers.Rows.Count > 0)
+                firstDisplayedIndexArchived = dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex;
 
-            // Refresh the data (this might reset the grid's scroll position)
-            LoadActiveCustomers(); // Your method to refresh the data source
+            LoadActiveCustomers();
             LoadArchivedCustomers();
 
-            // Restore the scroll position if valid
-            if (firstDisplayedIndex >= 0 && firstDisplayedIndex < dataGridViewActiveCustomers.Rows.Count)
+            if (firstDisplayedIndexActive >= 0 && firstDisplayedIndexActive < dataGridViewActiveCustomers.Rows.Count)
             {
-                dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndex;
+                dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndexActive;
             }
-            if (secondDisplayedIndex >= 0 && secondDisplayedIndex < dataGridViewArchivedCustomers.Rows.Count)
+            if (firstDisplayedIndexArchived >= 0 && firstDisplayedIndexArchived < dataGridViewArchivedCustomers.Rows.Count)
             {
-                dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex = secondDisplayedIndex;
-            }
-        }
-
-
-        private void SyncMikrotikData()
-        {
-            try
-            {
-                // Use the persistent connection via syncManager (no credentials needed here)
-                syncManager?.SyncCustomers();
-
-                // Refresh the DataGridViews with updated data from the database.
-                LoadActiveCustomers();
-                LoadArchivedCustomers();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error during sync: " + ex.Message);
+                dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndexArchived;
             }
         }
-
         private void LoadActiveCustomers()
         {
-            //try
-            //{
-            //    CustomerRepository repo = new CustomerRepository();
-            //    // Filter active customers (IsArchived == false)
-            //    var customers = repo.GetCustomers().Where(c => !c.IsArchived).ToList();
-            //    dataGridViewActiveCustomers.DataSource = null; // Clear current binding
-            //    dataGridViewActiveCustomers.DataSource = customers;
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Error loading active customers: " + ex.Message);
-            //}
             try
             {
                 CustomerRepository repo = new CustomerRepository();
-                // Retrieve all active customers (assuming IsArchived = false)
-                var customers = repo.GetCustomers().Where(c => !c.IsArchived).ToList();
+                // GetCustomers(false) will get only active customers.
+                // The repository already sorts by RouterName, then AccountName.
+                var customers = repo.GetCustomers(includeArchived: false);
 
-                // Get the search term from txtSearchActive
-                string search = txtSearchActive.Text.Trim();
-
-                // If search is not empty, filter the list (you can extend this filter as needed)
+                string search = txtSearchActive.Text.Trim().ToLowerInvariant();
                 if (!string.IsNullOrEmpty(search))
                 {
-                    customers = customers.Where(c => c.AccountName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                    customers = customers.Where(c =>
+                        (c.AccountName?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.RouterName?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.MacAddress?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.IPAddress?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.AdditionalName?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.Location?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.Email?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.ContactNumber?.ToLowerInvariant().Contains(search) ?? false)
+                    ).ToList();
                 }
-
-                // Bind the filtered list to the DataGridView.
+                dataGridViewActiveCustomers.DataSource = null;
                 dataGridViewActiveCustomers.DataSource = customers;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading active customers: " + ex.Message);
+                MessageBox.Show("Error loading active customers: " + ex.Message, "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
-
         private void LoadArchivedCustomers()
         {
-            //try
-            //{
-            //    CustomerRepository repo = new CustomerRepository();
-            //    // Filter archived customers (IsArchived == true)
-            //    var customers = repo.GetCustomers().Where(c => c.IsArchived).ToList();
-            //    dataGridViewArchivedCustomers.DataSource = null; // Clear current binding
-            //    dataGridViewArchivedCustomers.DataSource = customers;
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Error loading archived customers: " + ex.Message);
-            //}
             try
             {
                 CustomerRepository repo = new CustomerRepository();
-                // Retrieve all archived customers (assuming IsArchived = true)
-                var customers = repo.GetCustomers().Where(c => c.IsArchived).ToList();
+                // Get all customers and then filter locally for archived ones.
+                // Or, modify GetCustomers to better support this, but for now, GetCustomers(true) gets all.
+                var allCustomers = repo.GetCustomers(includeArchived: true);
+                var customers = allCustomers.Where(c => c.IsArchived).ToList();
 
-                // Get the search term from txtSearchArchived
-                string search = txtSearchArchived.Text.Trim();
-
-                // If search is not empty, filter the list
+                string search = txtSearchArchived.Text.Trim().ToLowerInvariant();
                 if (!string.IsNullOrEmpty(search))
                 {
-                    customers = customers.Where(c => c.AccountName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                    customers = customers.Where(c =>
+                        (c.AccountName?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.RouterName?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.MacAddress?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.IPAddress?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.AdditionalName?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.Location?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.Email?.ToLowerInvariant().Contains(search) ?? false) ||
+                        (c.ContactNumber?.ToLowerInvariant().Contains(search) ?? false)
+                    ).ToList();
                 }
-
-                // Bind the filtered list to the DataGridView.
+                dataGridViewArchivedCustomers.DataSource = null;
                 dataGridViewArchivedCustomers.DataSource = customers;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading archived customers: " + ex.Message);
+                MessageBox.Show("Error loading archived customers: " + ex.Message, "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void timerSync_Tick(object sender, EventArgs e)
+        {
+            DateTime? lastSyncTime = null;
+            string timeAgoStr = "error"; // Default to "error"
+
+            try
+            {
+                ServiceLogRepository logRepo = new ServiceLogRepository(); // Assuming default constructor is okay
+                NetwatchConfigRepository netwatchRepo = new NetwatchConfigRepository(logRepo); // Pass the logger
+
+                lastSyncTime = netwatchRepo.GetLastDataSyncTimestamp("PPPoESyncService");
+                timeAgoStr = FormatTimeAgo(lastSyncTime);
+
+                // Optional: Log the fetched time for debugging this specific timer's action
+                LogStatus($"timerSync_Tick (Customers Form): Fetched lastSyncTime='{lastSyncTime?.ToString("o") ?? "null"}', formatted timeAgoStr='{timeAgoStr}'");
+            }
+            catch (Exception ex)
+            {
+                LogStatus($"Error in Customers.timerSync_Tick fetching last sync time: {ex.Message}");
+                // timeAgoStr remains "error" as set initially
+            }
+
+            // 3. Update lblsyncActive
+            if (lblsyncActive != null)
+            {
+                lblsyncActive.Text = "Synced: " + timeAgoStr;
+            }
+
+            // 4. Update lblsyncArchived
+            if (lblsyncArchived != null)
+            {
+                lblsyncArchived.Text = "Synced: " + timeAgoStr;
             }
         }
 
-        private void timerSync_Tick(object sender, EventArgs e)
+        // Helper method for logging status to UI or console (optional)
+        private void LogStatus(string message)
         {
-            SyncMikrotikData();
-            
-            // Refresh the DataGridView with the latest data from the database.
-            LoadActiveCustomers();
-            LoadArchivedCustomers();
-
-            // Update the label with the current time in the format "Synced: 7:01:10 PM"
-            lblsyncActive.Text = "Synced: " + DateTime.Now.ToString("h:mm:ss tt");
-            lblsyncArchived.Text = "Synced: " + DateTime.Now.ToString("h:mm:ss tt");
+            System.Diagnostics.Debug.WriteLine($"CustomersForm: {message}");
         }
-
         private void Form1_Load(object sender, EventArgs e)
         {
-            SyncMikrotikData();
+            LogStatus("Form Load: Initializing and loading customer data...");
             LoadActiveCustomers();
             LoadArchivedCustomers();
-            lblsyncActive.Text = "Synced: " + DateTime.Now.ToString("h:mm:ss tt");
-            lblsyncArchived.Text = "Synced: " + DateTime.Now.ToString("h:mm:ss tt");
         }
-
         private void btnRefreshArchived_Click(object sender, EventArgs e)
         {
-            SyncMikrotikData();
+            LogStatus("Refresh Archived Clicked.");
             LoadArchivedCustomers();
-            lblsyncArchived.Text = "Synced: " + DateTime.Now.ToString("h:mm:ss tt");
         }
-
-        private void btnRefreshActive_Click(object sender, EventArgs e)
-        {
-            SyncMikrotikData();
-            lblsyncActive.Text = "Synced: " + DateTime.Now.ToString("h:mm:ss tt");
-        }
-
         private void Customers_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SyncManager.DataSynced -= SyncManager_DataSynced;
+            // Unsubscribe from the event when the form is closing
+            CustomerRepository.CustomerUpdated -= OnCustomerDataUpdated;
         }
-
-
         private void Customers_VisibleChanged(object sender, EventArgs e)
         {
             if (this.Visible)
             {
+                LogStatus("Form became visible. Refreshing data views and sync status...");
                 RefreshDataGridViewWithScrollPreservation();
             }
-        }
 
+        }
         private void txtSearchActive_TextChanged(object sender, EventArgs e)
         {
             LoadActiveCustomers();
-
         }
-
         private void txtSearchArchived_TextChanged(object sender, EventArgs e)
         {
             LoadArchivedCustomers();
         }
+        private string FormatTimeAgo(DateTime? dateTime)
+        {
+            if (!dateTime.HasValue)
+            {
+                return "never";
+            }
+
+            TimeSpan timeSpan = DateTime.Now - dateTime.Value;
+
+            if (timeSpan.TotalSeconds < 1) // Handle future or same time as "just now"
+            {
+                return "just now";
+            }
+            if (timeSpan.TotalSeconds < 60)
+            {
+                return $"{Math.Floor(timeSpan.TotalSeconds)}s ago";
+            }
+            if (timeSpan.TotalMinutes < 60)
+            {
+                return $"{Math.Floor(timeSpan.TotalMinutes)}m ago";
+            }
+            if (timeSpan.TotalHours < 24)
+            {
+                return $"{Math.Floor(timeSpan.TotalHours)}h ago";
+            }
+            if (timeSpan.TotalDays < 30)
+            {
+                return $"{Math.Floor(timeSpan.TotalDays)}d ago";
+            }
+            if (timeSpan.TotalDays < 365)
+            {
+                return $"{Math.Floor(timeSpan.TotalDays / 30)}mo ago";
+            }
+            return $"{Math.Floor(timeSpan.TotalDays / 365)}y ago";
+        }
     }
-    
+
 }

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using CustomerAndServerMaintenanceTracking.Models;
+using SharedLibrary.DataAccess;
+using SharedLibrary.Models;
 
 namespace CustomerAndServerMaintenanceTracking.DataAccess
 {

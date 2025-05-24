@@ -37,8 +37,7 @@
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.txtSearchActive = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel4 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnSync_RefreshActive = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnAddCustomerInfo = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
@@ -79,7 +78,7 @@
             // timerSync
             // 
             this.timerSync.Enabled = true;
-            this.timerSync.Interval = 300000;
+            this.timerSync.Interval = 1000;
             this.timerSync.Tick += new System.EventHandler(this.timerSync_Tick);
             // 
             // tabControl1
@@ -160,8 +159,7 @@
             // 
             // flowLayoutPanel4
             // 
-            this.flowLayoutPanel4.Controls.Add(this.btnSync_RefreshActive);
-            this.flowLayoutPanel4.Controls.Add(this.button1);
+            this.flowLayoutPanel4.Controls.Add(this.btnAddCustomerInfo);
             this.flowLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel4.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flowLayoutPanel4.Location = new System.Drawing.Point(493, 0);
@@ -170,28 +168,16 @@
             this.flowLayoutPanel4.Size = new System.Drawing.Size(493, 40);
             this.flowLayoutPanel4.TabIndex = 1;
             // 
-            // btnSync_RefreshActive
+            // btnAddCustomerInfo
             // 
-            this.btnSync_RefreshActive.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSync_RefreshActive.Location = new System.Drawing.Point(392, 0);
-            this.btnSync_RefreshActive.Margin = new System.Windows.Forms.Padding(0);
-            this.btnSync_RefreshActive.Name = "btnSync_RefreshActive";
-            this.btnSync_RefreshActive.Size = new System.Drawing.Size(101, 26);
-            this.btnSync_RefreshActive.TabIndex = 4;
-            this.btnSync_RefreshActive.Text = "Sync/Refresh";
-            this.btnSync_RefreshActive.UseVisualStyleBackColor = true;
-            this.btnSync_RefreshActive.Click += new System.EventHandler(this.btnRefreshActive_Click);
-            // 
-            // button1
-            // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(249, 0);
-            this.button1.Margin = new System.Windows.Forms.Padding(0);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(143, 26);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Add Customer Info";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnAddCustomerInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAddCustomerInfo.Location = new System.Drawing.Point(350, 0);
+            this.btnAddCustomerInfo.Margin = new System.Windows.Forms.Padding(0);
+            this.btnAddCustomerInfo.Name = "btnAddCustomerInfo";
+            this.btnAddCustomerInfo.Size = new System.Drawing.Size(143, 26);
+            this.btnAddCustomerInfo.TabIndex = 3;
+            this.btnAddCustomerInfo.Text = "Add Customer Info";
+            this.btnAddCustomerInfo.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel1
             // 
@@ -200,6 +186,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel6, 1, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 531);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -469,8 +456,7 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel8;
         private System.Windows.Forms.Label lblsyncArchived;
         private System.Windows.Forms.DataGridView dataGridViewArchivedCustomers;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button btnSync_RefreshActive;
+        private System.Windows.Forms.Button btnAddCustomerInfo;
     }
 }
 

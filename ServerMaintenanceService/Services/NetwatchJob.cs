@@ -7,237 +7,535 @@ using System.Threading.Tasks;
 using CustomerAndServerMaintenanceTracking.DataAccess;
 using CustomerAndServerMaintenanceTracking.Models;
 using System.Diagnostics; // For Console.WriteLine
+using System.Collections.Concurrent;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 namespace ServerMaintenanceService.Services
 {
     public class NetwatchJob : IDisposable
     {
         private NetwatchConfig _config;
-        private Timer _timer;
-        private bool _isDisposed = false;
-        private volatile bool _isExecutingCycle = false; // To prevent overlapping executions
+        private Timer _schedulerTimer; // Ticks frequently to check which IPs to ping
+        private readonly ConcurrentDictionary<string, MonitoredIpState> _ipStates = new ConcurrentDictionary<string, MonitoredIpState>();
+        private readonly SemaphoreSlim _pingConcurrencySemaphore;
+        private Timer _aggregateStatusUpdateTimer; // Timer to periodically update the aggregate status to DB
 
-        // Dependencies - these should be passed in or resolved via a DI container if you use one.
-        // For simplicity now, we can instantiate them or pass them.
-        // Let's assume they are passed via constructor for better testability.
+        private bool _isDisposed = false;
+        private volatile bool _isRefreshingIpList = false;
+        private volatile bool _isUpdatingAggregateStatus = false;
+
         private readonly TagRepository _tagRepository;
         private readonly NetwatchConfigRepository _netwatchConfigRepository;
+        private readonly ServiceLogRepository _logRepository; // For logging
+        private readonly string _serviceNameForLogging;
+
+
+        private string _lastCalculatedAggregateStatusForThisJobInstance = null;
+        private DateTime _lastTimeAggregateStatusWasWrittenToDb = DateTime.MinValue;
+        private DateTime _lastActivityTimestampForAggregate = DateTime.MinValue;
+
 
         public int ConfigId => _config.Id;
+        public string NetwatchName => _config?.NetwatchName ?? "Unknown Netwatch";
 
-        public NetwatchJob(NetwatchConfig config, TagRepository tagRepository, NetwatchConfigRepository netwatchConfigRepository)
+        public NetwatchJob(NetwatchConfig config, TagRepository tagRepository, NetwatchConfigRepository netwatchConfigRepository, ServiceLogRepository logRepository, string serviceName)
         {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            if (tagRepository == null) throw new ArgumentNullException(nameof(tagRepository));
-            if (netwatchConfigRepository == null) throw new ArgumentNullException(nameof(netwatchConfigRepository));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _tagRepository = tagRepository ?? throw new ArgumentNullException(nameof(tagRepository));
+            _netwatchConfigRepository = netwatchConfigRepository ?? throw new ArgumentNullException(nameof(netwatchConfigRepository));
+            _logRepository = logRepository ?? throw new ArgumentNullException(nameof(logRepository));
+            _serviceNameForLogging = serviceName ?? "NetwatchJob";
 
-            _config = config;
-            _tagRepository = tagRepository;
-            _netwatchConfigRepository = netwatchConfigRepository;
-
-            // Ensure interval is a positive value, default to 60s if not
             if (_config.IntervalSeconds <= 0)
             {
-                Console.WriteLine($"Warning: NetwatchJob for '{_config.NetwatchName}' (ID: {_config.Id}) has an invalid interval of {_config.IntervalSeconds}s. Defaulting to 60s.");
-                _config.IntervalSeconds = 60;
+                Log(LogLevel.WARN, $"NetwatchJob for '{_config.NetwatchName}' (ID: {_config.Id}) has an invalid interval of {_config.IntervalSeconds}s. Defaulting to 60s.");
+                _config.IntervalSeconds = 60; // Default to 60s if invalid
             }
+            if (_config.TimeoutMilliseconds <= 0)
+            {
+                Log(LogLevel.WARN, $"NetwatchJob for '{_config.NetwatchName}' (ID: {_config.Id}) has an invalid timeout of {_config.TimeoutMilliseconds}ms. Defaulting to 1000ms.");
+                _config.TimeoutMilliseconds = 1000; // Default to 1s if invalid
+            }
+
+            _pingConcurrencySemaphore = new SemaphoreSlim(10, 10); // Limit to 10 concurrent pings per job
         }
 
-        public void Start()
+        private void Log(LogLevel level, string message, Exception ex = null)
+        {
+            string logMessage = $"[NJ {_config.Id} '{_config.NetwatchName}'] {message}";
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{_serviceNameForLogging}] [{level}] {logMessage}{(ex != null ? " - Exception: " + ex.Message : "")}");
+            _logRepository.WriteLog(new ServiceLogEntry
+            {
+                ServiceName = _serviceNameForLogging,
+                LogLevel = level.ToString(),
+                Message = logMessage,
+                ExceptionDetails = ex?.ToString()
+            });
+        }
+
+        public async Task StartAsync()
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(NetwatchJob));
 
-            Console.WriteLine($"NetwatchJob for '{_config.NetwatchName}' (ID: {_config.Id}) starting with interval {_config.IntervalSeconds}s.");
-            _timer = new Timer(async _ => await TimerCallbackAsync(), null, TimeSpan.Zero, TimeSpan.FromSeconds(_config.IntervalSeconds));
+            Log(LogLevel.INFO, $"Starting job. Interval: {_config.IntervalSeconds}s, Timeout: {_config.TimeoutMilliseconds}ms.");
 
-            // If RunUponSave is true, trigger an immediate execution without waiting for the first interval.
-            // The TimeSpan.Zero in the Timer constructor above already triggers an immediate first callback.
-            // If you want a separate explicit call for RunUponSave, you could do:
-            // if (_config.RunUponSave) { Task.Run(async () => await ExecutePingCycleAsync()); }
+            await RefreshMonitoredIpListAsync();
+
+            _schedulerTimer = new Timer(async _ => await SchedulerTimerCallbackAsync(), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(500));
+
+            int aggregateUpdateIntervalSeconds = Math.Max(5, _config.IntervalSeconds / 2);
+            if (_config.IntervalSeconds < 5) aggregateUpdateIntervalSeconds = 5;
+
+            _aggregateStatusUpdateTimer = new Timer(async _ => await UpdateAggregateStatusToDatabaseAsync(), null, TimeSpan.FromSeconds(aggregateUpdateIntervalSeconds), TimeSpan.FromSeconds(aggregateUpdateIntervalSeconds));
+
+            if (_config.RunUponSave)
+            {
+                Log(LogLevel.DEBUG, "RunUponSave is true, scheduling immediate pings for all IPs.");
+                foreach (var ipState in _ipStates.Values)
+                {
+                    ipState.NextPingTime = DateTime.MinValue;
+                }
+                _ = Task.Delay(TimeSpan.FromSeconds(Math.Min(5, _config.IntervalSeconds + 2))).ContinueWith(async _ => await UpdateAggregateStatusToDatabaseAsync());
+            }
         }
 
         public void Stop()
         {
             if (_isDisposed) return;
+            Log(LogLevel.INFO, "Stopping job.");
 
-            Console.WriteLine($"NetwatchJob for '{_config.NetwatchName}' (ID: {_config.Id}) stopping.");
-            _timer?.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer
-            _timer?.Dispose();
-            _timer = null;
+            _schedulerTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _schedulerTimer?.Dispose();
+            _schedulerTimer = null;
+
+            _aggregateStatusUpdateTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _aggregateStatusUpdateTimer?.Dispose();
+            _aggregateStatusUpdateTimer = null;
+
+            _pingConcurrencySemaphore?.Dispose();
         }
 
-        public void UpdateConfig(NetwatchConfig newConfig)
+        public async Task UpdateConfigAsync(NetwatchConfig newConfig)
         {
             if (_isDisposed) throw new ObjectDisposedException(nameof(NetwatchJob));
             if (newConfig == null) throw new ArgumentNullException(nameof(newConfig));
             if (newConfig.Id != _config.Id) throw new ArgumentException("Cannot update job with a different config ID.");
 
-            bool needsRestart = _config.IntervalSeconds != newConfig.IntervalSeconds ||
-                                !_config.MonitoredTagIds.SequenceEqual(newConfig.MonitoredTagIds); // Basic check for tag changes
+            Log(LogLevel.DEBUG, $"Configuration update received.");
 
-            _config = newConfig; // Update to the new config
+            bool intervalChanged = _config.IntervalSeconds != newConfig.IntervalSeconds;
+            bool timeoutChanged = _config.TimeoutMilliseconds != newConfig.TimeoutMilliseconds;
+            // Ensure MonitoredTagIds are not null before comparing
+            var oldTags = _config.MonitoredTagIds ?? new List<int>();
+            var newTags = newConfig.MonitoredTagIds ?? new List<int>();
+            bool tagsChanged = !oldTags.SequenceEqual(newTags);
+            bool enabledChanged = _config.IsEnabled != newConfig.IsEnabled;
 
-            if (needsRestart && _timer != null) // Only restart if already started
+            _config = newConfig;
+
+            if (enabledChanged)
             {
-                Console.WriteLine($"NetwatchJob for '{_config.NetwatchName}' (ID: {_config.Id}) configuration updated. Restarting timer.");
-                Stop();
-                Start();
+                if (_config.IsEnabled)
+                {
+                    Log(LogLevel.INFO, "Job re-enabled by config update. Restarting operations.");
+                    await StartAsync();
+                }
+                else
+                {
+                    Log(LogLevel.INFO, "Job disabled by config update. Stopping operations.");
+                    Stop();
+                    try
+                    {
+                        _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "Disabled", DateTime.Now);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log(LogLevel.ERROR, $"Failed to update status to 'Disabled' in DB.", ex);
+                    }
+                }
             }
-            else if (_timer == null && _config.IsEnabled) // If it was previously stopped but now enabled by config
+            else if (_config.IsEnabled)
             {
-                Start();
-            }
-            else if (!_config.IsEnabled && _timer != null) // If it was running but now disabled by config
-            {
-                Stop();
+                if (tagsChanged)
+                {
+                    Log(LogLevel.INFO, "Monitored tags changed. Refreshing IP list.");
+                    await RefreshMonitoredIpListAsync();
+                }
             }
         }
 
-
-        private async Task TimerCallbackAsync()
+        private async Task RefreshMonitoredIpListAsync()
         {
-            if (_isDisposed || !_config.IsEnabled) // Double check if enabled, in case config changed
-            {
-                Stop(); // Ensure timer is stopped if job is disposed or config disabled
-                return;
-            }
+            if (_isRefreshingIpList || _isDisposed) return;
+            _isRefreshingIpList = true;
 
-            if (_isExecutingCycle)
-            {
-                Console.WriteLine($"Ping cycle for '{_config.NetwatchName}' (ID: {_config.Id}) skipped due to overlap.");
-                return;
-            }
-
-            _isExecutingCycle = true;
+            Log(LogLevel.DEBUG, "Starting IP list refresh.");
+            List<MonitoredIpDetail> newIpDetails;
             try
             {
-                await ExecutePingCycleAsync();
+                // Ensure _config.MonitoredTagIds is not null before passing
+                newIpDetails = _tagRepository.GetMonitoredIpDetailsForTags(_config.MonitoredTagIds ?? new List<int>());
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unhandled exception in TimerCallbackAsync for '{_config.NetwatchName}' (ID: {_config.Id}): {ex}");
-                // Optionally update status to a general error here
-                try
+                Log(LogLevel.ERROR, "Failed to get IP details for tags.", ex);
+                _isRefreshingIpList = false;
+                try { _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "Error: Failed to get IPs for tags", DateTime.Now); }
+                catch (Exception dbEx) { Log(LogLevel.ERROR, "Failed to update DB status for IP fetch error.", dbEx); }
+                return;
+            }
+
+            var currentIpSet = new HashSet<string>(_ipStates.Keys);
+
+            foreach (var detail in newIpDetails)
+            {
+                string key = detail.IpAddress ?? detail.EntityName;
+                if (_ipStates.TryGetValue(key, out MonitoredIpState existingState))
                 {
-                    _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, $"Error: Cycle execution failed ({ex.Message.Substring(0, Math.Min(ex.Message.Length, 100))})", DateTime.Now);
+                    existingState.IpDetail = detail;
                 }
-                catch (Exception dbEx)
+                else
                 {
-                    Console.WriteLine($"Failed to update DB with cycle execution error for '{_config.NetwatchName}': {dbEx}");
+                    _ipStates.TryAdd(key, new MonitoredIpState(detail));
+                    Log(LogLevel.DEBUG, $"Added new IP/Entity to monitor: {detail.EntityName} ({detail.IpAddress ?? "No IP"})");
                 }
             }
-            finally
+
+            var newIpKeySet = new HashSet<string>(newIpDetails.Select(ipd => ipd.IpAddress ?? ipd.EntityName));
+            var ipsToRemove = currentIpSet.Except(newIpKeySet).ToList();
+            foreach (var ipKeyToRemove in ipsToRemove)
             {
-                _isExecutingCycle = false;
+                if (_ipStates.TryRemove(ipKeyToRemove, out _))
+                {
+                    Log(LogLevel.DEBUG, $"Removed IP/Entity from monitoring: {ipKeyToRemove}");
+                }
+            }
+            Log(LogLevel.INFO, $"IP list refreshed. Monitoring {_ipStates.Count} targets.");
+
+            try
+            {
+                _netwatchConfigRepository.PruneNetwatchDataForMissingEntities(_config.Id, newIpDetails);
+                Log(LogLevel.DEBUG, "Pruning of stale NetwatchIpResults and NetwatchOutageLog completed.");
+            }
+            catch (Exception ex)
+            {
+                Log(LogLevel.ERROR, "Error during pruning of stale Netwatch data.", ex);
+            }
+
+            _isRefreshingIpList = false;
+        }
+
+        private async Task SchedulerTimerCallbackAsync()
+        {
+            if (_isDisposed || !_config.IsEnabled)
+            {
+                Stop(); return;
+            }
+
+            List<Task> activePingTasks = new List<Task>();
+            DateTime now = DateTime.Now;
+
+            foreach (var ipStateEntry in _ipStates)
+            {
+                MonitoredIpState ipState = ipStateEntry.Value;
+                if (ipState.IpDetail == null) // Safety check
+                {
+                    Log(LogLevel.WARN, $"Scheduler: Found ipState with null IpDetail for key {ipStateEntry.Key}. Skipping.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(ipState.IpDetail.IpAddress))
+                {
+                    ipState.LastKnownStatus = "No IP";
+                    ipState.LastPingAttemptTime = now;
+                    ipState.NextPingTime = now.AddSeconds(_config.IntervalSeconds);
+                    continue;
+                }
+
+                if (!ipState.IsPinging && now >= ipState.NextPingTime)
+                {
+                    ipState.IsPinging = true;
+                    activePingTasks.Add(ExecutePingAndUpdateStateAsync(ipState));
+                }
+            }
+
+            if (activePingTasks.Any())
+            {
+                await Task.WhenAll(activePingTasks);
             }
         }
 
-        //public async Task ExecutePingCycleAsync()
-        //{
-        //    Console.WriteLine($"[NJ {_config.Id}] Executing ping cycle for '{_config.NetwatchName}' at {DateTime.Now}");
+        private async Task ExecutePingAndUpdateStateAsync(MonitoredIpState ipState)
+        {
+            if (ipState.IpDetail == null) // Safety check
+            {
+                Log(LogLevel.ERROR, "ExecutePing: IpDetail is null. Cannot proceed.");
+                ipState.IsPinging = false; // Reset flag
+                return;
+            }
 
-        //    List<MonitoredIpDetail> ipDetailsToPing = new List<MonitoredIpDetail>();
-        //    if (_config.MonitoredTagIds != null && _config.MonitoredTagIds.Any())
-        //    {
-        //        try
-        //        {
-        //            // Use the new method to get IP details
-        //            ipDetailsToPing = _tagRepository.GetMonitoredIpDetailsForTags(_config.MonitoredTagIds);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine($"[NJ {_config.Id}] ERROR getting IP details for '{_config.NetwatchName}': {ex.Message}");
-        //            _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "Error: Failed to get IPs for tags", DateTime.Now);
-        //            return;
-        //        }
-        //    }
+            await _pingConcurrencySemaphore.WaitAsync();
+            try
+            {
+                DateTime pingAttemptTime = DateTime.Now;
+                ipState.LastPingAttemptTime = pingAttemptTime;
+                PingReply reply = null;
+                string currentPingStatusText;
 
-        //    if (!ipDetailsToPing.Any())
-        //    {
-        //        Console.WriteLine($"[NJ {_config.Id}] No IPs to ping for '{_config.NetwatchName}'.");
-        //        _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "No IPs configured/found for tags", DateTime.Now);
-        //        // Clear any old results for this config if no IPs are currently associated
-        //        try
-        //        {
-        //            // You might want a method to clear old IP results for a configId if IPs are removed
-        //            // _netwatchConfigRepository.ClearOldIpResults(_config.Id); // Placeholder for such a method
-        //        }
-        //        catch (Exception ex) { Console.WriteLine($"[NJ {_config.Id}] Error clearing old IP results: {ex.Message}"); }
-        //        return;
-        //    }
+                if (string.IsNullOrWhiteSpace(ipState.IpDetail.IpAddress))
+                {
+                    currentPingStatusText = "No IP";
+                }
+                else
+                {
+                    reply = await Pinger.SendPingAsync(ipState.IpDetail.IpAddress, _config.TimeoutMilliseconds);
+                    currentPingStatusText = reply?.Status.ToString() ?? "Error (No Reply)";
+                }
 
-        //    int totalIps = ipDetailsToPing.Count;
-        //    int upCount = 0;
-        //    int downCount = 0;
-        //    int timeoutCount = 0;
-        //    DateTime cycleStartTime = DateTime.Now;
+                if (currentPingStatusText.Length > 50) currentPingStatusText = currentPingStatusText.Substring(0, 50);
 
-        //    // Ping all IPs concurrently
-        //    var pingTasks = new List<Task<(MonitoredIpDetail IpDetail, PingReply Reply)>>();
-        //    foreach (var ipDetail in ipDetailsToPing)
-        //    {
-        //        pingTasks.Add(Pinger.SendPingAsync(ipDetail.IpAddress, _config.TimeoutMilliseconds)
-        //                            .ContinueWith(task => (ipDetail, task.Result))); // Pair IP detail with its reply
-        //    }
+                string previousStatus = ipState.LastKnownStatus;
+                bool currentIsEffectivelyDown = !(reply?.Status == IPStatus.Success || currentPingStatusText == "No IP");
+                bool previousWasEffectivelyDown = !(previousStatus == "Success" || previousStatus == "No IP" || previousStatus == "Pending");
 
-        //    var results = await Task.WhenAll(pingTasks);
+                if (currentIsEffectivelyDown && !previousWasEffectivelyDown && currentPingStatusText != "No IP")
+                {
+                    _netwatchConfigRepository.StartOutageLog(_config.Id, ipState.IpDetail.IpAddress, ipState.IpDetail.EntityName, pingAttemptTime, currentPingStatusText);
+                    Log(LogLevel.WARN, $"OUTAGE START: {ipState.IpDetail.EntityName} ({ipState.IpDetail.IpAddress}) is now {currentPingStatusText}.");
+                }
+                else if (!currentIsEffectivelyDown && previousWasEffectivelyDown && currentPingStatusText != "No IP")
+                {
+                    _netwatchConfigRepository.EndOutageLog(_config.Id, ipState.IpDetail.IpAddress, pingAttemptTime);
+                    Log(LogLevel.INFO, $"OUTAGE END: {ipState.IpDetail.EntityName} ({ipState.IpDetail.IpAddress}) is now {currentPingStatusText}.");
+                }
 
-        //    foreach (var result in results)
-        //    {
-        //        MonitoredIpDetail currentIpDetail = result.IpDetail;
-        //        PingReply reply = result.Reply;
-        //        DateTime pingAttemptTime = cycleStartTime; // Or more granular if Pinger could return it
+                ipState.LastKnownStatus = currentPingStatusText;
 
-        //        // Save individual ping result to the database
-        //        try
-        //        {
-        //            _netwatchConfigRepository.SaveIndividualIpPingResult(_config.Id, currentIpDetail, reply, pingAttemptTime);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine($"[NJ {_config.Id}] FAILED to save individual IP ping result for {currentIpDetail.IpAddress}: {ex.Message}");
-        //        }
+                _netwatchConfigRepository.SaveIndividualIpPingResult(_config.Id, ipState.IpDetail, reply, pingAttemptTime);
 
-        //        // Aggregate counts
-        //        if (reply != null && reply.Status == IPStatus.Success)
-        //        {
-        //            upCount++;
-        //        }
-        //        else if (reply != null && reply.Status == IPStatus.TimedOut)
-        //        {
-        //            timeoutCount++;
-        //            downCount++;
-        //        }
-        //        else
-        //        {
-        //            downCount++;
-        //        }
-        //    }
+                if (pingAttemptTime > _lastActivityTimestampForAggregate)
+                {
+                    _lastActivityTimestampForAggregate = pingAttemptTime;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log(LogLevel.ERROR, $"Error pinging {ipState.IpDetail.EntityName} ({ipState.IpDetail.IpAddress}).", ex);
+                ipState.LastKnownStatus = "PingError";
+            }
+            finally
+            {
+                ipState.NextPingTime = DateTime.Now.AddSeconds(_config.IntervalSeconds);
+                ipState.IsPinging = false;
+                _pingConcurrencySemaphore.Release();
+            }
+        }
 
-        //    // Aggregate status (same logic as before)
-        //    string aggregatedStatus;
-        //    if (upCount == totalIps) { aggregatedStatus = "All Up"; }
-        //    else if (upCount > 0) { aggregatedStatus = $"Partial: {upCount}/{totalIps} IPs Up"; }
-        //    else if (timeoutCount == totalIps) { aggregatedStatus = $"Timeout: All {totalIps} IPs timed out"; }
-        //    else if (totalIps > 0) { aggregatedStatus = $"All Down: {downCount}/{totalIps} IPs Down"; }
-        //    else { aggregatedStatus = "No IPs to monitor"; } // Should have been caught earlier by empty ipDetailsToPing
+        private string CalculateAndFormatAggregateStatus(
+            List<MonitoredIpState> currentIpStates,
+            out int totalTrackedEntities,
+            out int pingableEntitiesCount,
+            out int upCountOutput,
+            out int timeoutCountOutput,
+            out int noIpCountOutput,
+            out int otherErrorCountOutput)
+        {
+            // DIAGNOSTIC LOG ADDED HERE
+            Log(LogLevel.DEBUG, $"CalculateAndFormatAggregateStatus V3_DIAG: Starting calculation for {_config.NetwatchName}. Input states count: {currentIpStates.Count}");
 
-        //    if (timeoutCount > 0 && upCount < totalIps && !aggregatedStatus.Contains("Timeout"))
-        //    {
-        //        aggregatedStatus += $" ({timeoutCount} Timeout)";
-        //    }
+            totalTrackedEntities = currentIpStates.Count;
+            pingableEntitiesCount = 0;
+            upCountOutput = 0;
+            timeoutCountOutput = 0;
+            noIpCountOutput = 0;
+            otherErrorCountOutput = 0;
 
-        //    Console.WriteLine($"[NJ {_config.Id}] Netwatch '{_config.NetwatchName}' Result: {aggregatedStatus}. Total: {totalIps}, Up: {upCount}, Down: {downCount}, Timeout: {timeoutCount}");
+            if (totalTrackedEntities == 0)
+            {
+                Log(LogLevel.DEBUG, "CalculateAndFormatAggregateStatus V3_DIAG: No entities tracked. Returning 'No entities configured/found for tags.'");
+                return "No entities configured/found for tags.";
+            }
 
-        //    try
-        //    {
-        //        _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, aggregatedStatus, cycleStartTime);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"[NJ {_config.Id}] FAILED to update aggregate DB status for '{_config.NetwatchName}': {ex.Message}");
-        //    }
-        //}
+            foreach (var state in currentIpStates)
+            {
+                if (state.IpDetail == null) // Defensive check
+                {
+                    Log(LogLevel.WARN, "CalculateAndFormatAggregateStatus V3_DIAG: Encountered an IpState with null IpDetail. Skipping.");
+                    noIpCountOutput++; // Count it as a "No IP" or unpingable scenario for safety
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(state.IpDetail.IpAddress) || state.LastKnownStatus == "No IP")
+                {
+                    noIpCountOutput++;
+                }
+                else
+                {
+                    pingableEntitiesCount++;
+                    if (state.LastKnownStatus == IPStatus.Success.ToString())
+                    {
+                        upCountOutput++;
+                    }
+                    else if (state.LastKnownStatus == IPStatus.TimedOut.ToString())
+                    {
+                        timeoutCountOutput++;
+                    }
+                    else
+                    {
+                        otherErrorCountOutput++;
+                    }
+                }
+            }
+
+            // Log counts after iteration
+            Log(LogLevel.DEBUG, $"CalculateAndFormatAggregateStatus V3_DIAG: Counts - TotalTracked: {totalTrackedEntities}, Pingable: {pingableEntitiesCount}, Up: {upCountOutput}, Timeout: {timeoutCountOutput}, NoIP: {noIpCountOutput}, OtherError: {otherErrorCountOutput}");
+
+            string statusText;
+
+            if (pingableEntitiesCount == 0)
+            {
+                statusText = $"All {totalTrackedEntities} No IP";
+            }
+            else if (upCountOutput == pingableEntitiesCount)
+            {
+                statusText = $"All {upCountOutput}/{totalTrackedEntities} Up";
+                if (noIpCountOutput > 0)
+                {
+                    statusText += $", {noIpCountOutput} No IP";
+                }
+            }
+            else if (upCountOutput == 0)
+            {
+                statusText = $"All {pingableEntitiesCount}/{totalTrackedEntities} Down";
+                List<string> details = new List<string>();
+                if (timeoutCountOutput > 0) details.Add($"{timeoutCountOutput} Timeout");
+                if (otherErrorCountOutput > 0) details.Add($"{otherErrorCountOutput} Other Error");
+
+                if (details.Any())
+                {
+                    statusText += $" ({string.Join(", ", details)})";
+                }
+                if (noIpCountOutput > 0)
+                {
+                    statusText += $", {noIpCountOutput} No IP";
+                }
+            }
+            else
+            {
+                statusText = $"Partial {upCountOutput}/{totalTrackedEntities} Up";
+
+                List<string> downDetails = new List<string>();
+                if (timeoutCountOutput > 0)
+                {
+                    downDetails.Add($"{timeoutCountOutput} Timeout");
+                }
+
+                int noIpAndOtherErrorCount = noIpCountOutput + otherErrorCountOutput;
+                if (noIpAndOtherErrorCount > 0)
+                {
+                    downDetails.Add($"{noIpAndOtherErrorCount} No IP/Down");
+                }
+
+                if (downDetails.Any())
+                {
+                    statusText += ", " + string.Join(", ", downDetails);
+                }
+            }
+            Log(LogLevel.DEBUG, $"CalculateAndFormatAggregateStatus V3_DIAG: Final status string: '{statusText}'");
+            return statusText;
+        }
+
+
+        private async Task UpdateAggregateStatusToDatabaseAsync()
+        {
+            if (_isDisposed || !_config.IsEnabled || _isUpdatingAggregateStatus) return;
+            _isUpdatingAggregateStatus = true;
+
+            try
+            {
+                var currentStatesSnapshot = _ipStates.Values.ToList();
+                if (!currentStatesSnapshot.Any() && !(_config.MonitoredTagIds?.Any() ?? false))
+                {
+                    if (_lastCalculatedAggregateStatusForThisJobInstance != "No entities configured/found for tags." || DateTime.Now - _lastTimeAggregateStatusWasWrittenToDb > TimeSpan.FromMinutes(1))
+                    {
+                        _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "No entities configured/found for tags.", DateTime.Now);
+                        _lastCalculatedAggregateStatusForThisJobInstance = "No entities configured/found for tags.";
+                        _lastTimeAggregateStatusWasWrittenToDb = DateTime.Now;
+                        _lastActivityTimestampForAggregate = DateTime.Now; // Ensure activity timestamp is recent
+                    }
+                    _isUpdatingAggregateStatus = false;
+                    return;
+                }
+                else if (!currentStatesSnapshot.Any() && (_config.MonitoredTagIds?.Any() ?? false))
+                {
+                    if (_lastCalculatedAggregateStatusForThisJobInstance != "No entities found for current tags." || DateTime.Now - _lastTimeAggregateStatusWasWrittenToDb > TimeSpan.FromMinutes(1))
+                    {
+                        _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "No entities found for current tags.", DateTime.Now);
+                        _lastCalculatedAggregateStatusForThisJobInstance = "No entities found for current tags.";
+                        _lastTimeAggregateStatusWasWrittenToDb = DateTime.Now;
+                        _lastActivityTimestampForAggregate = DateTime.Now; // Ensure activity timestamp is recent
+                    }
+                    _isUpdatingAggregateStatus = false;
+                    return;
+                }
+
+                string newCalculatedAggregatedStatus = CalculateAndFormatAggregateStatus(
+                    currentStatesSnapshot,
+                    out int totalTracked, out int pingable, out int up,
+                    out int timeouts, out int noIps, out int otherErrors);
+
+                // Use the actual last ping activity time for the database update timestamp
+                DateTime timestampForDbUpdate = _lastActivityTimestampForAggregate == DateTime.MinValue ? DateTime.Now : _lastActivityTimestampForAggregate;
+
+                bool statusTextChanged = newCalculatedAggregatedStatus != _lastCalculatedAggregateStatusForThisJobInstance;
+
+                // --- START OF MODIFIED SECTION ---
+                // New logic for determining if a time-based refresh of LastChecked is needed.
+                // This will update LastChecked in the DB if it hasn't been updated for more than the job's interval (with a minimum of 5s).
+                // This makes the LastChecked timestamp more reflective of recent activity.
+                bool timeBasedForceUpdate = DateTime.Now - _lastTimeAggregateStatusWasWrittenToDb >= TimeSpan.FromSeconds(Math.Max(5, _config.IntervalSeconds)); // Changed > to >=
+                // --- END OF MODIFIED SECTION ---
+
+                if (statusTextChanged || timeBasedForceUpdate)
+                {
+                    // Log why the update is happening
+                    if (statusTextChanged)
+                    {
+                        Log(LogLevel.DEBUG, $"Aggregate status CHANGED. New: '{newCalculatedAggregatedStatus}'. Old Cache: '{_lastCalculatedAggregateStatusForThisJobInstance ?? "N/A"}'. Updating DB with timestamp: {timestampForDbUpdate:O}.");
+                    }
+                    else // Implies timeBasedForceUpdate is true
+                    {
+                        Log(LogLevel.DEBUG, $"Aggregate status UNCHANGED ('{newCalculatedAggregatedStatus}'). Forcing DB LastChecked update due to time threshold. Last DB write was at {_lastTimeAggregateStatusWasWrittenToDb:O}. Updating DB with timestamp: {timestampForDbUpdate:O}.");
+                    }
+
+                    _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, newCalculatedAggregatedStatus, timestampForDbUpdate);
+                    _lastCalculatedAggregateStatusForThisJobInstance = newCalculatedAggregatedStatus;
+                    _lastTimeAggregateStatusWasWrittenToDb = DateTime.Now; // Record the time of this DB write
+                }
+                // Ensure _lastActivityTimestampForAggregate itself is kept current if it's very old and nothing happened
+                // This might be redundant if pings are always happening for active jobs.
+                if (DateTime.Now - _lastActivityTimestampForAggregate > TimeSpan.FromMinutes(5) && _lastActivityTimestampForAggregate != DateTime.MinValue)
+                {
+                    Log(LogLevel.WARN, $"_lastActivityTimestampForAggregate for job {_config.Id} ('{_config.NetwatchName}') is older than 5 minutes ({_lastActivityTimestampForAggregate:O}). This might indicate no ping activity.");
+                    // If there are IPs, but no activity, this implies issues. If no IPs, it's expected.
+                    if (!_ipStates.IsEmpty)
+                    {
+                        // Force _lastActivityTimestampForAggregate to now, so the "never checked" doesn't persist too long if job is stuck.
+                        // This is a failsafe, ideally individual pings update this.
+                        // _lastActivityTimestampForAggregate = DateTime.Now;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log(LogLevel.ERROR, "Failed to update aggregate DB status.", ex);
+            }
+            finally
+            {
+                _isUpdatingAggregateStatus = false;
+            }
+        }
 
         public void Dispose()
         {
@@ -251,206 +549,10 @@ namespace ServerMaintenanceService.Services
 
             if (disposing)
             {
-                Stop(); // Stop and dispose the timer
+                Log(LogLevel.INFO, "Disposing job.");
+                Stop();
             }
             _isDisposed = true;
         }
-
-        // In ServerMaintenanceService/Services/NetwatchJob.cs
-        // Make sure these using statements are present or add them if needed:
-        // using CustomerAndServerMaintenanceTracking.DataAccess; (already there)
-        // using CustomerAndServerMaintenanceTracking.Models; (already there)
-        // using System.Net.NetworkInformation; (already there)
-        // using System.Diagnostics; (already there)
-
-        // ... (within the NetwatchJob class) ...
-
-        public async Task ExecutePingCycleAsync()
-        {
-            Console.WriteLine($"[NJ {_config.Id}] Executing ping cycle for '{_config.NetwatchName}' at {DateTime.Now}");
-
-            List<MonitoredIpDetail> ipDetailsToPing = new List<MonitoredIpDetail>();
-            if (_config.MonitoredTagIds != null && _config.MonitoredTagIds.Any())
-            {
-                try
-                {
-                    ipDetailsToPing = _tagRepository.GetMonitoredIpDetailsForTags(_config.MonitoredTagIds);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[NJ {_config.Id}] ERROR getting IP details for '{_config.NetwatchName}': {ex.Message}");
-                    _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "Error: Failed to get IPs for tags", DateTime.Now);
-                    return;
-                }
-            }
-
-            if (!ipDetailsToPing.Any())
-            {
-                Console.WriteLine($"[NJ {_config.Id}] No IPs to ping for '{_config.NetwatchName}'.");
-                _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, "No IPs configured/found for tags", DateTime.Now);
-                return;
-            }
-
-            int totalIps = ipDetailsToPing.Count;
-            int upCount = 0;
-            int downCount = 0;
-            int timeoutCount = 0;
-            DateTime cycleStartTime = DateTime.Now; // Use this as the consistent time for this cycle's events
-
-            var pingTasks = new List<Task<(MonitoredIpDetail IpDetail, PingReply Reply, string PreviousStatus)>>(); // Modified to include PreviousStatus
-
-            // --- MODIFICATION: Fetch previous status before pinging OR decide to fetch inside the loop ---
-            // Option: Fetch all previous statuses upfront (might be many DB calls if done individually)
-            // OR fetch individually before processing each result. Let's do it individually for simplicity here,
-            // though for high performance, batching might be considered.
-
-            foreach (var ipDetail in ipDetailsToPing)
-            {
-                pingTasks.Add(Task.Run(async () => // Wrap in Task.Run to allow async GetLastKnownPingStatusForIp
-                {
-                    string previousStatus = null;
-                    try
-                    {
-                        // Fetch the previous status from NetwatchIpResults
-                        previousStatus = _netwatchConfigRepository.GetLastKnownPingStatusForIp(_config.Id, ipDetail.IpAddress);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[NJ {_config.Id}] ERROR getting previous status for {ipDetail.IpAddress}: {ex.Message}");
-                        // Continue without previous status, outage logging for this IP might be affected for this cycle
-                    }
-
-                    PingReply reply = await Pinger.SendPingAsync(ipDetail.IpAddress, _config.TimeoutMilliseconds);
-                    return (ipDetail, reply, previousStatus);
-                }));
-            }
-
-            var resultsWithPreviousStatus = await Task.WhenAll(pingTasks);
-
-            // --- This part remains largely the same for saving to NetwatchIpResults and calculating aggregate status ---
-            // --- BUT we add the outage logging logic ---
-            foreach (var result in resultsWithPreviousStatus)
-            {
-                MonitoredIpDetail currentIpDetail = result.IpDetail;
-                PingReply reply = result.Reply;
-                string previousStatus = result.PreviousStatus; // The status before this current ping
-                DateTime pingAttemptTime = cycleStartTime;
-
-                string currentPingStatusText; // Determine current ping status text
-                if (reply == null) { currentPingStatusText = "Error (No Reply)"; }
-                else { currentPingStatusText = reply.Status.ToString(); }
-                if (currentPingStatusText.Length > 50) currentPingStatusText = currentPingStatusText.Substring(0, 50);
-
-
-                // --- NEW OUTAGE LOGGING LOGIC ---
-                try
-                {
-                    bool wasPreviouslyUp = previousStatus != null && previousStatus.Equals("Success", StringComparison.OrdinalIgnoreCase);
-                    // Consider other statuses like "Pending" or empty string as "UP" for simplicity if they shouldn't trigger an outage start.
-                    // For more robust "wasPreviouslyUp", you might have a helper function: IsStatusConsideredUp(previousStatus)
-                    if (string.IsNullOrEmpty(previousStatus) || previousStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase)) // Treat null, empty, or "Pending" as if it was up for new outage detection
-                    {
-                        wasPreviouslyUp = true;
-                    }
-
-
-                    bool isCurrentlyDown = reply == null || reply.Status != IPStatus.Success; // e.g., TimedOut, DestinationHostUnreachable etc.
-
-                    if (wasPreviouslyUp && isCurrentlyDown)
-                    {
-                        // IP went from UP to DOWN: Start a new outage log
-                        _netwatchConfigRepository.StartOutageLog(
-                            _config.Id,
-                            currentIpDetail.IpAddress,
-                            currentIpDetail.EntityName,
-                            pingAttemptTime, // This is the time the current "down" status was detected
-                            currentPingStatusText // The status that caused the outage to start
-                        );
-                    }
-                    else if (!wasPreviouslyUp && !isCurrentlyDown) // Was DOWN, now is UP
-                    {
-                        // IP went from DOWN to UP: End the existing outage log
-                        _netwatchConfigRepository.EndOutageLog(
-                            _config.Id,
-                            currentIpDetail.IpAddress,
-                            pingAttemptTime // This is the time the current "up" status was detected
-                        );
-                    }
-                    // If UP -> UP or DOWN -> DOWN, no changes to OutageLog
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[NJ {_config.Id}] ERROR during outage logging for {currentIpDetail.IpAddress}: {ex.Message}");
-                }
-                // --- END NEW OUTAGE LOGGING LOGIC ---
-
-
-                // Save individual ping result to the NetwatchIpResults table (still important for current state)
-                try
-                {
-                    _netwatchConfigRepository.SaveIndividualIpPingResult(_config.Id, currentIpDetail, reply, pingAttemptTime);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[NJ {_config.Id}] FAILED to save individual IP ping result to NetwatchIpResults for {currentIpDetail.IpAddress}: {ex.Message}");
-                }
-
-                // Aggregate counts for overall status
-                if (reply != null && reply.Status == IPStatus.Success)
-                {
-                    upCount++;
-                }
-                else if (reply != null && reply.Status == IPStatus.TimedOut)
-                {
-                    timeoutCount++;
-                    downCount++;
-                }
-                else
-                {
-                    downCount++;
-                }
-            }
-
-            // Aggregate status (same logic as before)
-            string aggregatedStatus;
-            // ... (your existing logic for determining aggregatedStatus) ...
-            // Example (ensure this matches your exact existing logic):
-            if (totalIps == 0) { aggregatedStatus = "No IPs to monitor"; } // Should be caught earlier
-            else if (upCount == totalIps) { aggregatedStatus = "All Up"; }
-            else if (upCount > 0) { aggregatedStatus = $"Partial: {upCount}/{totalIps} IPs Up"; }
-            else if (timeoutCount == totalIps) { aggregatedStatus = $"Timeout: All {totalIps} IPs timed out"; } // Or simply "All Timeout"
-            else { aggregatedStatus = $"All Down: {downCount}/{totalIps} IPs Down"; }
-
-
-            if (timeoutCount > 0 && upCount < totalIps && upCount > 0 && !aggregatedStatus.ToLower().Contains("timeout")) // Avoid double "timeout" if already in main status
-            {
-                aggregatedStatus += $" ({timeoutCount} Timeout)";
-            }
-            else if (timeoutCount > 0 && upCount == 0 && totalIps > 0 && !aggregatedStatus.ToLower().Contains("timeout")) // All are down, and some are timeouts
-            {
-                if (downCount == timeoutCount) // All down ARE timeouts
-                {
-                    // Already covered by "Timeout: All X IPs timed out" or similar if you have that
-                }
-                else if (!aggregatedStatus.Equals($"Timeout: All {totalIps} IPs timed out", StringComparison.OrdinalIgnoreCase))
-                {
-                    aggregatedStatus += $" ({timeoutCount} Timeout)";
-                }
-            }
-
-
-            Console.WriteLine($"[NJ {_config.Id}] Netwatch '{_config.NetwatchName}' Result: {aggregatedStatus}. Total: {totalIps}, Up: {upCount}, Down: {downCount}, Timeout: {timeoutCount}");
-
-            try
-            {
-                _netwatchConfigRepository.UpdateNetwatchLastStatus(_config.Id, aggregatedStatus, cycleStartTime);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[NJ {_config.Id}] FAILED to update aggregate DB status for '{_config.NetwatchName}': {ex.Message}");
-            }
-        }
-
-        // ... (rest of NetwatchJob.cs) ...
     }
 }

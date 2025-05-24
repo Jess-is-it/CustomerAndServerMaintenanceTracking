@@ -36,8 +36,15 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -51,16 +58,22 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\MonitoredIpState.cs" />
     <Compile Include="Services\NetwatchJob.cs" />
+    <Compile Include="Services\NetwatchServiceControl.cs" />
     <Compile Include="Services\NetwatchServiceManager.cs" />
     <Compile Include="Services\Pinger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CustomerAndServerMaintenanceTracking\CustomerAndServerMaintenanceTracking.csproj">
       <Project>{d0e38b92-eebe-4407-bd19-63e225df53a1}</Project>
       <Name>CustomerAndServerMaintenanceTracking</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj">
+      <Project>{a58fdf22-da9b-4435-ab00-2f1bcc4c9f2b}</Project>
+      <Name>SharedLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

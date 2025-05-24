@@ -1,67 +1,99 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO; // For Path.GetDirectoryName
+using System.Reflection; // For Assembly.GetExecutingAssembly().Location
 using System.Threading.Tasks;
-using CustomerAndServerMaintenanceTracking.DataAccess;
-using ServerMaintenanceService.Services;
+using ServerMaintenanceService.Services; // For NetwatchServiceControl
+using SharedLibrary.DataAccess; // For ServiceLogRepository
+using SharedLibrary.Models;     // For ServiceLogEntry, LogLevel
+
 
 namespace ServerMaintenanceService
 {
     class Program
     {
-        private static NetwatchServiceManager _netwatchManager;
-        private static TagRepository _tagRepo;
-        private static NetwatchConfigRepository _netwatchConfigRepo;
-        // DatabaseHelper might be instantiated within repositories or passed to them.
-        // Ensure its connection string is read from ServerMaintenanceService.exe.config
+        private static NetwatchServiceControl _serviceControl;
+        private static ServiceLogRepository _logRepoForProgram;
+        private static TagRepository _tagRepo; // Added
+        private static NetwatchConfigRepository _netwatchConfigRepo; // Added
 
-        static void Main(string[] args)
+        private const string SERVICE_NAME_FOR_LOGGING = "NetwatchPingerServiceHost";
+
+        static async Task Main(string[] args)
         {
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Process Started."); // Checkpoint 1
+            Console.Title = "Netwatch Pinger Service (Manual Console)";
 
             try
             {
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Entering TRY block in Main."); // Checkpoint 2
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                _logRepoForProgram = new ServiceLogRepository();
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] CONSOLE: Starting... Current directory: {Environment.CurrentDirectory}");
+                _logRepoForProgram.WriteLog(new ServiceLogEntry { ServiceName = SERVICE_NAME_FOR_LOGGING, LogLevel = LogLevel.INFO.ToString(), Message = "Console Host: Service starting..." });
 
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Attempting to initialize TagRepository...");
-                _tagRepo = new TagRepository(); // This might throw if DatabaseHelper or connection string is an issue
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: TagRepository Initialized successfully."); // Checkpoint 3
+                // Initialize repositories that will be passed down
+                _tagRepo = new TagRepository(); // Assuming TagRepository has a parameterless constructor or handles its own dependencies
+                _netwatchConfigRepo = new NetwatchConfigRepository(_logRepoForProgram, _tagRepo); // Pass logger and tag repo
 
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Attempting to initialize NetwatchConfigRepository...");
-                _netwatchConfigRepo = new NetwatchConfigRepository(); // This might also throw
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: NetwatchConfigRepository Initialized successfully."); // Checkpoint 4
-
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Attempting to initialize NetwatchServiceManager...");
-                _netwatchManager = new NetwatchServiceManager(_tagRepo, _netwatchConfigRepo); // Constructor runs here (reads App.config)
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: NetwatchServiceManager Initialized successfully."); // Checkpoint 5
-
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Calling NetwatchServiceManager.InitializeAndStartAll()...");
-                _netwatchManager.InitializeAndStartAll(); // Internal logs from this method should appear after this point
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: NetwatchServiceManager.InitializeAndStartAll() call completed."); // Checkpoint 6
-
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Netwatch Pinging Service is running. Press 'Q' to quit.");
-
-                while (Console.ReadKey(true).Key != ConsoleKey.Q)
-                {
-                    // Keep alive for 'Q' to quit
-                }
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER FATAL ERROR in Main: {ex.ToString()}");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] CONSOLE: CRITICAL error during initial setup (logging or directory set): {ex.ToString()}");
                 Console.ResetColor();
-                Console.WriteLine("The application encountered a fatal error and cannot continue.");
-                Console.WriteLine("Please check the error message above. The console will close after you press any key.");
-                Console.ReadKey(); // Keep window open to see the error
+                Console.WriteLine("Press any key to exit.");
+                Console.ReadKey();
+                return;
+            }
+
+            try
+            {
+                // Pass the already initialized repositories to NetwatchServiceControl
+                // NetwatchServiceControl will then pass them to NetwatchServiceManager
+                _serviceControl = new NetwatchServiceControl(_tagRepo, _netwatchConfigRepo, _logRepoForProgram);
+                bool started = await _serviceControl.StartAsync();
+
+                if (started)
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] CONSOLE: Netwatch Pinger Service Control started successfully. Press any key to initiate shutdown.");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] CONSOLE: Netwatch Pinger Service Control FAILED to start. Check logs. Press any key to exit.");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                string fatalMsg = "Console Host: FATAL UNHANDLED EXCEPTION during service lifecycle.";
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] {fatalMsg} {ex.ToString()}");
+                Console.ResetColor();
+                _logRepoForProgram?.WriteLog(new ServiceLogEntry
+                {
+                    ServiceName = SERVICE_NAME_FOR_LOGGING,
+                    LogLevel = LogLevel.FATAL.ToString(),
+                    Message = fatalMsg,
+                    ExceptionDetails = ex.ToString()
+                });
+                Console.WriteLine("The application encountered a fatal error. Press any key to exit.");
+                Console.ReadKey();
                 return;
             }
             finally
             {
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Entering FINALLY block. Attempting to dispose NetwatchServiceManager...");
-                _netwatchManager?.Dispose();
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] SERVER: Netwatch Pinging Service stopped / Main method ending.");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] CONSOLE: Shutting down...");
+                _logRepoForProgram?.WriteLog(new ServiceLogEntry { ServiceName = SERVICE_NAME_FOR_LOGGING, LogLevel = LogLevel.INFO.ToString(), Message = "Console Host: Initiating service shutdown..." });
+
+                if (_serviceControl != null)
+                {
+                    await _serviceControl.StopAsync();
+                }
+
+                _logRepoForProgram?.WriteLog(new ServiceLogEntry { ServiceName = SERVICE_NAME_FOR_LOGGING, LogLevel = LogLevel.INFO.ToString(), Message = "Console Host: Shutdown complete." });
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{SERVICE_NAME_FOR_LOGGING}] CONSOLE: Shutdown complete.");
             }
         }
     }

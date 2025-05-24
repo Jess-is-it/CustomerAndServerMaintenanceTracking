@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -57,9 +58,21 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppLogs\ServiceLogs.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppLogs\ServiceLogs.Designer.cs">
+      <DependentUpon>ServiceLogs.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomCells\ActionDataGridViewMultiButtonCell.cs" />
     <Compile Include="CustomCells\ActionDataGridViewMultiButtonColumn.cs" />
     <Compile Include="IRefreshableForm.cs" />
+    <Compile Include="ModalForms\AddCustomerInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\AddCustomerInfo.Designer.cs">
+      <DependentUpon>AddCustomerInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="ModalForms\AddNetwatchConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,10 +87,7 @@
     </Compile>
     <Compile Include="CustomCells\TagsDataGridViewMultiButtonCell.cs" />
     <Compile Include="DataAccess\DeviceIPRepository.cs" />
-    <Compile Include="DataAccess\MikrotikRouterRepository.cs" />
     <Compile Include="DataAccess\NetworkClusterRepository.cs" />
-    <Compile Include="DataAccess\NetwatchConfigRepository.cs" />
-    <Compile Include="DataAccess\SyncSettingsRepository.cs" />
     <Compile Include="DataAccess\TagHierarchyMappingRepository.cs" />
     <Compile Include="ModalForms\EditDeviceIPTag.cs">
       <SubType>Form</SubType>
@@ -133,15 +143,12 @@
     <Compile Include="Dashboard.Designer.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
     </Compile>
-    <Compile Include="DataAccess\CustomerRepository.cs" />
-    <Compile Include="DataAccess\DatabaseHelper.cs" />
     <Compile Include="Customers.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Customers.Designer.cs">
       <DependentUpon>Customers.cs</DependentUpon>
     </Compile>
-    <Compile Include="DataAccess\TagRepository.cs" />
     <Compile Include="DeviceIPForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -154,14 +161,6 @@
     <Compile Include="ModalForms\ViewTaggedDeviceIP.Designer.cs">
       <DependentUpon>ViewTaggedDeviceIP.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\DeviceIP.cs" />
-    <Compile Include="Models\IndividualIpStatus.cs" />
-    <Compile Include="Models\MonitoredIpDetail.cs" />
-    <Compile Include="Models\NetwatchConfig.cs" />
-    <Compile Include="Models\NetwatchConfigDisplay.cs" />
-    <Compile Include="Models\NetworkCluster.cs" />
-    <Compile Include="Models\TagAssignment.cs" />
-    <Compile Include="Models\TagDisplayModel.cs" />
     <Compile Include="Models\TagHierarchyGroup.cs" />
     <Compile Include="Models\TagHierarchyMapping.cs" />
     <Compile Include="Models\NetwatchDisplay.cs" />
@@ -207,7 +206,6 @@
     <Compile Include="ModalForms\AddCustomerTag.Designer.cs">
       <DependentUpon>AddCustomerTag.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\MikrotikRouter.cs" />
     <Compile Include="Models\Netwatch.cs" />
     <Compile Include="OverlayForm.cs">
       <SubType>Form</SubType>
@@ -215,8 +213,6 @@
     <Compile Include="OverlayForm.Designer.cs">
       <DependentUpon>OverlayForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\Customer.cs" />
-    <Compile Include="Models\TagClass.cs" />
     <Compile Include="NetwatchList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -246,10 +242,10 @@
     <Compile Include="Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
-    <Compile Include="SidePanelForms\NetwatchDetailedStatus.cs">
+    <Compile Include="NetwatchDetailedStatus.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SidePanelForms\NetwatchDetailedStatus.Designer.cs">
+    <Compile Include="NetwatchDetailedStatus.Designer.cs">
       <DependentUpon>NetwatchDetailedStatus.cs</DependentUpon>
     </Compile>
     <Compile Include="TagForm.cs">
@@ -276,6 +272,12 @@
     <Compile Include="UserControl\UC_NetworkCluster_Netwatch.Designer.cs">
       <DependentUpon>UC_NetworkCluster_Netwatch.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AppLogs\ServiceLogs.resx">
+      <DependentUpon>ServiceLogs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\AddCustomerInfo.resx">
+      <DependentUpon>AddCustomerInfo.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\AddNetwatchConfigForm.resx">
       <DependentUpon>AddNetwatchConfigForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -365,7 +367,7 @@
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SidePanelForms\NetwatchDetailedStatus.resx">
+    <EmbeddedResource Include="NetwatchDetailedStatus.resx">
       <DependentUpon>NetwatchDetailedStatus.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TagForm.resx">
@@ -401,6 +403,11 @@
   <ItemGroup>
     <None Include="Resources\Close black.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj">
+      <Project>{a58fdf22-da9b-4435-ab00-2f1bcc4c9f2b}</Project>
+      <Name>SharedLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

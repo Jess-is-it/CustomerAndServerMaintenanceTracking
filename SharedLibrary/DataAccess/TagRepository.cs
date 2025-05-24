@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using CustomerAndServerMaintenanceTracking.Models;
+using SharedLibrary.Models;
 
-namespace CustomerAndServerMaintenanceTracking.DataAccess
+namespace SharedLibrary.DataAccess
 {
     public class TagRepository
     {
@@ -708,76 +708,159 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
         #region METHOD for Detailed IP Status Popup/Form
         public List<MonitoredIpDetail> GetMonitoredIpDetailsForTags(List<int> monitoredTagIds)
         {
+            //var ipDetails = new List<MonitoredIpDetail>();
+            //var uniqueIpTracker = new HashSet<string>(); // To avoid duplicate IPs if tagged multiple ways
+
+            //if (monitoredTagIds == null || !monitoredTagIds.Any())
+            //{
+            //    return ipDetails;
+            //}
+
+            //string tagIdsParameter = string.Join(",", monitoredTagIds.Distinct());
+
+            //using (SqlConnection conn = dbHelper.GetConnection())
+            //{
+            //    conn.Open();
+
+            //    // 1. Get IPs and Names from Customers linked to the monitored tags
+            //    string customerIpQuery = $@"
+            //SELECT DISTINCT c.IPAddress, c.AccountName 
+            //FROM Customers c
+            //INNER JOIN CustomerTags ct ON c.Id = ct.CustomerId
+            //WHERE ct.TagId IN ({tagIdsParameter}) AND c.IPAddress IS NOT NULL AND c.IPAddress <> '';";
+
+            //    using (SqlCommand cmd = new SqlCommand(customerIpQuery, conn))
+            //    {
+            //        using (SqlDataReader reader = cmd.ExecuteReader())
+            //        {
+            //            while (reader.Read())
+            //            {
+            //                string ip = reader["IPAddress"].ToString();
+            //                if (!string.IsNullOrWhiteSpace(ip) && uniqueIpTracker.Add(ip)) // Ensure IP is unique
+            //                {
+            //                    ipDetails.Add(new MonitoredIpDetail
+            //                    {
+            //                        IpAddress = ip,
+            //                        EntityName = reader["AccountName"].ToString(),
+            //                        EntityType = "Customer"
+            //                    });
+            //                }
+            //            }
+            //        }
+            //    }
+
+            //    // 2. Get IPs and Names from DeviceIPs linked to the monitored tags
+            //    string deviceIpQuery = $@"
+            //SELECT DISTINCT dip.IPAddress, dip.DeviceName 
+            //FROM DeviceIPs dip
+            //INNER JOIN DeviceIPTags dt ON dip.Id = dt.DeviceIPId
+            //WHERE dt.TagId IN ({tagIdsParameter}) AND dip.IPAddress IS NOT NULL AND dip.IPAddress <> '';";
+
+            //    using (SqlCommand cmd = new SqlCommand(deviceIpQuery, conn))
+            //    {
+            //        using (SqlDataReader reader = cmd.ExecuteReader())
+            //        {
+            //            while (reader.Read())
+            //            {
+            //                string ip = reader["IPAddress"].ToString();
+            //                if (!string.IsNullOrWhiteSpace(ip) && uniqueIpTracker.Add(ip)) // Ensure IP is unique
+            //                {
+            //                    ipDetails.Add(new MonitoredIpDetail
+            //                    {
+            //                        IpAddress = ip,
+            //                        EntityName = reader["DeviceName"].ToString(),
+            //                        EntityType = "DeviceIP"
+            //                    });
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            //return ipDetails;
             var ipDetails = new List<MonitoredIpDetail>();
-            var uniqueIpTracker = new HashSet<string>(); // To avoid duplicate IPs if tagged multiple ways
+            // Use a HashSet of (EntityType, EntityName) to ensure an entity is added only once,
+            // even if tagged multiple times by the monitoredTagIds that might overlap.
+            var uniqueEntitiesTracker = new HashSet<(string EntityType, string EntityName)>();
 
             if (monitoredTagIds == null || !monitoredTagIds.Any())
             {
                 return ipDetails;
             }
 
+            // Create a comma-separated string of distinct tag IDs for the IN clause
             string tagIdsParameter = string.Join(",", monitoredTagIds.Distinct());
 
             using (SqlConnection conn = dbHelper.GetConnection())
             {
                 conn.Open();
 
-                // 1. Get IPs and Names from Customers linked to the monitored tags
-                string customerIpQuery = $@"
-            SELECT DISTINCT c.IPAddress, c.AccountName 
+                // 1. Get Customers linked to the monitored tags
+                // Fetches AccountName and IPAddress for all distinct customers tagged.
+                // IPAddress can be NULL.
+                string customerQuery = $@"
+            SELECT DISTINCT c.AccountName, c.IPAddress, c.Id AS CustomerId 
             FROM Customers c
             INNER JOIN CustomerTags ct ON c.Id = ct.CustomerId
-            WHERE ct.TagId IN ({tagIdsParameter}) AND c.IPAddress IS NOT NULL AND c.IPAddress <> '';";
+            WHERE ct.TagId IN ({tagIdsParameter});"; // IP Address null/empty check REMOVED
 
-                using (SqlCommand cmd = new SqlCommand(customerIpQuery, conn))
+                using (SqlCommand cmdCust = new SqlCommand(customerQuery, conn))
                 {
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (SqlDataReader reader = cmdCust.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            string ip = reader["IPAddress"].ToString();
-                            if (!string.IsNullOrWhiteSpace(ip) && uniqueIpTracker.Add(ip)) // Ensure IP is unique
+                            string entityName = reader["AccountName"].ToString();
+                            // Ensure each entity (Customer by AccountName) is processed once
+                            // For absolute uniqueness, using CustomerId would be best if MonitoredIpDetail could hold it.
+                            // Using (EntityType, EntityName) is a good proxy if names are reliably unique per type.
+                            if (uniqueEntitiesTracker.Add(("Customer", entityName)))
                             {
                                 ipDetails.Add(new MonitoredIpDetail
                                 {
-                                    IpAddress = ip,
-                                    EntityName = reader["AccountName"].ToString(),
-                                    EntityType = "Customer"
+                                    IpAddress = reader["IPAddress"] == DBNull.Value ? null : reader["IPAddress"].ToString(),
+                                    EntityName = entityName,
+                                    EntityType = "Customer",
+                                    // ActualEntityId = Convert.ToInt32(reader["CustomerId"]) // If you add ActualEntityId to MonitoredIpDetail
                                 });
                             }
                         }
                     }
                 }
 
-                // 2. Get IPs and Names from DeviceIPs linked to the monitored tags
+                // 2. Get DeviceIPs linked to the monitored tags
+                // Fetches DeviceName and IPAddress for all distinct devices tagged.
+                // IPAddress can be NULL.
                 string deviceIpQuery = $@"
-            SELECT DISTINCT dip.IPAddress, dip.DeviceName 
+            SELECT DISTINCT dip.DeviceName, dip.IPAddress, dip.Id AS DeviceIPId
             FROM DeviceIPs dip
             INNER JOIN DeviceIPTags dt ON dip.Id = dt.DeviceIPId
-            WHERE dt.TagId IN ({tagIdsParameter}) AND dip.IPAddress IS NOT NULL AND dip.IPAddress <> '';";
+            WHERE dt.TagId IN ({tagIdsParameter});"; // IP Address null/empty check REMOVED
 
-                using (SqlCommand cmd = new SqlCommand(deviceIpQuery, conn))
+                using (SqlCommand cmdDevice = new SqlCommand(deviceIpQuery, conn))
                 {
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (SqlDataReader reader = cmdDevice.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            string ip = reader["IPAddress"].ToString();
-                            if (!string.IsNullOrWhiteSpace(ip) && uniqueIpTracker.Add(ip)) // Ensure IP is unique
+                            string entityName = reader["DeviceName"].ToString();
+                            if (uniqueEntitiesTracker.Add(("DeviceIP", entityName)))
                             {
                                 ipDetails.Add(new MonitoredIpDetail
                                 {
-                                    IpAddress = ip,
-                                    EntityName = reader["DeviceName"].ToString(),
-                                    EntityType = "DeviceIP"
+                                    IpAddress = reader["IPAddress"] == DBNull.Value ? null : reader["IPAddress"].ToString(),
+                                    EntityName = entityName,
+                                    EntityType = "DeviceIP",
+                                    // ActualEntityId = Convert.ToInt32(reader["DeviceIPId"]) // If you add ActualEntityId to MonitoredIpDetail
                                 });
                             }
                         }
                     }
                 }
-            }
+            } // Connection is closed here
             return ipDetails;
         }
+
+
         #endregion
 
     }

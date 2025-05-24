@@ -10,12 +10,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SharedLibrary.Models;
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class NetworkClusterTag: Form
+    public partial class NetworkClusterTag: Form, IRefreshableForm
     {
         private OverlayForm overlayForm;
+
+        public void RefreshDataViews()
+        {
+            LoadClusters();
+        }
+
+
         public NetworkClusterTag()
         {
             InitializeComponent();

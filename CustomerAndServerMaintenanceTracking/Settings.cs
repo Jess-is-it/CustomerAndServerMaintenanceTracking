@@ -7,78 +7,66 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using CustomerAndServerMaintenanceTracking.DataAccess;
-using CustomerAndServerMaintenanceTracking.Models;
+using SharedLibrary.DataAccess;
+using SharedLibrary.Models;
 using CustomerAndServerMaintenanceTracking.ModalForms;
+using CustomerAndServerMaintenanceTracking.AppLogs; // For ServiceLogs form
+using System.ServiceProcess; // For ServiceController
+using System.Configuration;    // For ConfigurationManager
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class Settings: Form
+    public partial class Settings : Form
     {
         private OverlayForm overlayForm;
+        private System.Windows.Forms.Timer _serviceStatusRefreshTimer;
+
+        // These MUST match the actual registered Windows Service names
+        private const string ActualNetwatchPingerServiceName = "NetwatchPingerService";
+        private const string ActualPPPoESyncServiceName = "PPPoESyncService";
+
+        private readonly string _targetMachineName;
+
         public Settings()
         {
             InitializeComponent();
+
+            _targetMachineName = ConfigurationManager.AppSettings["ServiceControlTargetMachine"];
+            if (string.IsNullOrWhiteSpace(_targetMachineName))
+            {
+                _targetMachineName = ".";
+                // Optionally inform the user if the setting is missing and defaulting
+                // MessageBox.Show("ServiceControlTargetMachine not specified in App.config. Defaulting to local machine.", "Configuration Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
             InitializeRouterTab();
             LoadRouters();
+
+            // Remove event handlers for Start/Stop buttons from Settings form
+            // if (this.btnStartStopNetwatchService != null)
+            //     this.btnStartStopNetwatchService.Click -= BtnStartStopNetwatchService_Click; // Assuming it was wired
+            // if (this.btnStartStopPPPoESyncService != null)
+            //     this.btnStartStopPPPoESyncService.Click -= BtnStartStopPPPoESyncService_Click; // Assuming it was wired
+
+            // Keep event handlers for View Logs buttons
+            if (this.btnViewNetwatchService != null) // Assuming button1 is "View Console Logs" for Netwatch
+                this.btnViewNetwatchService.Click += BtnViewNetwatchLogs_Click;
+            if (this.btnViewPPPoESyncService != null)
+                this.btnViewPPPoESyncService.Click += BtnViewPPPoESyncLogs_Click;
         }
+
         private void InitializeRouterTab()
         {
-            // Assuming you have a TabPage for Router settings,
-            // and on that TabPage, a DataGridView named dataGridViewRouters,
-            // a TextBox named txtSearchRouter, and a Button named btnAddRouter.
-
             dataGridViewRouters.Columns.Clear();
             dataGridViewRouters.AutoGenerateColumns = false;
 
-            // (1) ID column
-            DataGridViewTextBoxColumn idColumn = new DataGridViewTextBoxColumn();
-            idColumn.DataPropertyName = "Id";
-            idColumn.HeaderText = "ID";
-            idColumn.Width = 50;
-            dataGridViewRouters.Columns.Add(idColumn);
-
-            // (2) Router Name column
-            DataGridViewTextBoxColumn routerNameColumn = new DataGridViewTextBoxColumn();
-            routerNameColumn.DataPropertyName = "RouterName";
-            routerNameColumn.HeaderText = "Router Name";
-            routerNameColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewRouters.Columns.Add(routerNameColumn);
-
-            // (3) Host IP Address column
-            DataGridViewTextBoxColumn hostIPColumn = new DataGridViewTextBoxColumn();
-            hostIPColumn.DataPropertyName = "HostIPAddress";
-            hostIPColumn.HeaderText = "Host IP Address";
-            hostIPColumn.Width = 120;
-
-            // (New) API Port column
-            DataGridViewTextBoxColumn apiPortColumn = new DataGridViewTextBoxColumn();
-            apiPortColumn.DataPropertyName = "ApiPort"; // this must match the property in MikrotikRouter
-            apiPortColumn.HeaderText = "API Port";
-            apiPortColumn.Width = 60; // adjust width as needed
-            dataGridViewRouters.Columns.Add(apiPortColumn);
-
-
-            // (4) Username column
-            DataGridViewTextBoxColumn usernameColumn = new DataGridViewTextBoxColumn();
-            usernameColumn.DataPropertyName = "Username";
-            usernameColumn.HeaderText = "Username";
-            usernameColumn.Width = 120;
-            dataGridViewRouters.Columns.Add(usernameColumn);
-
-            // (5) Password column
-            DataGridViewTextBoxColumn passwordColumn = new DataGridViewTextBoxColumn();
-            passwordColumn.DataPropertyName = "Password";
-            passwordColumn.HeaderText = "Password";
-            passwordColumn.Width = 120;
-            dataGridViewRouters.Columns.Add(passwordColumn);
-
-            // (6) Action column (unbound) for Edit/Delete buttons
-            DataGridViewTextBoxColumn actionColumn = new DataGridViewTextBoxColumn();
-            actionColumn.HeaderText = "Action";
-            actionColumn.Name = "Action";
-            actionColumn.ReadOnly = true;
-            dataGridViewRouters.Columns.Add(actionColumn);
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Id", HeaderText = "ID", Width = 50, Visible = false });
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "RouterName", HeaderText = "Router Name", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "HostIPAddress", HeaderText = "Host IP Address", Width = 120 });
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ApiPort", HeaderText = "API Port", Width = 60 });
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Username", HeaderText = "Username", Width = 120 });
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Password", HeaderText = "Password", Width = 120 });
+            dataGridViewRouters.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Action", Name = "Action", ReadOnly = true, Width = 120 });
         }
 
         private void LoadRouters()
@@ -87,17 +75,17 @@ namespace CustomerAndServerMaintenanceTracking
             {
                 MikrotikRouterRepository repo = new MikrotikRouterRepository();
                 var routers = repo.GetRouters();
-                string search = txtSearchRouter.Text.Trim();
-                if (!string.IsNullOrEmpty(search))
+                string search = txtSearchRouter.Text?.Trim() ?? "";
+                if (!string.IsNullOrEmpty(search) && routers != null)
                 {
-                    routers = routers.Where(r => r.RouterName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                    routers = routers.Where(r => r.RouterName != null && r.RouterName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
                 }
                 dataGridViewRouters.DataSource = null;
                 dataGridViewRouters.DataSource = routers;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading routers: " + ex.Message);
+                MessageBox.Show("Error loading routers: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -110,36 +98,50 @@ namespace CustomerAndServerMaintenanceTracking
         {
             AddRouter addRouterForm = new AddRouter();
             addRouterForm.RouterSaved += (s, ea) => LoadRouters();
-            addRouterForm.StartPosition = FormStartPosition.CenterScreen;
+            addRouterForm.StartPosition = FormStartPosition.CenterParent;
             Overlay();
-            addRouterForm.ShowDialog();
-            overlayForm.Close();
+            addRouterForm.ShowDialog(this);
+            CloseOverlay();
         }
 
         private void Overlay()
         {
-            overlayForm = new OverlayForm();
+            if (overlayForm == null || overlayForm.IsDisposed)
+            {
+                overlayForm = new OverlayForm();
+            }
+            Form formToCover = this.MdiParent ?? this;
+            overlayForm.Owner = formToCover;
             overlayForm.StartPosition = FormStartPosition.Manual;
-            // Set the overlay to cover the entire Dashboard form.
-            // If Dashboard is your main form, "this" refers to it.
-            overlayForm.Bounds = this.Bounds;
+            Point location = formToCover.PointToScreen(Point.Empty);
+            overlayForm.Bounds = new Rectangle(location, formToCover.ClientSize);
             overlayForm.Show();
+            overlayForm.BringToFront();
+        }
+
+        private void CloseOverlay()
+        {
+            if (overlayForm != null && !overlayForm.IsDisposed)
+            {
+                overlayForm.Close();
+                overlayForm = null;
+            }
         }
 
         private void dataGridViewRouters_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            if (e.ColumnIndex == dataGridViewRouters.Columns["Action"].Index && e.RowIndex >= 0)
+            if (e.RowIndex >= 0 && dataGridViewRouters.Columns["Action"] != null && e.ColumnIndex == dataGridViewRouters.Columns["Action"].Index)
             {
                 e.PaintBackground(e.ClipBounds, true);
-                // Calculate button dimensions.
                 int buttonWidth = (e.CellBounds.Width - 6) / 2;
+                if (buttonWidth < 10) buttonWidth = 10;
                 int buttonHeight = e.CellBounds.Height - 4;
+                if (buttonHeight < 5) buttonHeight = 5;
+
                 Rectangle editButtonRect = new Rectangle(e.CellBounds.X + 2, e.CellBounds.Y + 2, buttonWidth, buttonHeight);
                 Rectangle deleteButtonRect = new Rectangle(e.CellBounds.X + buttonWidth + 4, e.CellBounds.Y + 2, buttonWidth, buttonHeight);
 
-                // Draw the "Edit" button.
                 ButtonRenderer.DrawButton(e.Graphics, editButtonRect, "Edit", this.Font, false, System.Windows.Forms.VisualStyles.PushButtonState.Normal);
-                // Draw the "Delete" button.
                 ButtonRenderer.DrawButton(e.Graphics, deleteButtonRect, "Delete", this.Font, false, System.Windows.Forms.VisualStyles.PushButtonState.Normal);
 
                 e.Handled = true;
@@ -148,82 +150,154 @@ namespace CustomerAndServerMaintenanceTracking
 
         private void dataGridViewRouters_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex < 0) return;
 
-            if (e.RowIndex < 0)
-                return;
-
-            // Get the selected router object.
-            MikrotikRouter selectedRouter = (MikrotikRouter)dataGridViewRouters.Rows[e.RowIndex].DataBoundItem;
-            string columnName = dataGridViewRouters.Columns[e.ColumnIndex].Name;
-
-            if (columnName == "Action")
+            if (dataGridViewRouters.Rows[e.RowIndex].DataBoundItem is MikrotikRouter selectedRouter)
             {
-                // Get the bounds of the Action cell.
-                Rectangle cellRect = dataGridViewRouters.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
-                Point clickPoint = dataGridViewRouters.PointToClient(Cursor.Position);
-                int relativeX = clickPoint.X - cellRect.X;
-                int buttonWidth = (cellRect.Width - 6) / 2;
+                if (dataGridViewRouters.Columns["Action"] != null && e.ColumnIndex == dataGridViewRouters.Columns["Action"].Index)
+                {
+                    Rectangle cellRect = dataGridViewRouters.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
+                    Point clickPoint = dataGridViewRouters.PointToClient(Cursor.Position);
+                    int relativeX = clickPoint.X - cellRect.X;
+                    int buttonWidth = (cellRect.Width - 6) / 2;
+                    if (buttonWidth < 10) buttonWidth = (cellRect.Width - 2) / 2;
 
-                if (relativeX < buttonWidth + 2)
-                {
-                    // Edit button clicked: open EditRouter form.
-                    EditRouter editRouterForm = new EditRouter(selectedRouter);
-                    editRouterForm.RouterSaved += (s, ea) => LoadRouters();
-                    editRouterForm.StartPosition = FormStartPosition.CenterScreen;
-                    editRouterForm.ShowDialog();
-                }
-                else
-                {
-                    // Delete button clicked: confirm and delete.
-                    if (MessageBox.Show("Are you sure you want to delete this router?", "Confirm Delete", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (relativeX <= buttonWidth + 2)
                     {
-                        MikrotikRouterRepository repo = new MikrotikRouterRepository();
-                        repo.DeleteRouter(selectedRouter.Id);
-                        LoadRouters();
+                        EditRouter editRouterForm = new EditRouter(selectedRouter);
+                        editRouterForm.RouterSaved += (s, ea) => LoadRouters();
+                        editRouterForm.StartPosition = FormStartPosition.CenterParent;
+                        Overlay();
+                        editRouterForm.ShowDialog(this);
+                        CloseOverlay();
+                    }
+                    else
+                    {
+                        if (MessageBox.Show($"Are you sure you want to delete the router '{selectedRouter.RouterName}'?\nThis will also archive any customers associated with this router.", "Confirm Delete Router", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                        {
+                            try
+                            {
+                                // --- NEW CODE: Archive associated customers FIRST ---
+                                CustomerRepository customerRepo = new CustomerRepository();
+                                int customersArchived = customerRepo.ArchiveCustomersByRouterId(selectedRouter.Id);
+
+                                if (customersArchived > 0)
+                                {
+                                    MessageBox.Show($"{customersArchived} customer(s) associated with router '{selectedRouter.RouterName}' have been archived.", "Customers Archived", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                                // --- END OF NEW CODE ---
+
+                                // Now delete the router
+                                MikrotikRouterRepository routerRepo = new MikrotikRouterRepository(); // Renamed 'repo' to 'routerRepo' for clarity
+                                routerRepo.DeleteRouter(selectedRouter.Id);
+
+                                MessageBox.Show($"Router '{selectedRouter.RouterName}' deleted successfully.", "Router Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                LoadRouters(); // Refresh the grid
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Error deleting router or archiving customers: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                // Optionally, re-load routers even on error to reflect partial changes if any, or current state.
+                                LoadRouters();
+                            }
+                        }
                     }
                 }
             }
         }
 
-        private void btnSavePPPoeInterval_Click(object sender, EventArgs e)
-        {
-            if (int.TryParse(txtPPPoeInterval.Text.Trim(), out int interval))
-            {
-                SyncSettingsRepository repo = new SyncSettingsRepository();
-                repo.SaveInterval("PPPoeInterval", interval);
-                MessageBox.Show("PPPoe Accounts sync interval saved to the database.");
-
-                // Update the running timer's interval in the main form.
-                Dashboard mainForm = Application.OpenForms["Dashboard"] as Dashboard;
-                if (mainForm != null)
-                {
-                    mainForm.UpdatePPPoeTimerInterval();
-                }
-            }
-            else
-            {
-                MessageBox.Show("Please enter a valid number for the interval.");
-            }
-        }
-
- 
-
         private void Settings_Load(object sender, EventArgs e)
         {
-            SyncSettingsRepository repo = new SyncSettingsRepository();
+            UpdateAllServiceStatusesAndButtons();
 
-            // Retrieve the sync intervals from the database
-            int pppoeInterval = repo.GetInterval("PPPoeInterval");
-            int activeInterval = repo.GetInterval("PPPActiveInterval");
+            _serviceStatusRefreshTimer = new System.Windows.Forms.Timer();
+            _serviceStatusRefreshTimer.Interval = 10000; // Refresh every 10 seconds (adjust as needed)
+            _serviceStatusRefreshTimer.Tick += ServiceStatusRefreshTimer_Tick;
+            _serviceStatusRefreshTimer.Start();
 
-            // If no value is stored (or it's 0), set default values (e.g., 60000 ms)
-            if (pppoeInterval <= 0)
-                pppoeInterval = 60000;
-            if (activeInterval <= 0)
-                activeInterval = 60000;
-
-            // Display the intervals in the text boxes
-            txtPPPoeInterval.Text = pppoeInterval.ToString();
+            // Hide the Start/Stop buttons as per user request
+            if (btnStartStopNetwatchService != null) btnStartStopNetwatchService.Visible = false;
+            if (btnStartStopPPPoESyncService != null) btnStartStopPPPoESyncService.Visible = false;
         }
+
+        private void Settings_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _serviceStatusRefreshTimer?.Stop();
+            _serviceStatusRefreshTimer?.Dispose();
+        }
+
+        private void ServiceStatusRefreshTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.IsDisposed || this.Disposing) return;
+            UpdateAllServiceStatusesAndButtons();
+        }
+
+        private void UpdateAllServiceStatusesAndButtons()
+        {
+            if (this.IsDisposed || this.Disposing) return;
+            UpdateSimplifiedServiceStatusUI(ActualNetwatchPingerServiceName, lblNetwatchService);
+            UpdateSimplifiedServiceStatusUI(ActualPPPoESyncServiceName, lblPPPoESyncService);
+        }
+
+        // Simplified status update method
+        private void UpdateSimplifiedServiceStatusUI(string serviceName, Label statusLabel)
+        {
+            if (statusLabel == null || statusLabel.IsDisposed) return;
+            if (this.IsDisposed || this.Disposing) return;
+
+            string statusText = "Unreachable - Check Server Services"; // Default
+            Color statusColor = Color.OrangeRed; // Default for unreachable
+
+            try
+            {
+                using (ServiceController sc = new ServiceController(serviceName, _targetMachineName))
+                {
+                    sc.Refresh(); // Important to get the latest status
+                    if (sc.Status == ServiceControllerStatus.Running)
+                    {
+                        statusText = "Running";
+                        statusColor = Color.Green;
+                    }
+                    // For any other status (Stopped, Paused, Pending, Not Found), it's considered "Unreachable" for this simplified view
+                }
+            }
+            catch (InvalidOperationException) // Service not found
+            {
+                // Status remains "Unreachable..."
+            }
+            catch (Exception ex)
+            {
+                // Status remains "Unreachable..."
+                Console.WriteLine($"Error getting status for {serviceName} on '{_targetMachineName}': {ex.Message}");
+            }
+            finally
+            {
+                if (!statusLabel.IsDisposed)
+                {
+                    statusLabel.Text = $"Status: {statusText}";
+                    statusLabel.ForeColor = statusColor;
+                }
+            }
+        }
+
+        // ControlService method is removed as Start/Stop buttons are removed from this form.
+
+        // Event Handlers for View Logs Buttons (remain unchanged)
+        private void BtnViewNetwatchLogs_Click(object sender, EventArgs e)
+        {
+            ServiceLogs logsForm = new ServiceLogs(ActualNetwatchPingerServiceName, "Netwatch Pinger Service");
+            logsForm.ShowDialog(this);
+        }
+
+        private void BtnViewPPPoESyncLogs_Click(object sender, EventArgs e)
+        {
+            ServiceLogs logsForm = new ServiceLogs(ActualPPPoESyncServiceName, "PPPoE Sync Service");
+            logsForm.ShowDialog(this);
+        }
+
+        // Remove click event handlers for Start/Stop buttons if they were defined
+        // private void BtnStartStopNetwatchService_Click(object sender, EventArgs e) { /* Removed */ }
+        // private void BtnStartStopPPPoESyncService_Click(object sender, EventArgs e) { /* Removed */ }
     }
 }

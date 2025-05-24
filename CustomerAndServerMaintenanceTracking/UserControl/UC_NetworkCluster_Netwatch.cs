@@ -15,6 +15,8 @@ using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Windows.Documents;
 using System.Xml.Linq;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 namespace CustomerAndServerMaintenanceTracking.UserControl
 {

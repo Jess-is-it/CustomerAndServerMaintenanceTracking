@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomerAndServerMaintenanc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerMaintenanceService", "ServerMaintenanceService\ServerMaintenanceService.csproj", "{82BE85CD-593A-41C1-83A7-F8CD034139DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPPoESyncService", "PPPoESyncService\PPPoESyncService.csproj", "{11CCBE2F-5329-4FAD-81B6-FA5C90F47D89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "SharedLibrary\SharedLibrary.csproj", "{A58FDF22-DA9B-4435-AB00-2F1BCC4C9F2B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{82BE85CD-593A-41C1-83A7-F8CD034139DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82BE85CD-593A-41C1-83A7-F8CD034139DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82BE85CD-593A-41C1-83A7-F8CD034139DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11CCBE2F-5329-4FAD-81B6-FA5C90F47D89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11CCBE2F-5329-4FAD-81B6-FA5C90F47D89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11CCBE2F-5329-4FAD-81B6-FA5C90F47D89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11CCBE2F-5329-4FAD-81B6-FA5C90F47D89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A58FDF22-DA9B-4435-AB00-2F1BCC4C9F2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A58FDF22-DA9B-4435-AB00-2F1BCC4C9F2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A58FDF22-DA9B-4435-AB00-2F1BCC4C9F2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A58FDF22-DA9B-4435-AB00-2F1BCC4C9F2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

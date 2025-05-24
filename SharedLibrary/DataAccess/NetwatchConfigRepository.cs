@@ -1,5 +1,4 @@
-﻿using CustomerAndServerMaintenanceTracking.Models;
-using System;
+﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -9,41 +8,76 @@ using System.Net.NetworkInformation;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using SharedLibrary.DataAccess;
+using SharedLibrary.Models;
 
-namespace CustomerAndServerMaintenanceTracking.DataAccess
+namespace SharedLibrary.DataAccess
 {
     public class NetwatchConfigRepository
     {
-        private DatabaseHelper dbHelper;
+        private readonly DatabaseHelper dbHelper;
+        private readonly TagRepository _tagRepository; // Assuming this is used by other methods in the class
+        private readonly ServiceLogRepository _logRepository; // Added for logging
+        private const string REPO_LOG_SOURCE = "NetwatchConfigRepo"; // For log messages
 
-        public NetwatchConfigRepository()
+        // Updated constructor to accept ServiceLogRepository
+        public NetwatchConfigRepository(ServiceLogRepository logRepository, TagRepository tagRepository)
         {
             dbHelper = new DatabaseHelper();
+            _logRepository = logRepository ?? throw new ArgumentNullException(nameof(logRepository));
+            _tagRepository = tagRepository; // Keep if other methods use it
+        }
+
+        // Overload constructor for cases where only dbHelper and logRepository are needed (like for heartbeats)
+        // Or, if TagRepository is always needed, ensure it's always passed.
+        // For simplicity, let's assume some parts of this repo might not need TagRepo,
+        // but UpdateNetwatchLastStatus definitely doesn't.
+        // A cleaner DI approach would be better long-term.
+        public NetwatchConfigRepository(ServiceLogRepository logRepository)
+        {
+            dbHelper = new DatabaseHelper();
+            _logRepository = logRepository ?? throw new ArgumentNullException(nameof(logRepository));
+            _tagRepository = null; // Explicitly set to null if not provided/needed for all methods
+                                   // Or, make TagRepository mandatory if all methods use it.
+                                   // For now, to minimize changes, let's allow it to be null if only used by some methods.
+                                   // If GetMonitoredIpDetailsForTags (or similar) is in THIS repo, _tagRepository is needed.
+                                   // Based on previous files, GetMonitoredIpDetailsForTags is in TagRepository itself.
+                                   // The NetwatchConfigRepository constructor in user files had `_tagRepository = new TagRepository();`
+                                   // Let's keep that pattern for now, but inject the logger.
+            _tagRepository = new TagRepository(); // Re-instating this as per original structure
         }
 
 
-        // In NetwatchConfigRepository.cs
+        private void Log(LogLevel level, string message, Exception ex = null, int? configId = null)
+        {
+            string context = configId.HasValue ? $"ConfigId {configId}: " : "";
+            _logRepository.WriteLog(new ServiceLogEntry
+            {
+                ServiceName = REPO_LOG_SOURCE, // Or a more general service name if this library is used by multiple
+                LogLevel = level.ToString(),
+                Message = context + message,
+                ExceptionDetails = ex?.ToString()
+            });
+            // Also to console for immediate debugging if service is run manually
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] [{REPO_LOG_SOURCE}{(configId.HasValue ? $" CfgID:{configId}" : "")}] [{level}] {message}{(ex != null ? " - Exc: " + ex.Message : "")}");
+        }
+
         public void AddNetwatchConfig(NetwatchConfig config)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
             {
                 conn.Open();
-                SqlTransaction transaction = conn.BeginTransaction(); // Start a database transaction
+                SqlTransaction transaction = conn.BeginTransaction();
 
                 try
                 {
-                    // Step 1: Insert into NetwatchConfigs table
-                    // TargetTagId has been removed from this INSERT as per your database change.
                     string queryConfig = @"
                 INSERT INTO NetwatchConfigs 
                             (NetwatchName, Type, IntervalSeconds, TimeoutMilliseconds, 
-                             SourceType, TargetId,  -- TargetId is the NetworkClusterId here
-                             IsEnabled, RunUponSave, CreatedDate, LastStatus)
+                             SourceType, TargetId, IsEnabled, RunUponSave, CreatedDate, LastStatus)
                 VALUES      (@NetwatchName, @Type, @IntervalSeconds, @TimeoutMilliseconds, 
-                             @SourceType, @TargetId, 
-                             @IsEnabled, @RunUponSave, @CreatedDate, @LastStatus);
-                SELECT SCOPE_IDENTITY();"; // Get the ID of the newly inserted row
+                             @SourceType, @TargetId, @IsEnabled, @RunUponSave, @CreatedDate, @LastStatus);
+                SELECT SCOPE_IDENTITY();";
 
                     using (SqlCommand cmdConfig = new SqlCommand(queryConfig, conn, transaction))
                     {
@@ -52,10 +86,7 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                         cmdConfig.Parameters.AddWithValue("@IntervalSeconds", config.IntervalSeconds);
                         cmdConfig.Parameters.AddWithValue("@TimeoutMilliseconds", config.TimeoutMilliseconds);
                         cmdConfig.Parameters.AddWithValue("@SourceType", config.SourceType.ToString());
-
-                        // TargetId for NetwatchConfigs is the ID of the source entity (e.g., NetworkCluster.Id)
                         cmdConfig.Parameters.AddWithValue("@TargetId", config.TargetId);
-
                         cmdConfig.Parameters.AddWithValue("@IsEnabled", config.IsEnabled);
                         cmdConfig.Parameters.AddWithValue("@RunUponSave", config.RunUponSave);
                         cmdConfig.Parameters.AddWithValue("@CreatedDate", config.CreatedDate);
@@ -65,54 +96,46 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                         object newId = cmdConfig.ExecuteScalar();
                         if (newId != null && newId != DBNull.Value)
                         {
-                            config.Id = Convert.ToInt32(newId); // Set the ID on the config object for use in the next step
+                            config.Id = Convert.ToInt32(newId);
                         }
                         else
                         {
-                            // If SCOPE_IDENTITY() returns null or DBNull, something went wrong with the insert.
-                            throw new Exception("Failed to retrieve new NetwatchConfig ID after insert. The insert may have failed.");
+                            throw new Exception("Failed to retrieve new NetwatchConfig ID after insert.");
                         }
                     }
 
-                    // Step 2: Insert into NetwatchConfigTags table for each monitored tag ID
-                    if (config.MonitoredTagIds != null && config.MonitoredTagIds.Any()) // Check if there are any tags to monitor
+                    if (config.MonitoredTagIds != null && config.MonitoredTagIds.Any())
                     {
                         string queryTags = "INSERT INTO NetwatchConfigTags (NetwatchConfigId, TagId) VALUES (@NetwatchConfigId, @TagId)";
                         foreach (int tagIdInList in config.MonitoredTagIds)
                         {
                             using (SqlCommand cmdTags = new SqlCommand(queryTags, conn, transaction))
                             {
-                                cmdTags.Parameters.AddWithValue("@NetwatchConfigId", config.Id); // Use the new ID from Step 1
+                                cmdTags.Parameters.AddWithValue("@NetwatchConfigId", config.Id);
                                 cmdTags.Parameters.AddWithValue("@TagId", tagIdInList);
                                 cmdTags.ExecuteNonQuery();
                             }
                         }
                     }
-
-                    transaction.Commit(); // If all database operations were successful, commit the transaction
+                    transaction.Commit();
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback(); // If any error occurred during the process, roll back all changes
-                                            // Optionally log the exception (ex.ToString()) or provide more specific error handling
-                    throw new Exception("Error saving Netwatch configuration with associated tags: " + ex.Message, ex); // Re-throw to notify the UI layer
+                    transaction.Rollback();
+                    Log(LogLevel.ERROR, "Error saving Netwatch configuration with associated tags.", ex, config?.Id);
+                    throw; // Re-throw to notify the calling layer
                 }
-                // The 'using (SqlConnection conn ...)' block will ensure the connection is closed.
             }
         }
 
         public List<NetwatchConfigDisplay> GetNetwatchConfigsForDisplay()
-
         {
             var configsList = new List<NetwatchConfigDisplay>();
-            // Temporary dictionary to hold tag names for each config ID
             var configTagsDict = new Dictionary<int, List<string>>();
 
             using (SqlConnection conn = dbHelper.GetConnection())
             {
                 conn.Open();
-
-                // First, get all tag mappings and their names
                 string tagsQuery = @"
             SELECT 
                 nct.NetwatchConfigId, 
@@ -136,9 +159,7 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                             configTagsDict[configId].Add(tagName);
                         }
                     }
-                } // readerTags and cmdTags disposed here
-
-                // Now, get the main NetwatchConfigs and join with NetworkClusters if applicable
+                }
                 string query = @"
             SELECT 
                 nc.Id, nc.NetwatchName, nc.Type, nc.IntervalSeconds, nc.TimeoutMilliseconds,
@@ -148,9 +169,6 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             FROM NetwatchConfigs nc
             LEFT JOIN NetworkClusters ncl ON nc.TargetId = ncl.Id AND nc.SourceType = @NetworkClusterSourceType
             ORDER BY nc.NetwatchName;";
-
-                // Pass NetwatchSourceType.NetworkCluster.ToString() as a parameter
-                // This ensures the LEFT JOIN only attempts to match ClusterName for the correct SourceType.
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -176,29 +194,24 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                                 LastStatus = reader["LastStatus"] == DBNull.Value ? string.Empty : reader["LastStatus"].ToString()
                             };
 
-                            // Set TargetSourceName based on SourceType
                             if (displayModel.SourceType == NetwatchSourceType.NetworkCluster.ToString())
                             {
                                 displayModel.TargetSourceName = reader["ClusterName"] == DBNull.Value ? "N/A" : reader["ClusterName"].ToString();
                             }
-                            // else if (displayModel.SourceType == NetwatchSourceType.Customer.ToString()) { /* Fetch Customer Name */ }
-                            // else if (displayModel.SourceType == NetwatchSourceType.DeviceIP.ToString()) { /* Fetch DeviceIP Name */ }
                             else
                             {
-                                displayModel.TargetSourceName = "N/A";
+                                displayModel.TargetSourceName = "N/A"; // Placeholder for other types
                             }
 
-                            // Assign collected tag names
                             if (configTagsDict.ContainsKey(displayModel.Id))
                             {
                                 displayModel.MonitoredTagNames = configTagsDict[displayModel.Id];
                             }
-
                             configsList.Add(displayModel);
                         }
                     }
-                } // reader and cmd disposed here
-            } // conn disposed here
+                }
+            }
             return configsList;
         }
 
@@ -215,55 +228,44 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 {
                     cmd.Parameters.AddWithValue("@IsEnabled", isEnabled);
                     cmd.Parameters.AddWithValue("@ConfigId", configId);
-
                     try
                     {
                         conn.Open();
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected == 0)
                         {
-                            // This could mean the configId was not found, though not necessarily an exception
-                            // You might want to log this or handle it if it's unexpected.
-                            Console.WriteLine($"Warning: No NetwatchConfig found with ID {configId} to update IsEnabled status.");
+                            Log(LogLevel.WARN, $"UpdateNetwatchConfigEnabledStatus: No row found for ConfigId {configId}. Status set to {isEnabled}.", null, configId);
+                        }
+                        else
+                        {
+                            Log(LogLevel.INFO, $"UpdateNetwatchConfigEnabledStatus: ConfigId {configId} IsEnabled set to {isEnabled}. Rows affected: {rowsAffected}.", null, configId);
                         }
                     }
                     catch (SqlException ex)
                     {
-                        // Log the exception (ex.ToString()) or handle it more gracefully
-                        // For now, re-throw to make the calling code aware of the failure
-                        throw new Exception($"Database error updating NetwatchConfig IsEnabled status for ID {configId}: {ex.Message}", ex);
+                        Log(LogLevel.ERROR, $"Database error updating NetwatchConfig IsEnabled status for ID {configId}.", ex, configId);
+                        throw;
                     }
-                    // The 'using (SqlConnection conn ...)' block will ensure the connection is closed.
                 }
             }
         }
-
-        // Add this method to your NetwatchConfigRepository.cs file
 
         public bool DeleteNetwatchConfigById(int configId)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
             {
                 conn.Open();
-                SqlTransaction transaction = conn.BeginTransaction(); // Start a transaction
-
+                SqlTransaction transaction = conn.BeginTransaction();
                 try
                 {
-                    // Step 1: Delete from NetwatchConfigTags (associated tags)
-                    // ON DELETE CASCADE is set for NetwatchConfigId in NetwatchConfigTags table based on your SQL script,
-                    // so this step might be redundant if the cascade delete is working as expected at the database level.
-                    // However, explicit deletion can be safer or used if cascade isn't set for TagId.
-                    // If ON DELETE CASCADE is reliable for NetwatchConfigId, you might only need to delete from NetwatchConfigs.
-                    // For now, let's assume explicit deletion of tags first for clarity.
+                    // NetwatchConfigTags are deleted by CASCADE DELETE constraint in DB
+                    // string queryDeleteTags = "DELETE FROM NetwatchConfigTags WHERE NetwatchConfigId = @ConfigId";
+                    // using (SqlCommand cmdDeleteTags = new SqlCommand(queryDeleteTags, conn, transaction))
+                    // {
+                    //    cmdDeleteTags.Parameters.AddWithValue("@ConfigId", configId);
+                    //    cmdDeleteTags.ExecuteNonQuery(); 
+                    // }
 
-                    string queryDeleteTags = "DELETE FROM NetwatchConfigTags WHERE NetwatchConfigId = @ConfigId";
-                    using (SqlCommand cmdDeleteTags = new SqlCommand(queryDeleteTags, conn, transaction))
-                    {
-                        cmdDeleteTags.Parameters.AddWithValue("@ConfigId", configId);
-                        cmdDeleteTags.ExecuteNonQuery(); // This will remove all tag associations for this config
-                    }
-
-                    // Step 2: Delete from NetwatchConfigs
                     string queryDeleteConfig = "DELETE FROM NetwatchConfigs WHERE Id = @ConfigId";
                     using (SqlCommand cmdDeleteConfig = new SqlCommand(queryDeleteConfig, conn, transaction))
                     {
@@ -272,37 +274,40 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
 
                         if (rowsAffected > 0)
                         {
-                            transaction.Commit(); // Commit if both deletions were successful (or config deletion if tags are cascaded)
+                            transaction.Commit();
+                            Log(LogLevel.INFO, $"NetwatchConfig with ID {configId} deleted successfully.", null, configId);
                             return true;
                         }
                         else
                         {
-                            transaction.Rollback(); // Rollback if the main config wasn't found or deleted
-                            return false; // Config not found or not deleted
+                            transaction.Rollback();
+                            Log(LogLevel.WARN, $"NetwatchConfig with ID {configId} not found for deletion.", null, configId);
+                            return false;
                         }
                     }
                 }
                 catch (SqlException ex)
                 {
-                    transaction.Rollback(); // Rollback on any SQL error
-                                            // Log the exception (ex.ToString()) or handle it more gracefully
-                    throw new Exception($"Database error deleting NetwatchConfig with ID {configId}: {ex.Message}", ex);
+                    transaction.Rollback();
+                    Log(LogLevel.ERROR, $"Database error deleting NetwatchConfig with ID {configId}.", ex, configId);
+                    throw;
                 }
-                // The 'using (SqlConnection conn ...)' block will ensure the connection is closed.
             }
         }
 
-        #region ICMP Ping Service
         public void UpdateNetwatchLastStatus(int configId, string newStatus, DateTime lastCheckedTime)
         {
-            using (SqlConnection conn = dbHelper.GetConnection()) // Assuming dbHelper is your DatabaseHelper instance
+            string originalNewStatus = newStatus; // For logging original
+            if (newStatus != null && newStatus.Length > 255)
             {
-                // Ensure newStatus is not excessively long for the database column (nvarchar(255))
-                if (newStatus != null && newStatus.Length > 255)
-                {
-                    newStatus = newStatus.Substring(0, 255);
-                }
+                newStatus = newStatus.Substring(0, 255);
+                Log(LogLevel.WARN, $"Status string for ConfigId {configId} was truncated from '{originalNewStatus}' to '{newStatus}'.", null, configId);
+            }
 
+            Log(LogLevel.DEBUG, $"Attempting to update DB: ConfigId={configId}, NewStatus='{newStatus}', LastCheckedTime='{lastCheckedTime:O}'", null, configId);
+
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
                 string query = @"
             UPDATE NetwatchConfigs 
             SET 
@@ -312,7 +317,6 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    // Handle potential null or empty status string
                     cmd.Parameters.AddWithValue("@LastStatus", string.IsNullOrEmpty(newStatus) ? (object)DBNull.Value : newStatus);
                     cmd.Parameters.AddWithValue("@LastChecked", lastCheckedTime);
                     cmd.Parameters.AddWithValue("@ConfigId", configId);
@@ -321,25 +325,24 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                     {
                         conn.Open();
                         int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected == 0)
+                        if (rowsAffected > 0)
                         {
-                            // This could mean the configId was not found.
-                            // You might want to log this as a warning.
-                            Console.WriteLine($"Warning: No NetwatchConfig found with ID {configId} to update LastStatus/LastChecked.");
+                            Log(LogLevel.INFO, $"Successfully updated LastStatus='{newStatus}', LastChecked='{lastCheckedTime:O}'. Rows affected: {rowsAffected}.", null, configId);
+                        }
+                        else
+                        {
+                            Log(LogLevel.WARN, $"UpdateNetwatchLastStatus: No row found for ConfigId {configId}. Status not updated in DB.", null, configId);
                         }
                     }
                     catch (SqlException ex)
                     {
-                        // Log the exception or handle it more gracefully
-                        // For now, re-throw to make the calling code aware of the failure
-                        throw new Exception($"Database error updating Netwatch LastStatus/LastChecked for ID {configId}: {ex.Message}", ex);
+                        Log(LogLevel.ERROR, $"Database error updating Netwatch LastStatus/LastChecked. Status='{newStatus}', LastChecked='{lastCheckedTime:O}'.", ex, configId);
+                        throw; // Re-throw to allow calling code to handle it
                     }
-                    // Connection will be closed by the 'using' block.
                 }
             }
         }
 
-        // Helper method to fetch a single NetwatchConfig with its associated MonitoredTagIds
         public NetwatchConfig GetNetwatchConfigWithDetails(int configId)
         {
             NetwatchConfig config = null;
@@ -374,15 +377,14 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                                 CreatedDate = Convert.ToDateTime(reader["CreatedDate"]),
                                 LastChecked = reader["LastChecked"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(reader["LastChecked"]),
                                 LastStatus = reader["LastStatus"] == DBNull.Value ? string.Empty : reader["LastStatus"].ToString(),
-                                MonitoredTagIds = new List<int>() // Initialize
+                                MonitoredTagIds = new List<int>()
                             };
                         }
-                    } // Reader closes here
-                } // Command disposed here
+                    }
+                }
 
                 if (config != null)
                 {
-                    // Now fetch the associated TagIds
                     string tagsQuery = "SELECT TagId FROM NetwatchConfigTags WHERE NetwatchConfigId = @ConfigId";
                     using (SqlCommand cmdTags = new SqlCommand(tagsQuery, conn))
                     {
@@ -393,15 +395,13 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                             {
                                 config.MonitoredTagIds.Add(Convert.ToInt32(tagsReader["TagId"]));
                             }
-                        } // tagsReader closes here
-                    } // cmdTags disposed here
+                        }
+                    }
                 }
-            } // Connection closes here
+            }
             return config;
         }
 
-        // Method to get all ENABLED NetwatchConfigs with their MonitoredTagIds
-        // This will be used by the NetwatchServiceManager on startup.
         public List<NetwatchConfig> GetAllEnabledNetwatchConfigsWithDetails()
         {
             var configs = new List<NetwatchConfig>();
@@ -410,8 +410,6 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             using (SqlConnection conn = dbHelper.GetConnection())
             {
                 conn.Open();
-
-                // Step 1: Get all MonitoredTagIds for all NetwatchConfigs
                 string allTagsQuery = "SELECT NetwatchConfigId, TagId FROM NetwatchConfigTags";
                 using (SqlCommand cmdAllTags = new SqlCommand(allTagsQuery, conn))
                 {
@@ -430,14 +428,12 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                     }
                 }
 
-
-                // Step 2: Get all enabled NetwatchConfig main details
                 string query = @"
             SELECT Id, NetwatchName, Type, IntervalSeconds, TimeoutMilliseconds, 
                    SourceType, TargetId, IsEnabled, RunUponSave, CreatedDate, 
                    LastChecked, LastStatus
             FROM NetwatchConfigs
-            WHERE IsEnabled = 1;"; // Only fetch enabled ones
+            WHERE IsEnabled = 1;";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -461,7 +457,7 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                                 LastStatus = reader["LastStatus"] == DBNull.Value ? string.Empty : reader["LastStatus"].ToString(),
                                 MonitoredTagIds = configIdToTagsMap.ContainsKey(Convert.ToInt32(reader["Id"]))
                                                   ? configIdToTagsMap[Convert.ToInt32(reader["Id"])]
-                                                  : new List<int>() // Empty list if no tags
+                                                  : new List<int>()
                             };
                             configs.Add(config);
                         }
@@ -471,14 +467,10 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             return configs;
         }
 
-        #endregion
-
-        #region Netwatch HeartBeats
         public void UpdateServiceHeartbeat(string serviceName, DateTime heartbeatTime)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
             {
-                // UPSERT logic: Update if exists, Insert if not.
                 string query = @"
             MERGE ServiceHeartbeats AS target
             USING (SELECT @ServiceName AS ServiceName, @HeartbeatTime AS LastHeartbeatDateTime) AS source
@@ -516,12 +508,6 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             }
             return null;
         }
-        #endregion
-
-        #region METHOD for Detailed IP Status Popup/Form
-  
-
-// In CustomerAndServerMaintenanceTracking/DataAccess/NetwatchConfigRepository.cs
         public void SaveIndividualIpPingResult(int netwatchConfigId, MonitoredIpDetail ipDetail, PingReply reply, DateTime pingAttemptTime)
         {
             string pingStatusText;
@@ -540,18 +526,7 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 }
             }
 
-            // Truncate status text if too long for DB column
             if (pingStatusText.Length > 50) pingStatusText = pingStatusText.Substring(0, 50);
-            // Ensure EntityName is not null for logging, but handle DBNull for parameter
-            string entityNameToLog = ipDetail.EntityName ?? "N/A";
-            if (ipDetail.EntityName != null && ipDetail.EntityName.Length > 100)
-            {
-                // This truncation was in your code, keep it for the parameter if needed by DB schema,
-                // but be aware if original name is longer.
-                // For logging, we can use the potentially truncated or original.
-                // For the parameter, the truncated version will be used via ipDetail.EntityName.
-            }
-
 
             using (SqlConnection conn = dbHelper.GetConnection())
             {
@@ -573,7 +548,7 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
-                    cmd.Parameters.AddWithValue("@IpAddress", ipDetail.IpAddress); // Assumes ipDetail.IpAddress is never null
+                    cmd.Parameters.AddWithValue("@IpAddress", ipDetail.IpAddress);
                     cmd.Parameters.AddWithValue("@EntityName", string.IsNullOrEmpty(ipDetail.EntityName) ? (object)DBNull.Value : ipDetail.EntityName);
                     cmd.Parameters.AddWithValue("@LastPingStatus", pingStatusText);
                     cmd.Parameters.AddWithValue("@RoundtripTimeMs", roundtripTime.HasValue ? (object)roundtripTime.Value : DBNull.Value);
@@ -582,14 +557,10 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        
                     }
-                    catch (SqlException ex) // Catch specific SqlException
+                    catch (SqlException ex)
                     {
-                        throw; 
-                    }
-                    catch (Exception ex) // Catch any other general exceptions
-                    {
+                        Log(LogLevel.ERROR, $"SQL Error saving individual IP ping result for ConfigId {netwatchConfigId}, IP {ipDetail.IpAddress}.", ex, netwatchConfigId);
                         throw;
                     }
                 }
@@ -597,48 +568,83 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
         }
         public List<IndividualIpStatus> GetDetailedIpStatuses(int netwatchConfigId)
         {
-            var detailedStatuses = new List<IndividualIpStatus>();
+            var resultStatusList = new List<IndividualIpStatus>();
+            NetwatchConfig config = GetNetwatchConfigWithDetails(netwatchConfigId);
+            if (config == null || config.MonitoredTagIds == null || !config.MonitoredTagIds.Any())
+            {
+                return resultStatusList;
+            }
+
+            TagRepository tagRepo = _tagRepository ?? new TagRepository(); // Use injected or new up
+            List<MonitoredIpDetail> allExpectedEntities = tagRepo.GetMonitoredIpDetailsForTags(config.MonitoredTagIds);
+            var currentPingResultsMap = new Dictionary<string, IndividualIpStatus>();
 
             using (SqlConnection conn = dbHelper.GetConnection())
             {
-                string query = @"
+                string queryIpResults = @"
             SELECT EntityName, IpAddress, LastPingStatus, RoundtripTimeMs, LastPingAttemptDateTime
             FROM NetwatchIpResults
-            WHERE NetwatchConfigId = @NetwatchConfigId
-            ORDER BY EntityName, IpAddress;"; // Or any order you prefer
-
+            WHERE NetwatchConfigId = @NetwatchConfigId;";
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlCommand cmd = new SqlCommand(queryIpResults, conn))
                 {
                     cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            detailedStatuses.Add(new IndividualIpStatus
+                            string ipAddress = reader["IpAddress"].ToString();
+                            if (!string.IsNullOrWhiteSpace(ipAddress) && !currentPingResultsMap.ContainsKey(ipAddress))
                             {
-                                EntityName = reader["EntityName"] == DBNull.Value ? "N/A" : reader["EntityName"].ToString(),
-                                IpAddress = reader["IpAddress"].ToString(),
-                                LastPingStatus = reader["LastPingStatus"].ToString(),
-                                RoundtripTimeMs = reader["RoundtripTimeMs"] == DBNull.Value ? (long?)null : Convert.ToInt64(reader["RoundtripTimeMs"]),
-                                LastPingAttemptDateTime = Convert.ToDateTime(reader["LastPingAttemptDateTime"])
-                            });
+                                currentPingResultsMap[ipAddress] = new IndividualIpStatus
+                                {
+                                    EntityName = reader["EntityName"] == DBNull.Value ? "N/A" : reader["EntityName"].ToString(),
+                                    IpAddress = ipAddress,
+                                    LastPingStatus = reader["LastPingStatus"].ToString(),
+                                    RoundtripTimeMs = reader["RoundtripTimeMs"] == DBNull.Value ? (long?)null : Convert.ToInt64(reader["RoundtripTimeMs"]),
+                                    LastPingAttemptDateTime = Convert.ToDateTime(reader["LastPingAttemptDateTime"])
+                                };
+                            }
                         }
                     }
                 }
             }
-            return detailedStatuses;
+
+            foreach (var expectedEntity in allExpectedEntities)
+            {
+                if (string.IsNullOrWhiteSpace(expectedEntity.IpAddress))
+                {
+                    resultStatusList.Add(new IndividualIpStatus
+                    {
+                        EntityName = expectedEntity.EntityName,
+                        IpAddress = "N/A",
+                        LastPingStatus = "No IP",
+                        RoundtripTimeMs = null,
+                        LastPingAttemptDateTime = DateTime.MinValue
+                    });
+                }
+                else
+                {
+                    if (currentPingResultsMap.TryGetValue(expectedEntity.IpAddress, out IndividualIpStatus pingStatus))
+                    {
+                        pingStatus.EntityName = expectedEntity.EntityName;
+                        resultStatusList.Add(pingStatus);
+                    }
+                    else
+                    {
+                        resultStatusList.Add(new IndividualIpStatus
+                        {
+                            EntityName = expectedEntity.EntityName,
+                            IpAddress = expectedEntity.IpAddress,
+                            LastPingStatus = "Pending",
+                            RoundtripTimeMs = null,
+                            LastPingAttemptDateTime = DateTime.MinValue
+                        });
+                    }
+                }
+            }
+            return resultStatusList.OrderBy(s => s.EntityName).ThenBy(s => s.IpAddress).ToList();
         }
-        #endregion
-
-        // Add these new methods to your NetwatchConfigRepository.cs class
-
-        #region Netwatch Outage Logging
-
-        /// <summary>
-        /// Gets the last known ping status for a specific IP within a Netwatch configuration.
-        /// Returns null if no previous record exists.
-        /// </summary>
         public string GetLastKnownPingStatusForIp(int netwatchConfigId, string ipAddress)
         {
             string lastStatus = null;
@@ -662,10 +668,6 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             }
             return lastStatus;
         }
-
-        /// <summary>
-        /// Starts a new outage log entry.
-        /// </summary>
         public void StartOutageLog(int netwatchConfigId, string ipAddress, string entityName, DateTime outageStartTime, string initialPingStatus)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
@@ -687,37 +689,30 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        Console.WriteLine($"REPO: Started outage log for ConfigId: {netwatchConfigId}, IP: {ipAddress} at {outageStartTime}");
+                        Log(LogLevel.INFO, $"Started outage log for IP: {ipAddress} at {outageStartTime}", null, netwatchConfigId);
                     }
                     catch (SqlException ex)
                     {
-                        Console.WriteLine($"REPO: SQL ERROR Starting OutageLog for ConfigId: {netwatchConfigId}, IP: {ipAddress}. Error: {ex.Message}");
-                        // Decide if you need to throw here or just log
+                        Log(LogLevel.ERROR, $"SQL ERROR Starting OutageLog for IP: {ipAddress}.", ex, netwatchConfigId);
                     }
                 }
             }
         }
-
-        /// <summary>
-        /// Ends an ongoing outage for a specific IP by setting its OutageEndTime.
-        /// Only updates the most recent open outage for that IP and Config.
-        /// </summary>
         public void EndOutageLog(int netwatchConfigId, string ipAddress, DateTime outageEndTime)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
             {
-                // Update the latest open outage record for this specific IP and NetwatchConfigId
                 string query = @"
-            UPDATE NetwatchOutageLog
-            SET OutageEndTime = @OutageEndTime
-            WHERE OutageLogId = (
-                SELECT TOP 1 OutageLogId Console.WriteLine
-                FROM NetwatchOutageLog
-                WHERE NetwatchConfigId = @NetwatchConfigId 
-                  AND IpAddress = @IpAddress 
-                  AND OutageEndTime IS NULL
-                ORDER BY OutageStartTime DESC
-            );";
+                UPDATE NetwatchOutageLog
+                SET OutageEndTime = @OutageEndTime
+                WHERE OutageLogId = (
+                    SELECT TOP 1 OutageLogId 
+                    FROM NetwatchOutageLog
+                    WHERE NetwatchConfigId = @NetwatchConfigId 
+                      AND IpAddress = @IpAddress 
+                      AND OutageEndTime IS NULL
+                    ORDER BY OutageStartTime DESC
+                );";
                 conn.Open();
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -730,27 +725,21 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
                         {
-                            Console.WriteLine($"REPO: Ended outage log for ConfigId: {netwatchConfigId}, IP: {ipAddress} at {outageEndTime}");
+                            Log(LogLevel.INFO, $"Ended outage log for IP: {ipAddress} at {outageEndTime}", null, netwatchConfigId);
                         }
                         else
                         {
-                            // This might happen if no open outage was found, which could be normal if the IP came up without a prior logged outage.
-                            Console.WriteLine($"REPO: No open outage found to end for ConfigId: {netwatchConfigId}, IP: {ipAddress}");
+                            Log(LogLevel.WARN, $"No open outage found to end for IP: {ipAddress}", null, netwatchConfigId);
                         }
                     }
                     catch (SqlException ex)
                     {
-                        Console.WriteLine($"REPO: SQL ERROR Ending OutageLog for ConfigId: {netwatchConfigId}, IP: {ipAddress}. Error: {ex.Message}");
-                        // Decide if you need to throw here or just log
+                        Log(LogLevel.ERROR, $"SQL ERROR Ending OutageLog for IP: {ipAddress}.", ex, netwatchConfigId);
+                        throw;
                     }
                 }
             }
         }
-
-        /// <summary>
-        /// Gets the start time of the current ongoing outage for a specific IP.
-        /// Returns null if no ongoing outage is found.
-        /// </summary>
         public DateTime? GetCurrentOutageStartTime(int netwatchConfigId, string ipAddress)
         {
             DateTime? outageStartTime = null;
@@ -762,7 +751,7 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             WHERE NetwatchConfigId = @NetwatchConfigId 
               AND IpAddress = @IpAddress 
               AND OutageEndTime IS NULL
-            ORDER BY OutageStartTime DESC;"; // Should only be one, but DESC ensures latest if somehow multiple open
+            ORDER BY OutageStartTime DESC;";
                 conn.Open();
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
@@ -777,7 +766,205 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
             }
             return outageStartTime;
         }
+        public void PruneNetwatchDataForMissingEntities(int netwatchConfigId, List<MonitoredIpDetail> currentValidEntityDetails)
+        {
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                conn.Open();
+                SqlTransaction transaction = conn.BeginTransaction();
+                try
+                {
+                    var existingDbEntries = new HashSet<(string EntityName, string IpAddress)>();
+                    string selectQuery = @"
+                SELECT DISTINCT EntityName, IpAddress 
+                FROM NetwatchIpResults 
+                WHERE NetwatchConfigId = @NetwatchConfigId AND EntityName IS NOT NULL AND IpAddress IS NOT NULL";
+                    using (SqlCommand cmdSelect = new SqlCommand(selectQuery, conn, transaction))
+                    {
+                        cmdSelect.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                        using (SqlDataReader reader = cmdSelect.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                existingDbEntries.Add((reader.GetString(0), reader.GetString(1)));
+                            }
+                        }
+                    }
 
-        #endregion // End Netwatch Outage Logging
+                    var currentValidSet = new HashSet<(string EntityName, string IpAddress)>(
+                        currentValidEntityDetails.Select(d => (d.EntityName, d.IpAddress))
+                    );
+
+                    var entriesToPrune = existingDbEntries.Except(currentValidSet).ToList();
+
+                    if (entriesToPrune.Any())
+                    {
+                        Log(LogLevel.INFO, $"Pruning data for {entriesToPrune.Count} stale entity-IP pairs.", null, netwatchConfigId);
+                        foreach (var staleEntry in entriesToPrune)
+                        {
+                            string staleEntityName = staleEntry.EntityName;
+                            string staleIpAddress = staleEntry.IpAddress;
+                            DateTime pruneTime = DateTime.Now;
+
+                            string updateOutageSql = @"
+                        UPDATE NetwatchOutageLog 
+                        SET OutageEndTime = @PruneTime 
+                        WHERE NetwatchConfigId = @NetwatchConfigId 
+                          AND EntityName = @EntityName 
+                          AND IpAddress = @IpAddress 
+                          AND OutageEndTime IS NULL;";
+                            using (SqlCommand cmdUpdateOutage = new SqlCommand(updateOutageSql, conn, transaction))
+                            {
+                                cmdUpdateOutage.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                                cmdUpdateOutage.Parameters.AddWithValue("@EntityName", staleEntityName);
+                                cmdUpdateOutage.Parameters.AddWithValue("@IpAddress", staleIpAddress);
+                                cmdUpdateOutage.Parameters.AddWithValue("@PruneTime", pruneTime);
+                                cmdUpdateOutage.ExecuteNonQuery();
+                                Log(LogLevel.DEBUG, $"Closed open outages for stale: {staleEntityName} - {staleIpAddress}", null, netwatchConfigId);
+                            }
+
+                            string deleteIpResultSql = @"
+                        DELETE FROM NetwatchIpResults 
+                        WHERE NetwatchConfigId = @NetwatchConfigId 
+                          AND EntityName = @EntityName 
+                          AND IpAddress = @IpAddress;";
+                            using (SqlCommand cmdDeleteResult = new SqlCommand(deleteIpResultSql, conn, transaction))
+                            {
+                                cmdDeleteResult.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                                cmdDeleteResult.Parameters.AddWithValue("@EntityName", staleEntityName);
+                                cmdDeleteResult.Parameters.AddWithValue("@IpAddress", staleIpAddress);
+                                cmdDeleteResult.ExecuteNonQuery();
+                                Log(LogLevel.DEBUG, $"Deleted IP results for stale: {staleEntityName} - {staleIpAddress}", null, netwatchConfigId);
+                            }
+                        }
+                    }
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    Log(LogLevel.ERROR, $"ERROR pruning stale Netwatch data.", ex, netwatchConfigId);
+                    throw;
+                }
+            }
+        }
+        public TimeSpan GetTotalHistoricalOutageDurationForEntity(int netwatchConfigId, string entityName, string excludeCurrentIpAddress)
+        {
+            TimeSpan totalHistoricalDuration = TimeSpan.Zero;
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                conn.Open();
+                string query = @"
+            SELECT OutageStartTime, OutageEndTime 
+            FROM NetwatchOutageLog
+            WHERE NetwatchConfigId = @NetwatchConfigId 
+              AND EntityName = @EntityName
+              AND IpAddress != @ExcludeCurrentIpAddress 
+              AND OutageEndTime IS NOT NULL;";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@NetwatchConfigId", netwatchConfigId);
+                    cmd.Parameters.AddWithValue("@EntityName", string.IsNullOrEmpty(entityName) ? (object)DBNull.Value : entityName);
+                    cmd.Parameters.AddWithValue("@ExcludeCurrentIpAddress", string.IsNullOrEmpty(excludeCurrentIpAddress) ? (object)DBNull.Value : excludeCurrentIpAddress);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            DateTime startTime = reader.GetDateTime(0);
+                            DateTime endTime = reader.GetDateTime(1);
+                            totalHistoricalDuration += (endTime - startTime);
+                        }
+                    }
+                }
+            }
+            return totalHistoricalDuration;
+        }
+        public void UpdateLastDataSyncTimestamp(string serviceName, DateTime syncTimestamp)
+        {
+            try
+            {
+                using (SqlConnection conn = dbHelper.GetConnection()) // Assumes dbHelper is available like in other methods
+                {
+                    conn.Open();
+                    // Check if the service entry exists, if not, create it (though UpdateServiceHeartbeat likely handles creation)
+                    // For simplicity, this assumes UpdateServiceHeartbeat is called regularly and creates the entry.
+                    // If not, you might need an INSERT INTO ... ON DUPLICATE KEY UPDATE or MERGE equivalent,
+                    // or ensure the record exists before this call.
+                    // Given the context, we'll assume an UPDATE is sufficient as the record should exist.
+
+                    string query = @"
+                UPDATE ServiceHeartbeats 
+                SET LastDataSyncTimestamp = @SyncTimestamp
+                WHERE ServiceName = @ServiceName";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@SyncTimestamp", syncTimestamp);
+                        cmd.Parameters.AddWithValue("@ServiceName", serviceName);
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected == 0)
+                        {
+                            // Optionally, if the record might not exist, you could try an INSERT here
+                            // or log a warning. For now, we assume UpdateServiceHeartbeat ensures the record.
+                            Console.WriteLine($"UpdateLastDataSyncTimestamp: No existing record found for ServiceName '{serviceName}' to update LastDataSyncTimestamp.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log this exception appropriately in a real application
+                Console.WriteLine($"Error in UpdateLastDataSyncTimestamp for {serviceName}: {ex.Message}");
+                // Consider re-throwing or logging to a more persistent store if this is critical
+            }
+        }
+        public DateTime? GetLastDataSyncTimestamp(string serviceName)
+        {
+            if (string.IsNullOrWhiteSpace(serviceName))
+            {
+                Log(LogLevel.WARN, "GetLastDataSyncTimestamp: ServiceName cannot be null or whitespace.");
+                return null;
+            }
+
+            DateTime? lastSyncTimestamp = null;
+            using (SqlConnection conn = dbHelper.GetConnection())
+            {
+                string query = "SELECT LastDataSyncTimestamp FROM ServiceHeartbeats WHERE ServiceName = @ServiceName";
+                try
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ServiceName", serviceName);
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            lastSyncTimestamp = Convert.ToDateTime(result);
+                            Log(LogLevel.DEBUG, $"GetLastDataSyncTimestamp: Retrieved {lastSyncTimestamp} for service '{serviceName}'.");
+                        }
+                        else
+                        {
+                            Log(LogLevel.INFO, $"GetLastDataSyncTimestamp: No LastDataSyncTimestamp found for service '{serviceName}'.");
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    Log(LogLevel.ERROR, $"SQL Error fetching LastDataSyncTimestamp for service '{serviceName}'.", ex);
+                    // Depending on handling strategy, you might want to return null or rethrow
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    Log(LogLevel.ERROR, $"General Error fetching LastDataSyncTimestamp for service '{serviceName}'.", ex);
+                    return null;
+                }
+            }
+            return lastSyncTimestamp;
+        }
+
+
     }
 }

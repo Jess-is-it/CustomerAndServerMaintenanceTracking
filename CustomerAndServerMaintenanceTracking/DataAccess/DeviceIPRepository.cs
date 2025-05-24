@@ -4,7 +4,8 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CustomerAndServerMaintenanceTracking.Models;
+using SharedLibrary.DataAccess;
+using SharedLibrary.Models;
 
 namespace CustomerAndServerMaintenanceTracking.DataAccess
 {

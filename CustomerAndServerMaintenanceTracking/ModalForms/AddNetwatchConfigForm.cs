@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 namespace CustomerAndServerMaintenanceTracking.ModalForms
 {
@@ -24,6 +26,8 @@ namespace CustomerAndServerMaintenanceTracking.ModalForms
 
         // Event to notify that a Netwatch configuration has been saved.
         public event EventHandler NetwatchConfigSaved;
+        private readonly TagRepository _tagRepository; // Added: To pass to NetwatchConfigRepository
+        private readonly ServiceLogRepository _logRepository;
 
         public AddNetwatchConfigForm()
         {
@@ -106,7 +110,7 @@ namespace CustomerAndServerMaintenanceTracking.ModalForms
             try
             {
                 // We are about to update NetwatchConfigRepository
-                NetwatchConfigRepository repo = new NetwatchConfigRepository();
+                NetwatchConfigRepository repo = new NetwatchConfigRepository(_logRepository, _tagRepository);
                 repo.AddNetwatchConfig(newConfig);
 
                 MessageBox.Show("Netwatch configuration saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);

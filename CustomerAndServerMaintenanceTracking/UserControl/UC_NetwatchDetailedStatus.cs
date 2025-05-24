@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CustomerAndServerMaintenanceTracking.DataAccess;
 using CustomerAndServerMaintenanceTracking.Models;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 namespace CustomerAndServerMaintenanceTracking.UserControl
 {
@@ -18,6 +20,8 @@ namespace CustomerAndServerMaintenanceTracking.UserControl
         private string _initialNetwatchConfigName;
         private NetwatchConfigRepository _netwatchConfigRepository;
         private BindingList<IndividualIpStatus> _ipStatusBindingList;
+        private readonly TagRepository _tagRepository; // Added: To pass to NetwatchConfigRepository
+        private readonly ServiceLogRepository _logRepository;
 
         public UC_NetwatchDetailedStatus(int netwatchConfigId, string netwatchConfigName)
         {
@@ -25,7 +29,7 @@ namespace CustomerAndServerMaintenanceTracking.UserControl
 
             if (!this.DesignMode)
             {
-                _netwatchConfigRepository = new NetwatchConfigRepository();
+                _netwatchConfigRepository = new NetwatchConfigRepository(_logRepository, _tagRepository);
             }
             _ipStatusBindingList = new BindingList<IndividualIpStatus>();
 

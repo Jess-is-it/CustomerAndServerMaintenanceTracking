@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CustomerAndServerMaintenanceTracking.Models;
-using System.Data.SqlClient;
-using static CustomerAndServerMaintenanceTracking.Models.MikrotikRouter;
+using PPPoESyncService.Models;
+using SharedLibrary.DataAccess;
 
-namespace CustomerAndServerMaintenanceTracking.DataAccess
+namespace PPPoESyncService.DataAccess
 {
     public class MikrotikRouterRepository
     {
@@ -19,6 +19,9 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
         }
 
         // Adds a new router record to the Routers table.
+        // Note: This service might not need to Add/Update/Delete routers,
+        // as that's typically managed by the UI application.
+        // However, including it for completeness or potential future use.
         public void AddRouter(MikrotikRouter router)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
@@ -36,11 +39,12 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 cmd.Parameters.AddWithValue("@Password", router.Password);
 
                 cmd.ExecuteNonQuery();
-                conn.Close();
+                // conn.Close(); // Using block handles closing
             }
         }
 
         // Retrieves all router records from the Routers table.
+        // The service will use this to get connection details.
         public List<MikrotikRouter> GetRouters()
         {
             List<MikrotikRouter> routers = new List<MikrotikRouter>();
@@ -67,12 +71,13 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                         routers.Add(router);
                     }
                 }
-                conn.Close(); // Explicitly close connection
+                // conn.Close(); // Using block handles closing
             }
-
             return routers;
         }
 
+        // Updates an existing router record.
+        // Likely not used by this service directly, but included for completeness.
         public void UpdateRouter(MikrotikRouter router)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
@@ -89,10 +94,12 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 cmd.Parameters.AddWithValue("@Id", router.Id);
 
                 cmd.ExecuteNonQuery();
-                conn.Close(); // Explicitly close connection
+                // conn.Close(); // Using block handles closing
             }
         }
 
+        // Deletes a router record.
+        // Likely not used by this service directly.
         public void DeleteRouter(int routerId)
         {
             using (SqlConnection conn = dbHelper.GetConnection())
@@ -101,10 +108,8 @@ namespace CustomerAndServerMaintenanceTracking.DataAccess
                 SqlCommand cmd = new SqlCommand("DELETE FROM Routers WHERE Id=@Id", conn);
                 cmd.Parameters.AddWithValue("@Id", routerId);
                 cmd.ExecuteNonQuery();
-                conn.Close();
+                // conn.Close(); // Using block handles closing
             }
         }
-
-
     }
 }

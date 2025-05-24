@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CustomerAndServerMaintenanceTracking.Models
+namespace SharedLibrary.Models
 {
     public class TagAssignment
     {

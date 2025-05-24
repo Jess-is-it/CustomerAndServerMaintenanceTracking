@@ -10,12 +10,20 @@ using System.Windows.Forms;
 using CustomerAndServerMaintenanceTracking.DataAccess;
 using CustomerAndServerMaintenanceTracking.ModalForms;
 using CustomerAndServerMaintenanceTracking.Models;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class DeviceIPForm: Form
+    public partial class DeviceIPForm: Form, IRefreshableForm
     {
         private OverlayForm overlayForm;
+
+        public void RefreshDataViews()
+        {
+            LoadDevices(); // Call the existing method to reload data
+        }
+
         public DeviceIPForm()
         {
             InitializeComponent();

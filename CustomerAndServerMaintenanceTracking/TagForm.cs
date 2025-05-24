@@ -11,18 +11,27 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CustomerAndServerMaintenanceTracking.Models;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using SharedLibrary.Models;
+using SharedLibrary.DataAccess;
 
 
 namespace CustomerAndServerMaintenanceTracking
 {
-    public partial class TagForm: Form
+    public partial class TagForm: Form, IRefreshableForm
     {
        private AddCustomerTag addTagFormmodalFormTag;
         private OverlayForm overlayForm;
 
         // Dictionary to store each tag's collapse state (true = collapsed, false = normal)
         private Dictionary<int, bool> tagCollapseState = new Dictionary<int, bool>();
-        public TagForm()
+
+        public void RefreshDataViews()
+        {
+            LoadCustomerTags();
+            LoadDeviceIPTags();
+        }
+
+        public TagForm(ServiceLogRepository logRepository, TagRepository tagRepository)
         {
             InitializeComponent();
 
