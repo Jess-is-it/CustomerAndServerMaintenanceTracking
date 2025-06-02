@@ -32,8 +32,11 @@ namespace CustomerAndServerMaintenanceTracking.ModalForms
         public AddNetwatchConfigForm()
         {
             InitializeComponent();
-            // Set default values as per your designer/previous discussion
-            // comboBox1 for Type should be pre-filled and potentially disabled if only ICMP is supported
+
+            _logRepository = new ServiceLogRepository(); // Initialize the log repository
+            _tagRepository = new TagRepository(); // Initialize the tag repository
+
+
             comboBox1.Items.Add("ICMP");
             comboBox1.SelectedItem = "ICMP";
             comboBox1.Enabled = false; // Only ICMP for now

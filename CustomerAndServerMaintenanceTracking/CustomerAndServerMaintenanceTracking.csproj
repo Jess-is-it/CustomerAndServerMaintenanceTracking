@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -64,14 +67,99 @@
     <Compile Include="AppLogs\ServiceLogs.Designer.cs">
       <DependentUpon>ServiceLogs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Configuration\PermissionDefinitions.cs" />
     <Compile Include="CustomCells\ActionDataGridViewMultiButtonCell.cs" />
     <Compile Include="CustomCells\ActionDataGridViewMultiButtonColumn.cs" />
     <Compile Include="IRefreshableForm.cs" />
+    <Compile Include="Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Login.Designer.cs">
+      <DependentUpon>Login.cs</DependentUpon>
+    </Compile>
     <Compile Include="ModalForms\AddCustomerInfo.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ModalForms\AddCustomerInfo.Designer.cs">
       <DependentUpon>AddCustomerInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\AddNotificationRule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\AddNotificationRule.Designer.cs">
+      <DependentUpon>AddNotificationRule.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\AddNotificationSchedule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\AddNotificationSchedule.Designer.cs">
+      <DependentUpon>AddNotificationSchedule.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\SelectRecipientAddEmailOrPhone.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\SelectRecipientAddEmailOrPhone.Designer.cs">
+      <DependentUpon>SelectRecipientAddEmailOrPhone.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\SelectRecipientSpecificCustomers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\SelectRecipientSpecificCustomers.Designer.cs">
+      <DependentUpon>SelectRecipientSpecificCustomers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\SelectRecipientTags.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\SelectRecipientTags.Designer.cs">
+      <DependentUpon>SelectRecipientTags.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\TriggerEventNetwatch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ModalForms\Notification Rules\TriggerEventNetwatch.Designer.cs">
+      <DependentUpon>TriggerEventNetwatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\SettingsForms\AddUserRole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\SettingsForms\AddUserRole.Designer.cs">
+      <DependentUpon>AddUserRole.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\SettingsForms\AddUserAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\SettingsForms\AddUserAccount.Designer.cs">
+      <DependentUpon>AddUserAccount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\CustomersForms\CustomersAddFilter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\CustomersForms\CustomersAddFilter.Designer.cs">
+      <DependentUpon>CustomersAddFilter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\CustomersForms\CustomersFilters.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\CustomersForms\CustomersFilters.Designer.cs">
+      <DependentUpon>CustomersFilters.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ModalForms\SettingsForms\DeactivationReasonForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModalForms\SettingsForms\DeactivationReasonForm.Designer.cs">
+      <DependentUpon>DeactivationReasonForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NotificationManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NotificationManagerForm.Designer.cs">
+      <DependentUpon>NotificationManagerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProfilesForms\ModalForms\AddLocation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProfilesForms\ModalForms\AddLocation.Designer.cs">
+      <DependentUpon>AddLocation.cs</DependentUpon>
     </Compile>
     <Compile Include="ModalForms\AddNetwatchConfigForm.cs">
       <SubType>Form</SubType>
@@ -182,10 +270,10 @@
     <Compile Include="ModalForms\EditRouter.Designer.cs">
       <DependentUpon>EditRouter.cs</DependentUpon>
     </Compile>
-    <Compile Include="ModalForms\AddRouter.cs">
+    <Compile Include="ModalForms\SettingsForms\AddRouter.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ModalForms\AddRouter.Designer.cs">
+    <Compile Include="ModalForms\SettingsForms\AddRouter.Designer.cs">
       <DependentUpon>AddRouter.cs</DependentUpon>
     </Compile>
     <Compile Include="ModalForms\ViewCustomerTag.cs">
@@ -248,6 +336,12 @@
     <Compile Include="NetwatchDetailedStatus.Designer.cs">
       <DependentUpon>NetwatchDetailedStatus.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProfilesForms\Locations.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProfilesForms\Locations.Designer.cs">
+      <DependentUpon>Locations.cs</DependentUpon>
+    </Compile>
     <Compile Include="TagForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -272,11 +366,59 @@
     <Compile Include="UserControl\UC_NetworkCluster_Netwatch.Designer.cs">
       <DependentUpon>UC_NetworkCluster_Netwatch.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserFeaturesForms\Drafts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserFeaturesForms\Drafts.Designer.cs">
+      <DependentUpon>Drafts.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AppLogs\ServiceLogs.resx">
       <DependentUpon>ServiceLogs.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Login.resx">
+      <DependentUpon>Login.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\AddCustomerInfo.resx">
       <DependentUpon>AddCustomerInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\Notification Rules\AddNotificationRule.resx">
+      <DependentUpon>AddNotificationRule.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\Notification Rules\AddNotificationSchedule.resx">
+      <DependentUpon>AddNotificationSchedule.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\Notification Rules\SelectRecipientAddEmailOrPhone.resx">
+      <DependentUpon>SelectRecipientAddEmailOrPhone.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\Notification Rules\SelectRecipientSpecificCustomers.resx">
+      <DependentUpon>SelectRecipientSpecificCustomers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\Notification Rules\SelectRecipientTags.resx">
+      <DependentUpon>SelectRecipientTags.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\Notification Rules\TriggerEventNetwatch.resx">
+      <DependentUpon>TriggerEventNetwatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\SettingsForms\AddUserRole.resx">
+      <DependentUpon>AddUserRole.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\SettingsForms\AddUserAccount.resx">
+      <DependentUpon>AddUserAccount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\CustomersForms\CustomersAddFilter.resx">
+      <DependentUpon>CustomersAddFilter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\CustomersForms\CustomersFilters.resx">
+      <DependentUpon>CustomersFilters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModalForms\SettingsForms\DeactivationReasonForm.resx">
+      <DependentUpon>DeactivationReasonForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NotificationManagerForm.resx">
+      <DependentUpon>NotificationManagerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProfilesForms\ModalForms\AddLocation.resx">
+      <DependentUpon>AddLocation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\AddNetwatchConfigForm.resx">
       <DependentUpon>AddNetwatchConfigForm.cs</DependentUpon>
@@ -330,7 +472,7 @@
     <EmbeddedResource Include="ModalForms\EditRouter.resx">
       <DependentUpon>EditRouter.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ModalForms\AddRouter.resx">
+    <EmbeddedResource Include="ModalForms\SettingsForms\AddRouter.resx">
       <DependentUpon>AddRouter.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ModalForms\ViewCustomerTag.resx">
@@ -370,6 +512,10 @@
     <EmbeddedResource Include="NetwatchDetailedStatus.resx">
       <DependentUpon>NetwatchDetailedStatus.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ProfilesForms\Locations.resx">
+      <DependentUpon>Locations.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="TagForm.resx">
       <DependentUpon>TagForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -382,6 +528,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserControl\UC_NetworkCluster_Netwatch.resx">
       <DependentUpon>UC_NetworkCluster_Netwatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserFeaturesForms\Drafts.resx">
+      <DependentUpon>Drafts.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -408,6 +557,12 @@
       <Project>{a58fdf22-da9b-4435-ab00-2f1bcc4c9f2b}</Project>
       <Name>SharedLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icons8-checklist-48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icons8-add-40.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

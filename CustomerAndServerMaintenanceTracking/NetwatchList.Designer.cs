@@ -28,8 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NetwatchList));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.txtSearch = new System.Windows.Forms.TextBox();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripMore = new System.Windows.Forms.ToolStripDropDownButton();
+            this.addNotificationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopAllProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startAllProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnAddNetwatch = new System.Windows.Forms.Button();
             this.dgvNetwatchConfigs = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -45,15 +56,12 @@
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
             this.treeViewCluster = new System.Windows.Forms.TreeView();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.txtSearch = new System.Windows.Forms.TextBox();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnAddNetwatch = new System.Windows.Forms.Button();
-            this.btnStopAll = new System.Windows.Forms.Button();
-            this.btnStartAll = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNetwatchConfigs)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -61,9 +69,6 @@
             this.flowLayoutPanel3.SuspendLayout();
             this.flowLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
-            this.tableLayoutPanel5.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -90,6 +95,110 @@
             this.tabPage1.Text = "Network Cluster";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 1;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel5, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.dgvNetwatchConfigs, 0, 1);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 3;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1113, 585);
+            this.tableLayoutPanel2.TabIndex = 3;
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.ColumnCount = 2;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel5.Controls.Add(this.txtSearch, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.flowLayoutPanel1, 1, 0);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 1;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(1113, 30);
+            this.tableLayoutPanel5.TabIndex = 4;
+            // 
+            // txtSearch
+            // 
+            this.txtSearch.Location = new System.Drawing.Point(3, 3);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(214, 22);
+            this.txtSearch.TabIndex = 2;
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.toolStrip1);
+            this.flowLayoutPanel1.Controls.Add(this.btnAddNetwatch);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(556, 0);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(557, 30);
+            this.flowLayoutPanel1.TabIndex = 3;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMore});
+            this.toolStrip1.Location = new System.Drawing.Point(481, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(76, 25);
+            this.toolStrip1.TabIndex = 9;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripMore
+            // 
+            this.toolStripMore.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addNotificationToolStripMenuItem,
+            this.stopAllProcessToolStripMenuItem,
+            this.startAllProcessToolStripMenuItem});
+            this.toolStripMore.Image = ((System.Drawing.Image)(resources.GetObject("toolStripMore.Image")));
+            this.toolStripMore.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripMore.Name = "toolStripMore";
+            this.toolStripMore.Size = new System.Drawing.Size(64, 22);
+            this.toolStripMore.Text = "More";
+            // 
+            // addNotificationToolStripMenuItem
+            // 
+            this.addNotificationToolStripMenuItem.Name = "addNotificationToolStripMenuItem";
+            this.addNotificationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addNotificationToolStripMenuItem.Text = "Add Notification";
+            // 
+            // stopAllProcessToolStripMenuItem
+            // 
+            this.stopAllProcessToolStripMenuItem.Name = "stopAllProcessToolStripMenuItem";
+            this.stopAllProcessToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.stopAllProcessToolStripMenuItem.Text = "Stop All Process";
+            this.stopAllProcessToolStripMenuItem.Click += new System.EventHandler(this.btnStopAll_Click);
+            // 
+            // startAllProcessToolStripMenuItem
+            // 
+            this.startAllProcessToolStripMenuItem.Name = "startAllProcessToolStripMenuItem";
+            this.startAllProcessToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startAllProcessToolStripMenuItem.Text = "Start All Process";
+            this.startAllProcessToolStripMenuItem.Click += new System.EventHandler(this.btnStartAll_Click);
+            // 
+            // btnAddNetwatch
+            // 
+            this.btnAddNetwatch.Location = new System.Drawing.Point(366, 3);
+            this.btnAddNetwatch.Name = "btnAddNetwatch";
+            this.btnAddNetwatch.Size = new System.Drawing.Size(112, 23);
+            this.btnAddNetwatch.TabIndex = 1;
+            this.btnAddNetwatch.Text = "Add Netwatch";
+            this.btnAddNetwatch.UseVisualStyleBackColor = true;
+            this.btnAddNetwatch.Click += new System.EventHandler(this.btnAddNetwatch_Click);
+            // 
             // dgvNetwatchConfigs
             // 
             this.dgvNetwatchConfigs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -105,7 +214,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(750, 591);
+            this.tabPage2.Size = new System.Drawing.Size(1119, 591);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Customers";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -124,7 +233,7 @@
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(744, 585);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(1113, 585);
             this.tableLayoutPanel3.TabIndex = 3;
             // 
             // tableLayoutPanel4
@@ -141,7 +250,7 @@
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(744, 40);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(1113, 40);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // flowLayoutPanel3
@@ -151,7 +260,7 @@
             this.flowLayoutPanel3.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(372, 40);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(556, 40);
             this.flowLayoutPanel3.TabIndex = 0;
             // 
             // txtSearchTags
@@ -169,10 +278,10 @@
             this.flowLayoutPanel4.Controls.Add(this.button2);
             this.flowLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel4.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel4.Location = new System.Drawing.Point(372, 0);
+            this.flowLayoutPanel4.Location = new System.Drawing.Point(556, 0);
             this.flowLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel4.Name = "flowLayoutPanel4";
-            this.flowLayoutPanel4.Size = new System.Drawing.Size(372, 40);
+            this.flowLayoutPanel4.Size = new System.Drawing.Size(557, 40);
             this.flowLayoutPanel4.TabIndex = 1;
             // 
             // btnAddPingTags
@@ -180,7 +289,7 @@
             this.btnAddPingTags.BackColor = System.Drawing.Color.DeepSkyBlue;
             this.btnAddPingTags.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAddPingTags.ForeColor = System.Drawing.Color.Black;
-            this.btnAddPingTags.Location = new System.Drawing.Point(252, 0);
+            this.btnAddPingTags.Location = new System.Drawing.Point(437, 0);
             this.btnAddPingTags.Margin = new System.Windows.Forms.Padding(0);
             this.btnAddPingTags.Name = "btnAddPingTags";
             this.btnAddPingTags.Size = new System.Drawing.Size(120, 26);
@@ -192,7 +301,7 @@
             // 
             this.button1.BackColor = System.Drawing.Color.Coral;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(188, 0);
+            this.button1.Location = new System.Drawing.Point(373, 0);
             this.button1.Margin = new System.Windows.Forms.Padding(0);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(64, 26);
@@ -204,7 +313,7 @@
             // 
             this.button2.BackColor = System.Drawing.Color.Turquoise;
             this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(115, 0);
+            this.button2.Location = new System.Drawing.Point(300, 0);
             this.button2.Margin = new System.Windows.Forms.Padding(0);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(73, 26);
@@ -252,106 +361,17 @@
             this.treeViewCluster.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeViewCluster.Location = new System.Drawing.Point(3, 43);
             this.treeViewCluster.Name = "treeViewCluster";
-            this.treeViewCluster.Size = new System.Drawing.Size(738, 499);
+            this.treeViewCluster.Size = new System.Drawing.Size(1107, 499);
             this.treeViewCluster.TabIndex = 2;
             // 
             // tabPage3
             // 
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(750, 591);
+            this.tabPage3.Size = new System.Drawing.Size(1119, 591);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Device IP";
             this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // tableLayoutPanel2
-            // 
-            this.tableLayoutPanel2.ColumnCount = 1;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel5, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.dgvNetwatchConfigs, 0, 1);
-            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 3;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(1113, 585);
-            this.tableLayoutPanel2.TabIndex = 3;
-            // 
-            // tableLayoutPanel5
-            // 
-            this.tableLayoutPanel5.ColumnCount = 2;
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel5.Controls.Add(this.txtSearch, 0, 0);
-            this.tableLayoutPanel5.Controls.Add(this.flowLayoutPanel1, 1, 0);
-            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
-            this.tableLayoutPanel5.RowCount = 1;
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(1113, 30);
-            this.tableLayoutPanel5.TabIndex = 4;
-            // 
-            // txtSearch
-            // 
-            this.txtSearch.Location = new System.Drawing.Point(3, 3);
-            this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(214, 22);
-            this.txtSearch.TabIndex = 2;
-            // 
-            // flowLayoutPanel1
-            // 
-            this.flowLayoutPanel1.Controls.Add(this.btnAddNetwatch);
-            this.flowLayoutPanel1.Controls.Add(this.btnStopAll);
-            this.flowLayoutPanel1.Controls.Add(this.btnStartAll);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(556, 0);
-            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(557, 30);
-            this.flowLayoutPanel1.TabIndex = 3;
-            // 
-            // btnAddNetwatch
-            // 
-            this.btnAddNetwatch.Location = new System.Drawing.Point(442, 3);
-            this.btnAddNetwatch.Name = "btnAddNetwatch";
-            this.btnAddNetwatch.Size = new System.Drawing.Size(112, 23);
-            this.btnAddNetwatch.TabIndex = 1;
-            this.btnAddNetwatch.Text = "Add Netwatch";
-            this.btnAddNetwatch.UseVisualStyleBackColor = true;
-            this.btnAddNetwatch.Click += new System.EventHandler(this.btnAddNetwatch_Click);
-            // 
-            // btnStopAll
-            // 
-            this.btnStopAll.BackColor = System.Drawing.Color.Coral;
-            this.btnStopAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnStopAll.Location = new System.Drawing.Point(375, 0);
-            this.btnStopAll.Margin = new System.Windows.Forms.Padding(0);
-            this.btnStopAll.Name = "btnStopAll";
-            this.btnStopAll.Size = new System.Drawing.Size(64, 26);
-            this.btnStopAll.TabIndex = 6;
-            this.btnStopAll.Text = "Stop all";
-            this.btnStopAll.UseVisualStyleBackColor = false;
-            this.btnStopAll.Click += new System.EventHandler(this.btnStopAll_Click);
-            // 
-            // btnStartAll
-            // 
-            this.btnStartAll.BackColor = System.Drawing.Color.Turquoise;
-            this.btnStartAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnStartAll.Location = new System.Drawing.Point(302, 0);
-            this.btnStartAll.Margin = new System.Windows.Forms.Padding(0);
-            this.btnStartAll.Name = "btnStartAll";
-            this.btnStartAll.Size = new System.Drawing.Size(73, 26);
-            this.btnStartAll.TabIndex = 7;
-            this.btnStartAll.Text = "Start all";
-            this.btnStartAll.UseVisualStyleBackColor = false;
-            this.btnStartAll.Click += new System.EventHandler(this.btnStartAll_Click);
             // 
             // NetwatchList
             // 
@@ -364,6 +384,13 @@
             this.Load += new System.EventHandler(this.NetwatchList_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNetwatchConfigs)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
@@ -372,10 +399,6 @@
             this.flowLayoutPanel3.PerformLayout();
             this.flowLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel5.ResumeLayout(false);
-            this.tableLayoutPanel5.PerformLayout();
-            this.flowLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -404,7 +427,10 @@
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button btnAddNetwatch;
-        private System.Windows.Forms.Button btnStopAll;
-        private System.Windows.Forms.Button btnStartAll;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripMore;
+        private System.Windows.Forms.ToolStripMenuItem addNotificationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stopAllProcessToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startAllProcessToolStripMenuItem;
     }
 }

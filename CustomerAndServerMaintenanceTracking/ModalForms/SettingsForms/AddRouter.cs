@@ -12,7 +12,7 @@ using System.Windows.Forms;
 using SharedLibrary.Models;
 using SharedLibrary.DataAccess;
 
-namespace CustomerAndServerMaintenanceTracking.ModalForms
+namespace CustomerAndServerMaintenanceTracking.ModalForms.SettingsForms
 {
     public partial class AddRouter : Form
     {

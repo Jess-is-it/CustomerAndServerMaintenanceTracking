@@ -73,6 +73,26 @@ namespace CustomerAndServerMaintenanceTracking.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap icons8_add_40 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-add-40", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap icons8_checklist_48 {
+            get {
+                object obj = ResourceManager.GetObject("icons8-checklist-48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_close_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-close-48", resourceCulture);

@@ -14,6 +14,7 @@ using System.Timers;
 using System.Windows.Forms;
 using CustomerAndServerMaintenanceTracking.SidePanelForms;
 using SharedLibrary.DataAccess;
+using CustomerAndServerMaintenanceTracking.Profiles;
 
 
 namespace CustomerAndServerMaintenanceTracking
@@ -226,6 +227,39 @@ namespace CustomerAndServerMaintenanceTracking
             settings.Show();
         }
 
+        private void LocationstoolStripMenu_Click(object sender, EventArgs e)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is Locations)
+                {
+                    child.Activate();
+                    return;
+                }
+            }
+            // Pass repositories if Settings form's constructor needs them
+            Locations loc = new Locations();
+            loc.MdiParent = this;
+            loc.Show();
+        }
+
+        private void toolStripMenuItemNotifRules_Click(object sender, EventArgs e)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is NotificationManagerForm)
+                {
+                    child.Activate();
+                    return;
+                }
+            }
+            // Pass repositories if Settings form's constructor needs them
+            NotificationManagerForm nmf = new NotificationManagerForm();
+            nmf.MdiParent = this;
+            nmf.Show();
+        }
+
+    
         #endregion
 
         #region Right Side Panel
@@ -271,6 +305,9 @@ namespace CustomerAndServerMaintenanceTracking
             }
         }
 
+
         #endregion
+
+       
     }
 }

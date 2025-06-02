@@ -248,24 +248,105 @@ namespace CustomerAndServerMaintenanceTracking
 
         private void RefreshDataGridViewWithScrollPreservation()
         {
-            int firstDisplayedIndexActive = -1;
-            if (dataGridViewActiveCustomers.Rows.Count > 0)
-                firstDisplayedIndexActive = dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex;
+            //int firstDisplayedIndexActive = -1;
+            //if (dataGridViewActiveCustomers.Rows.Count > 0)
+            //    firstDisplayedIndexActive = dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex;
 
-            int firstDisplayedIndexArchived = -1;
-            if (dataGridViewArchivedCustomers.Rows.Count > 0)
-                firstDisplayedIndexArchived = dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex;
+            //int firstDisplayedIndexArchived = -1;
+            //if (dataGridViewArchivedCustomers.Rows.Count > 0)
+            //    firstDisplayedIndexArchived = dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex;
 
+            //LoadActiveCustomers();
+            //LoadArchivedCustomers();
+
+            //if (firstDisplayedIndexActive >= 0 && firstDisplayedIndexActive < dataGridViewActiveCustomers.Rows.Count)
+            //{
+            //    dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndexActive;
+            //}
+            //if (firstDisplayedIndexArchived >= 0 && firstDisplayedIndexArchived < dataGridViewArchivedCustomers.Rows.Count)
+            //{
+            //    dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndexArchived;
+            //}
+            // --- Preserve state for dataGridViewActiveCustomers ---
+            int? active_currentCell_RowIndex = dataGridViewActiveCustomers.CurrentCell?.RowIndex;
+            int? active_currentCell_ColumnIndex = dataGridViewActiveCustomers.CurrentCell?.ColumnIndex;
+            int active_firstDisplayedScrollingRowIndex = dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex;
+            // If you want to preserve the exact selected rows (multi-select):
+            // List<object> active_selectedDataBoundItems = dataGridViewActiveCustomers.SelectedRows
+            //                                              .Cast<DataGridViewRow>()
+            //                                              .Select(row => row.DataBoundItem)
+            //                                              .Where(item => item != null)
+            //                                              .ToList();
+
+            // --- Preserve state for dataGridViewArchivedCustomers ---
+            int? archived_currentCell_RowIndex = dataGridViewArchivedCustomers.CurrentCell?.RowIndex;
+            int? archived_currentCell_ColumnIndex = dataGridViewArchivedCustomers.CurrentCell?.ColumnIndex;
+            int archived_firstDisplayedScrollingRowIndex = dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex;
+            // List<object> archived_selectedDataBoundItems = dataGridViewArchivedCustomers.SelectedRows
+            //                                               .Cast<DataGridViewRow>()
+            //                                               .Select(row => row.DataBoundItem)
+            //                                               .Where(item => item != null)
+            //                                               .ToList();
+
+            // --- Load data (this will clear selection and scroll) ---
             LoadActiveCustomers();
             LoadArchivedCustomers();
 
-            if (firstDisplayedIndexActive >= 0 && firstDisplayedIndexActive < dataGridViewActiveCustomers.Rows.Count)
+            // --- Restore state for dataGridViewActiveCustomers ---
+            try
             {
-                dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndexActive;
+                if (dataGridViewActiveCustomers.Rows.Count > 0)
+                {
+                    // 1. Restore current cell FIRST
+                    if (active_currentCell_RowIndex.HasValue && active_currentCell_ColumnIndex.HasValue &&
+                        active_currentCell_RowIndex.Value >= 0 && active_currentCell_RowIndex.Value < dataGridViewActiveCustomers.Rows.Count &&
+                        active_currentCell_ColumnIndex.Value >= 0 && active_currentCell_ColumnIndex.Value < dataGridViewActiveCustomers.Columns.Count)
+                    {
+                        // It's good practice to clear any existing (default) selection before setting a new one.
+                        dataGridViewActiveCustomers.ClearSelection();
+                        dataGridViewActiveCustomers.CurrentCell = dataGridViewActiveCustomers.Rows[active_currentCell_RowIndex.Value].Cells[active_currentCell_ColumnIndex.Value];
+                        // Setting CurrentCell usually also selects the row, especially with FullRowSelect.
+                        // If you want to be absolutely sure the row is selected:
+                        // dataGridViewActiveCustomers.Rows[active_currentCell_RowIndex.Value].Selected = true;
+                    }
+
+                    // 2. Then, restore scroll position. This should now be the dominant scroll command.
+                    if (active_firstDisplayedScrollingRowIndex >= 0 && active_firstDisplayedScrollingRowIndex < dataGridViewActiveCustomers.Rows.Count)
+                    {
+                        dataGridViewActiveCustomers.FirstDisplayedScrollingRowIndex = active_firstDisplayedScrollingRowIndex;
+                    }
+                }
             }
-            if (firstDisplayedIndexArchived >= 0 && firstDisplayedIndexArchived < dataGridViewArchivedCustomers.Rows.Count)
+            catch (Exception ex)
             {
-                dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex = firstDisplayedIndexArchived;
+                LogStatus($"Error restoring state for active customers grid: {ex.Message}");
+            }
+
+            // --- Restore state for dataGridViewArchivedCustomers ---
+            try
+            {
+                if (dataGridViewArchivedCustomers.Rows.Count > 0)
+                {
+                    // 1. Restore current cell FIRST
+                    if (archived_currentCell_RowIndex.HasValue && archived_currentCell_ColumnIndex.HasValue &&
+                        archived_currentCell_RowIndex.Value >= 0 && archived_currentCell_RowIndex.Value < dataGridViewArchivedCustomers.Rows.Count &&
+                        archived_currentCell_ColumnIndex.Value >= 0 && archived_currentCell_ColumnIndex.Value < dataGridViewArchivedCustomers.Columns.Count)
+                    {
+                        dataGridViewArchivedCustomers.ClearSelection();
+                        dataGridViewArchivedCustomers.CurrentCell = dataGridViewArchivedCustomers.Rows[archived_currentCell_RowIndex.Value].Cells[archived_currentCell_ColumnIndex.Value];
+                        // dataGridViewArchivedCustomers.Rows[archived_currentCell_RowIndex.Value].Selected = true; // Optional explicit selection
+                    }
+
+                    // 2. Then, restore scroll position
+                    if (archived_firstDisplayedScrollingRowIndex >= 0 && archived_firstDisplayedScrollingRowIndex < dataGridViewArchivedCustomers.Rows.Count)
+                    {
+                        dataGridViewArchivedCustomers.FirstDisplayedScrollingRowIndex = archived_firstDisplayedScrollingRowIndex;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogStatus($"Error restoring state for archived customers grid: {ex.Message}");
             }
         }
         private void LoadActiveCustomers()
@@ -377,11 +458,7 @@ namespace CustomerAndServerMaintenanceTracking
             LoadActiveCustomers();
             LoadArchivedCustomers();
         }
-        private void btnRefreshArchived_Click(object sender, EventArgs e)
-        {
-            LogStatus("Refresh Archived Clicked.");
-            LoadArchivedCustomers();
-        }
+
         private void Customers_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Unsubscribe from the event when the form is closing

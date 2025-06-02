@@ -31,16 +31,22 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Dashboard));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.CustomerList = new System.Windows.Forms.ToolStripMenuItem();
-            this.Tags = new System.Windows.Forms.ToolStripMenuItem();
-            this.assignCustomerTagToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.NetworkClusterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemNotifRules = new System.Windows.Forms.ToolStripMenuItem();
             this.Ping = new System.Windows.Forms.ToolStripMenuItem();
             this.pingAddNetwatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pingNetwatchListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.iP = new System.Windows.Forms.ToolStripMenuItem();
-            this.DeviceIP = new System.Windows.Forms.ToolStripMenuItem();
+            this.Tags = new System.Windows.Forms.ToolStripMenuItem();
+            this.assignCustomerTagToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.NetworkClusterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.IP = new System.Windows.Forms.ToolStripMenuItem();
+            this.DeviceIPtoolStripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.Settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.Profiles = new System.Windows.Forms.ToolStripMenuItem();
+            this.LocationstoolStripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStripSystemTray = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,11 +71,16 @@
             this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(0);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem2,
+            this.toolStripMenuItem1,
             this.CustomerList,
-            this.Tags,
+            this.toolStripMenuItem4,
+            this.toolStripMenuItemNotifRules,
             this.Ping,
-            this.iP,
-            this.Settings});
+            this.Tags,
+            this.IP,
+            this.Settings,
+            this.Profiles});
             this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
             this.menuStrip1.Location = new System.Drawing.Point(0, 96);
             this.menuStrip1.Name = "menuStrip1";
@@ -78,93 +89,152 @@
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItem2.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Padding = new System.Windows.Forms.Padding(0);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(175, 25);
+            this.toolStripMenuItem2.Text = "Inbox";
+            this.toolStripMenuItem2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Padding = new System.Windows.Forms.Padding(0);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(175, 25);
+            this.toolStripMenuItem1.Text = "Drafts";
+            this.toolStripMenuItem1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // CustomerList
             // 
-            this.CustomerList.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CustomerList.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CustomerList.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.CustomerList.Margin = new System.Windows.Forms.Padding(0, 40, 0, 0);
             this.CustomerList.Name = "CustomerList";
             this.CustomerList.Padding = new System.Windows.Forms.Padding(0);
-            this.CustomerList.Size = new System.Drawing.Size(175, 29);
+            this.CustomerList.Size = new System.Drawing.Size(175, 25);
             this.CustomerList.Text = "Customer List";
             this.CustomerList.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.CustomerList.Click += new System.EventHandler(this.CustmerList_Click);
             // 
-            // Tags
+            // toolStripMenuItem4
             // 
-            this.Tags.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.assignCustomerTagToolStripMenuItem,
-            this.NetworkClusterToolStripMenuItem});
-            this.Tags.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Tags.Name = "Tags";
-            this.Tags.Size = new System.Drawing.Size(175, 29);
-            this.Tags.Text = "Tags";
-            this.Tags.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolStripMenuItem4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItem4.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Padding = new System.Windows.Forms.Padding(0);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(175, 25);
+            this.toolStripMenuItem4.Text = "New Installations";
+            this.toolStripMenuItem4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // assignCustomerTagToolStripMenuItem
+            // toolStripMenuItemNotifRules
             // 
-            this.assignCustomerTagToolStripMenuItem.Name = "assignCustomerTagToolStripMenuItem";
-            this.assignCustomerTagToolStripMenuItem.Size = new System.Drawing.Size(219, 30);
-            this.assignCustomerTagToolStripMenuItem.Text = "Tags";
-            this.assignCustomerTagToolStripMenuItem.Click += new System.EventHandler(this.assignTagToolStripMenuItem_Click);
-            // 
-            // NetworkClusterToolStripMenuItem
-            // 
-            this.NetworkClusterToolStripMenuItem.Name = "NetworkClusterToolStripMenuItem";
-            this.NetworkClusterToolStripMenuItem.Size = new System.Drawing.Size(219, 30);
-            this.NetworkClusterToolStripMenuItem.Text = "Network Cluster";
-            this.NetworkClusterToolStripMenuItem.Click += new System.EventHandler(this.NetworkClusterToolStripMenuItem_Click);
+            this.toolStripMenuItemNotifRules.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripMenuItemNotifRules.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripMenuItemNotifRules.Name = "toolStripMenuItemNotifRules";
+            this.toolStripMenuItemNotifRules.Padding = new System.Windows.Forms.Padding(0);
+            this.toolStripMenuItemNotifRules.Size = new System.Drawing.Size(175, 25);
+            this.toolStripMenuItemNotifRules.Text = "Notification Rules";
+            this.toolStripMenuItemNotifRules.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolStripMenuItemNotifRules.Click += new System.EventHandler(this.toolStripMenuItemNotifRules_Click);
             // 
             // Ping
             // 
             this.Ping.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pingAddNetwatchToolStripMenuItem,
             this.pingNetwatchListToolStripMenuItem});
-            this.Ping.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Ping.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Ping.Name = "Ping";
-            this.Ping.Size = new System.Drawing.Size(175, 29);
+            this.Ping.Size = new System.Drawing.Size(175, 25);
             this.Ping.Text = "Tools";
             this.Ping.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pingAddNetwatchToolStripMenuItem
             // 
             this.pingAddNetwatchToolStripMenuItem.Name = "pingAddNetwatchToolStripMenuItem";
-            this.pingAddNetwatchToolStripMenuItem.Size = new System.Drawing.Size(203, 30);
+            this.pingAddNetwatchToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.pingAddNetwatchToolStripMenuItem.Text = "Add Netwatch";
             this.pingAddNetwatchToolStripMenuItem.Click += new System.EventHandler(this.pingAddNetwatchToolStripMenuItem_Click);
             // 
             // pingNetwatchListToolStripMenuItem
             // 
             this.pingNetwatchListToolStripMenuItem.Name = "pingNetwatchListToolStripMenuItem";
-            this.pingNetwatchListToolStripMenuItem.Size = new System.Drawing.Size(203, 30);
+            this.pingNetwatchListToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.pingNetwatchListToolStripMenuItem.Text = "Netwatch List";
             this.pingNetwatchListToolStripMenuItem.Click += new System.EventHandler(this.pingNetwatchListToolStripMenuItem_Click);
             // 
-            // iP
+            // Tags
             // 
-            this.iP.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.DeviceIP});
-            this.iP.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.iP.Name = "iP";
-            this.iP.Size = new System.Drawing.Size(175, 29);
-            this.iP.Text = "IP";
-            this.iP.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Tags.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.assignCustomerTagToolStripMenuItem,
+            this.NetworkClusterToolStripMenuItem});
+            this.Tags.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Tags.Name = "Tags";
+            this.Tags.Size = new System.Drawing.Size(175, 25);
+            this.Tags.Text = "Tags";
+            this.Tags.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // DeviceIP
+            // assignCustomerTagToolStripMenuItem
             // 
-            this.DeviceIP.Name = "DeviceIP";
-            this.DeviceIP.Size = new System.Drawing.Size(161, 30);
-            this.DeviceIP.Text = "Device IP";
-            this.DeviceIP.Click += new System.EventHandler(this.DeviceIP_Click);
+            this.assignCustomerTagToolStripMenuItem.Name = "assignCustomerTagToolStripMenuItem";
+            this.assignCustomerTagToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.assignCustomerTagToolStripMenuItem.Text = "Tags";
+            this.assignCustomerTagToolStripMenuItem.Click += new System.EventHandler(this.assignTagToolStripMenuItem_Click);
+            // 
+            // NetworkClusterToolStripMenuItem
+            // 
+            this.NetworkClusterToolStripMenuItem.Name = "NetworkClusterToolStripMenuItem";
+            this.NetworkClusterToolStripMenuItem.Size = new System.Drawing.Size(193, 26);
+            this.NetworkClusterToolStripMenuItem.Text = "Network Cluster";
+            this.NetworkClusterToolStripMenuItem.Click += new System.EventHandler(this.NetworkClusterToolStripMenuItem_Click);
+            // 
+            // IP
+            // 
+            this.IP.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.DeviceIPtoolStripMenu});
+            this.IP.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.IP.Name = "IP";
+            this.IP.Size = new System.Drawing.Size(175, 25);
+            this.IP.Text = "IP";
+            this.IP.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // DeviceIPtoolStripMenu
+            // 
+            this.DeviceIPtoolStripMenu.Name = "DeviceIPtoolStripMenu";
+            this.DeviceIPtoolStripMenu.Size = new System.Drawing.Size(143, 26);
+            this.DeviceIPtoolStripMenu.Text = "Device IP";
+            this.DeviceIPtoolStripMenu.Click += new System.EventHandler(this.DeviceIP_Click);
             // 
             // Settings
             // 
-            this.Settings.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Settings.Margin = new System.Windows.Forms.Padding(0, 24, 0, 0);
+            this.Settings.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Settings.Name = "Settings";
-            this.Settings.Size = new System.Drawing.Size(175, 29);
+            this.Settings.Size = new System.Drawing.Size(175, 25);
             this.Settings.Text = "Settings";
             this.Settings.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.Settings.Click += new System.EventHandler(this.Settings_Click);
+            // 
+            // Profiles
+            // 
+            this.Profiles.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.LocationstoolStripMenu});
+            this.Profiles.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Profiles.Margin = new System.Windows.Forms.Padding(0, 48, 0, 0);
+            this.Profiles.Name = "Profiles";
+            this.Profiles.Size = new System.Drawing.Size(175, 25);
+            this.Profiles.Text = "Profiles";
+            this.Profiles.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // LocationstoolStripMenu
+            // 
+            this.LocationstoolStripMenu.Name = "LocationstoolStripMenu";
+            this.LocationstoolStripMenu.Size = new System.Drawing.Size(180, 26);
+            this.LocationstoolStripMenu.Text = "Locations";
+            this.LocationstoolStripMenu.Click += new System.EventHandler(this.LocationstoolStripMenu_Click);
             // 
             // notifyIcon1
             // 
@@ -305,12 +375,18 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.Label lblMikrotikStatus;
-        private System.Windows.Forms.ToolStripMenuItem iP;
-        private System.Windows.Forms.ToolStripMenuItem DeviceIP;
         private System.Windows.Forms.ToolStripMenuItem assignCustomerTagToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem NetworkClusterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pingAddNetwatchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pingNetwatchListToolStripMenuItem;
         private System.Windows.Forms.Timer autoRefreshTimer;
+        private System.Windows.Forms.ToolStripMenuItem Profiles;
+        private System.Windows.Forms.ToolStripMenuItem LocationstoolStripMenu;
+        private System.Windows.Forms.ToolStripMenuItem IP;
+        private System.Windows.Forms.ToolStripMenuItem DeviceIPtoolStripMenu;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemNotifRules;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
     }
 }

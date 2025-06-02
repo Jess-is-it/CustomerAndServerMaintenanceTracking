@@ -31,9 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,25 +47,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataAccess\AppSettingsManager.cs" />
     <Compile Include="DataAccess\CustomerRepository.cs" />
     <Compile Include="DataAccess\DatabaseHelper.cs" />
+    <Compile Include="DataAccess\LocationRepository.cs" />
     <Compile Include="DataAccess\MikrotikRouterRepository.cs" />
     <Compile Include="DataAccess\NetwatchConfigRepository.cs" />
     <Compile Include="DataAccess\ServiceLogRepository.cs" />
     <Compile Include="DataAccess\TagRepository.cs" />
+    <Compile Include="DataAccess\UserAccountRepository.cs" />
+    <Compile Include="DataAccess\UserRoleRepository.cs" />
+    <Compile Include="Models\Barangay.cs" />
     <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\DeviceIP.cs" />
+    <Compile Include="Models\EmailSettings.cs" />
     <Compile Include="Models\IndividualIpStatus.cs" />
     <Compile Include="Models\MikrotikRouter.cs" />
     <Compile Include="Models\MonitoredIpDetail.cs" />
+    <Compile Include="Models\Municipality.cs" />
     <Compile Include="Models\NetwatchConfig.cs" />
     <Compile Include="Models\NetwatchConfigDisplay.cs" />
     <Compile Include="Models\NetworkCluster.cs" />
+    <Compile Include="Models\RolePermission.cs" />
     <Compile Include="Models\ServiceLogEntry.cs" />
     <Compile Include="Models\TagAssignment.cs" />
     <Compile Include="Models\TagClass.cs" />
     <Compile Include="Models\TagDisplayModel.cs" />
+    <Compile Include="Models\UserAccount.cs" />
+    <Compile Include="Models\UserRole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

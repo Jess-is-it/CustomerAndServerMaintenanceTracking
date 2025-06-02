@@ -1,4 +1,4 @@
-﻿namespace CustomerAndServerMaintenanceTracking.ModalForms
+﻿namespace CustomerAndServerMaintenanceTracking.ModalForms.SettingsForms
 {
     partial class AddRouter
     {

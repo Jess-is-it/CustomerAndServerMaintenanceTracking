@@ -15,6 +15,7 @@ using CustomerAndServerMaintenanceTracking.ModalForms;
 using System.Diagnostics;
 using SharedLibrary.Models;
 using SharedLibrary.DataAccess;
+using CustomerAndServerMaintenanceTracking.ModalForms.Notification_Rules;
 
 namespace CustomerAndServerMaintenanceTracking
 {
@@ -44,6 +45,7 @@ namespace CustomerAndServerMaintenanceTracking
 
             _allNetwatchConfigsMasterList = new List<NetwatchConfigDisplay>();
             _allNetwatchConfigsBindingList = new BindingList<NetwatchConfigDisplay>();
+            addNotificationToolStripMenuItem.Click += addNotificationToolStripMenuItem_Click;
 
             if (this.dgvNetwatchConfigs != null)
             {
@@ -56,6 +58,28 @@ namespace CustomerAndServerMaintenanceTracking
             {
                 MessageBox.Show("Error: dgvNetwatchConfigs is not found on tabPage1. Please check the designer.", "UI Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            //Add Notification
+            var ctx = new ContextMenuStrip();
+            var ctxAddNotif = new ToolStripMenuItem("Add Notification");
+            ctxAddNotif.Name = "ctxAddNotification";
+            ctxAddNotif.Click += addNotificationToolStripMenuItem_Click;
+            // Re‐use the same click handler (it already checks for the selected row)
+            ctx.Items.Add(ctxAddNotif);
+
+            // 2) Assign it to the DataGridView
+            dgvNetwatchConfigs.ContextMenuStrip = ctx;
+
+            // 3) Optional: Only show the menu when right‐clicking on a valid row
+            dgvNetwatchConfigs.CellMouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
+                {
+                    dgvNetwatchConfigs.ClearSelection();
+                    dgvNetwatchConfigs.Rows[e.RowIndex].Selected = true;
+                }
+            };
+
         }
 
         private void NetwatchList_Load(object sender, EventArgs e)
@@ -524,6 +548,31 @@ namespace CustomerAndServerMaintenanceTracking
                     MessageBox.Show("All displayed Netwatch configurations are already disabled or there are no items to stop.", "Stop All", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
+
         }
+        private void addNotificationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dgvNetwatchConfigs.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select a Netwatch entry first.", "No Netwatch Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Cast to the display model instead of NetwatchConfig
+            var netwatchDisplay = (NetwatchConfigDisplay)dgvNetwatchConfigs.SelectedRows[0].DataBoundItem;
+
+            // If you need to fetch the full NetwatchConfig from the repository, you can use the Id:
+            int netwatchId = netwatchDisplay.Id;
+            string netwatchName = netwatchDisplay.NetwatchName;
+
+            // Now open AddNotificationRule with these values
+            var addForm = new AddNotificationRule(netwatchId, netwatchName);
+            addForm.StartPosition = FormStartPosition.CenterParent;
+            addForm.Owner = this;
+            addForm.ShowDialog();
+        }
+
+
     }
+
 }
