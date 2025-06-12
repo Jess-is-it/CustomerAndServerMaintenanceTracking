@@ -30,6 +30,7 @@ namespace CustomerAndServerMaintenanceTracking
         private UserRoleRepository _userRoleRepository;
         private UserAccountRepository _userAccountRepository;
         private ServiceLogRepository _serviceLogRepositoryForSettings;
+        private EmailSettingsRepository _emailSettingsRepository;
 
         private void ShowOverlay()
         {
@@ -60,7 +61,7 @@ namespace CustomerAndServerMaintenanceTracking
             InitializeComponent();
             InitializeRouterTab();
             LoadRouters();
-            LoadSystemEmailSettings();
+
 
             try
             {
@@ -73,10 +74,18 @@ namespace CustomerAndServerMaintenanceTracking
                 // Depending on how critical logging is, you might disable functionality or just proceed without logging.
             }
 
+            #region EMAIL
+
+            _emailSettingsRepository = new EmailSettingsRepository();
+            InitializeEmailSettingsGrid();
+            LoadEmailSettingsGrid();
+
+            this.btnAddEmail.Click += new System.EventHandler(this.btnAddEmail_Click);
+            #endregion
             #region ROLES
             // User Role Repository (already there)
             try
-                    {
+            {
                         _userRoleRepository = new UserRoleRepository();
                     }
                     catch (ConfigurationErrorsException configEx)
@@ -96,7 +105,7 @@ namespace CustomerAndServerMaintenanceTracking
                     }
                     else
                     {
-                        if (tabControl1.TabPages.Contains(tabPage6) && tabControl3.TabPages.Contains(tabPage5))
+                        if (tabControl1.TabPages.Contains(tabPageUsers) && tabControl3.TabPages.Contains(tabPage5))
                         {
                             tabPage5.Enabled = false;
                             tabPage5.Text = "Roles (Error)";
@@ -149,7 +158,7 @@ namespace CustomerAndServerMaintenanceTracking
             }
             else
             {
-                if (tabControl1.TabPages.Contains(tabPage6) && tabControl3.TabPages.Contains(tabPage4))
+                if (tabControl1.TabPages.Contains(tabPageUsers) && tabControl3.TabPages.Contains(tabPage4))
                 {
                     tabPage4.Enabled = false; // tabPage4 is the "Users" sub-tab containing tabControlUserActiveInActive
                     tabPage4.Text = "Users (Error)";
@@ -1060,83 +1069,188 @@ namespace CustomerAndServerMaintenanceTracking
         }
         #endregion
 
-        // In Settings.cs, can be in a new #region SystemEmail
-        #region SystemEmail
-
-        private void LoadSystemEmailSettings()
+        #region Email Management
+        private void InitializeEmailSettingsGrid()
         {
-            try
-            {
-                EmailSettings settings = AppSettingsManager.LoadEmailSettings();
+            // Use the correct name of your DataGridView from the designer
+            dgvEmail.Columns.Clear();
+            dgvEmail.AutoGenerateColumns = false;
 
-                txtServer.Text = settings.SmtpServer;
-                txtPort.Text = settings.SmtpPort.ToString(); // txtPort should ideally be NumericUpDown
-                chkEnableSsl.Checked = settings.EnableSsl;
-                txtUser.Text = settings.SmtpUsername;       // SMTP Username
-                txtPassword.Text = settings.SmtpPassword;   // SMTP Password
-                txtSenderEmail.Text = settings.SenderEmail;      // Sender Email ("From")
-                txtDisplayName.Text = settings.SenderDisplayName;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error loading system email settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            // Add columns
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "Id", DataPropertyName = "Id", HeaderText = "ID", Visible = false });
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "IsDefault", DataPropertyName = "IsDefault", HeaderText = "Default", Width = 60 });
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "SettingName", DataPropertyName = "SettingName", HeaderText = "Setting Name", Width = 150 });
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "SmtpServer", DataPropertyName = "SmtpServer", HeaderText = "SMTP Server", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "SmtpPort", DataPropertyName = "SmtpPort", HeaderText = "Port", Width = 50 });
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "SenderEmail", DataPropertyName = "SenderEmail", HeaderText = "Sender Email", Width = 200 });
+            dgvEmail.Columns.Add(new DataGridViewTextBoxColumn { Name = "Action", HeaderText = "Action", ReadOnly = true, Width = 200 });
+
+            // Set grid properties
+            dgvEmail.AllowUserToAddRows = false;
+            dgvEmail.ReadOnly = true;
+            dgvEmail.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvEmail.MultiSelect = false;
+
+            // Wire up the new grid events
+            dgvEmail.CellPainting += dgvEmail_CellPainting;
+            dgvEmail.CellClick += dgvEmail_CellClick;
         }
-        private void btnSaveEmail_Click(object sender, EventArgs e)
+
+        private void LoadEmailSettingsGrid()
         {
-            // Validate Port
-            if (!int.TryParse(txtPort.Text, out int port) || port <= 0)
-            {
-                MessageBox.Show("Please enter a valid SMTP Port number.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtPort.Focus();
-                return;
-            }
-
-            // Basic validation for server (can be enhanced, e.g., with regex for hostnames/IPs)
-            if (string.IsNullOrWhiteSpace(txtServer.Text))
-            {
-                MessageBox.Show("SMTP Server cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtServer.Focus();
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(txtSenderEmail.Text))
-            {
-                MessageBox.Show("Sender Email ('From') cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtSenderEmail.Focus();
-                return;
-            }
-            // Optional: Validate username if SMTP server requires authentication (usually does)
-            // if (chkAuthenticationRequired.Checked && string.IsNullOrWhiteSpace(txtUser.Text)) { ... }
-
-
-            EmailSettings settings = new EmailSettings
-            {
-                SmtpServer = txtServer.Text.Trim(),
-                SmtpPort = port,
-                EnableSsl = chkEnableSsl.Checked,
-                SmtpUsername = txtUser.Text.Trim(),
-                SmtpPassword = txtPassword.Text, // Storing plain as requested
-                SenderEmail = txtSenderEmail.Text.Trim(),
-                SenderDisplayName = txtDisplayName.Text.Trim()
-            };
-
             try
             {
-                if (AppSettingsManager.SaveEmailSettings(settings))
+                var settingsList = _emailSettingsRepository.GetAllEmailSettings();
+                dgvEmail.DataSource = null;
+                if (settingsList != null)
                 {
-                    MessageBox.Show("Email settings saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Failed to save email settings. Check application logs or App.config permissions.", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    dgvEmail.DataSource = settingsList;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving email settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Failed to load email settings from the database: {ex.Message}", "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        #endregion SystemEmail
+        private void btnAddEmail_Click(object sender, EventArgs e)
+        {
+            using (var addForm = new AddEmail())
+            {
+                addForm.StartPosition = FormStartPosition.CenterParent;
+                if (addForm.ShowDialog(this) == DialogResult.OK)
+                {
+                    LoadEmailSettingsGrid(); // Refresh the grid
+                }
+            }
+        }
+
+        private void dgvEmail_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex != dgvEmail.Columns["Action"].Index)
+                return;
+
+            e.PaintBackground(e.ClipBounds, true);
+
+            // --- Start of Fix ---
+
+            // A single, smaller font for all actions (buttons and text)
+            Font actionFont = new Font(dgvEmail.Font.FontFamily, 8f);
+
+            try
+            {
+                // Use the same layout calculations as before
+                int padding = 4;
+                int smallButtonWidth = 50;
+                int largeButtonWidth = e.CellBounds.Width - (smallButtonWidth * 2) - (padding * 4);
+                int topOffset = e.CellBounds.Top + 2;
+                int buttonHeight = e.CellBounds.Height - 4;
+
+                var setting = dgvEmail.Rows[e.RowIndex].DataBoundItem as EmailSettings;
+                if (setting == null) return;
+
+                // Action 1: "Default" / "Set as Default" (as plain black text)
+                string defaultActionText = setting.IsDefault ? "Default" : "Set as Default";
+                Rectangle textRect = new Rectangle(e.CellBounds.X + padding, topOffset, largeButtonWidth, buttonHeight);
+
+                // Use TextRenderer to draw plain black text.
+                TextRenderer.DrawText(e.Graphics, defaultActionText, actionFont, textRect,
+                                      Color.Black, // Set text color to black
+                                      TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter);
+
+
+                // Action 2: "Edit" Button
+                Rectangle editButtonRect = new Rectangle(textRect.Right + padding, topOffset, smallButtonWidth, buttonHeight);
+                ButtonRenderer.DrawButton(e.Graphics, editButtonRect, "Edit", actionFont, false, System.Windows.Forms.VisualStyles.PushButtonState.Normal);
+
+                // Action 3: "Delete" Button
+                Rectangle deleteButtonRect = new Rectangle(editButtonRect.Right + padding, topOffset, smallButtonWidth, buttonHeight);
+                ButtonRenderer.DrawButton(e.Graphics, deleteButtonRect, "Delete", actionFont, false, System.Windows.Forms.VisualStyles.PushButtonState.Normal);
+            }
+            finally
+            {
+                actionFont?.Dispose();
+            }
+
+            // --- End of Fix ---
+
+            e.Handled = true;
+        }
+
+        private void dgvEmail_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex != dgvEmail.Columns["Action"].Index)
+                return;
+
+            var setting = dgvEmail.Rows[e.RowIndex].DataBoundItem as EmailSettings;
+            if (setting == null) return;
+
+            Rectangle cellBounds = dgvEmail.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
+            Point mousePosition = dgvEmail.PointToClient(Cursor.Position);
+            Point clickPointInCell = new Point(mousePosition.X - cellBounds.Left, mousePosition.Y - cellBounds.Top);
+
+            // --- Start of Fix ---
+
+            // 1. Update rectangle calculations to match the new layout in CellPainting
+            int padding = 4;
+            int smallButtonWidth = 50;
+            int largeButtonWidth = cellBounds.Width - (smallButtonWidth * 2) - (padding * 4);
+            int topMargin = 2; // Use the same reduced margin
+            int buttonHeight = cellBounds.Height - (topMargin * 2);
+
+            Rectangle defaultActionRect = new Rectangle(padding, topMargin, largeButtonWidth, buttonHeight);
+            Rectangle editButtonRect = new Rectangle(defaultActionRect.Right + padding, topMargin, smallButtonWidth, buttonHeight);
+            Rectangle deleteButtonRect = new Rectangle(editButtonRect.Right + padding, topMargin, smallButtonWidth, buttonHeight);
+
+            // --- End of Fix ---
+
+            if (defaultActionRect.Contains(clickPointInCell))
+            {
+                if (setting.IsDefault) return;
+                try
+                {
+                    _emailSettingsRepository.SetDefaultEmailSetting(setting.Id);
+                    LoadEmailSettingsGrid();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to set default: {ex.Message}", "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else if (editButtonRect.Contains(clickPointInCell))
+            {
+                using (var editForm = new AddEmail(setting))
+                {
+                    editForm.StartPosition = FormStartPosition.CenterParent;
+                    if (editForm.ShowDialog(this) == DialogResult.OK)
+                    {
+                        LoadEmailSettingsGrid();
+                    }
+                }
+            }
+            else if (deleteButtonRect.Contains(clickPointInCell))
+            {
+                if (setting.IsDefault)
+                {
+                    MessageBox.Show($"Cannot delete the default setting '{setting.SettingName}'. Please set another as default first.", "Cannot Delete Default", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (MessageBox.Show($"Are you sure you want to delete '{setting.SettingName}'?", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                {
+                    try
+                    {
+                        _emailSettingsRepository.DeleteEmailSetting(setting.Id);
+                        LoadEmailSettingsGrid();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Failed to delete: {ex.Message}", "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+        #endregion
+
+
     }
 }

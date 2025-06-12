@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NetwatchList));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -36,10 +37,6 @@
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripMore = new System.Windows.Forms.ToolStripDropDownButton();
-            this.addNotificationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.stopAllProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startAllProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnAddNetwatch = new System.Windows.Forms.Button();
             this.dgvNetwatchConfigs = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -56,6 +53,12 @@
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
             this.treeViewCluster = new System.Windows.Forms.TreeView();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.contextMenuStripDgvActions = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
+            this.addNotificationContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopAllProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startAllProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -69,6 +72,7 @@
             this.flowLayoutPanel3.SuspendLayout();
             this.flowLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            this.contextMenuStripDgvActions.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -150,48 +154,16 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMore});
-            this.toolStrip1.Location = new System.Drawing.Point(481, 0);
+            this.ToolStripMenuItem});
+            this.toolStrip1.Location = new System.Drawing.Point(450, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(76, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(107, 25);
             this.toolStrip1.TabIndex = 9;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripMore
-            // 
-            this.toolStripMore.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addNotificationToolStripMenuItem,
-            this.stopAllProcessToolStripMenuItem,
-            this.startAllProcessToolStripMenuItem});
-            this.toolStripMore.Image = ((System.Drawing.Image)(resources.GetObject("toolStripMore.Image")));
-            this.toolStripMore.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripMore.Name = "toolStripMore";
-            this.toolStripMore.Size = new System.Drawing.Size(64, 22);
-            this.toolStripMore.Text = "More";
-            // 
-            // addNotificationToolStripMenuItem
-            // 
-            this.addNotificationToolStripMenuItem.Name = "addNotificationToolStripMenuItem";
-            this.addNotificationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.addNotificationToolStripMenuItem.Text = "Add Notification";
-            // 
-            // stopAllProcessToolStripMenuItem
-            // 
-            this.stopAllProcessToolStripMenuItem.Name = "stopAllProcessToolStripMenuItem";
-            this.stopAllProcessToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.stopAllProcessToolStripMenuItem.Text = "Stop All Process";
-            this.stopAllProcessToolStripMenuItem.Click += new System.EventHandler(this.btnStopAll_Click);
-            // 
-            // startAllProcessToolStripMenuItem
-            // 
-            this.startAllProcessToolStripMenuItem.Name = "startAllProcessToolStripMenuItem";
-            this.startAllProcessToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.startAllProcessToolStripMenuItem.Text = "Start All Process";
-            this.startAllProcessToolStripMenuItem.Click += new System.EventHandler(this.btnStartAll_Click);
-            // 
             // btnAddNetwatch
             // 
-            this.btnAddNetwatch.Location = new System.Drawing.Point(366, 3);
+            this.btnAddNetwatch.Location = new System.Drawing.Point(335, 3);
             this.btnAddNetwatch.Name = "btnAddNetwatch";
             this.btnAddNetwatch.Size = new System.Drawing.Size(112, 23);
             this.btnAddNetwatch.TabIndex = 1;
@@ -202,6 +174,7 @@
             // dgvNetwatchConfigs
             // 
             this.dgvNetwatchConfigs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvNetwatchConfigs.ContextMenuStrip = this.contextMenuStripDgvActions;
             this.dgvNetwatchConfigs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvNetwatchConfigs.Location = new System.Drawing.Point(3, 33);
             this.dgvNetwatchConfigs.Name = "dgvNetwatchConfigs";
@@ -373,6 +346,53 @@
             this.tabPage3.Text = "Device IP";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // contextMenuStripDgvActions
+            // 
+            this.contextMenuStripDgvActions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1});
+            this.contextMenuStripDgvActions.Name = "contextMenuStripDgvActions";
+            this.contextMenuStripDgvActions.Size = new System.Drawing.Size(163, 26);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(162, 22);
+            this.toolStripMenuItem1.Text = "Add Notification";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.addNotificationContextMenuItem_Click);
+            // 
+            // ToolStripMenuItem
+            // 
+            this.ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addNotificationContextMenuItem,
+            this.stopAllProcessToolStripMenuItem,
+            this.startAllProcessToolStripMenuItem});
+            this.ToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("ToolStripMenuItem.Image")));
+            this.ToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.ToolStripMenuItem.Name = "ToolStripMenuItem";
+            this.ToolStripMenuItem.Size = new System.Drawing.Size(64, 22);
+            this.ToolStripMenuItem.Text = "More";
+            // 
+            // addNotificationContextMenuItem
+            // 
+            this.addNotificationContextMenuItem.Name = "addNotificationContextMenuItem";
+            this.addNotificationContextMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addNotificationContextMenuItem.Text = "Add Notification";
+            this.addNotificationContextMenuItem.Click += new System.EventHandler(this.addNotificationToolStripMenuItem_Click);
+            // 
+            // stopAllProcessToolStripMenuItem
+            // 
+            this.stopAllProcessToolStripMenuItem.Name = "stopAllProcessToolStripMenuItem";
+            this.stopAllProcessToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.stopAllProcessToolStripMenuItem.Text = "Stop All Process";
+            this.stopAllProcessToolStripMenuItem.Click += new System.EventHandler(this.btnStopAll_Click);
+            // 
+            // startAllProcessToolStripMenuItem
+            // 
+            this.startAllProcessToolStripMenuItem.Name = "startAllProcessToolStripMenuItem";
+            this.startAllProcessToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startAllProcessToolStripMenuItem.Text = "Start All Process";
+            this.startAllProcessToolStripMenuItem.Click += new System.EventHandler(this.btnStartAll_Click);
+            // 
             // NetwatchList
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -399,6 +419,7 @@
             this.flowLayoutPanel3.PerformLayout();
             this.flowLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.contextMenuStripDgvActions.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -428,9 +449,11 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button btnAddNetwatch;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripMore;
-        private System.Windows.Forms.ToolStripMenuItem addNotificationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addNotificationContextMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopAllProcessToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startAllProcessToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripDgvActions;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
     }
 }

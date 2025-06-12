@@ -863,5 +863,41 @@ namespace SharedLibrary.DataAccess
 
         #endregion
 
+        #region Method for Notification Recipient
+        public List<Customer> GetCustomersByTagId(int tagId)
+        {
+            var customers = new List<Customer>();
+            using (var conn = dbHelper.GetConnection())
+            {
+                conn.Open();
+                // This query joins TagAssignments with Customers to find all customers for a given tag
+                string query = @"
+            SELECT c.* FROM Customers c
+            INNER JOIN TagAssignments ta ON c.Id = ta.CustomerId
+            WHERE ta.TagId = @TagId AND c.IsArchived = 0;";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@TagId", tagId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // We only need basic customer info here, primarily the email
+                            var customer = new Customer
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                AccountName = reader["AccountName"].ToString(),
+                                Email = reader["Email"] == DBNull.Value ? string.Empty : reader["Email"].ToString()
+                                // Add other properties if needed elsewhere
+                            };
+                            customers.Add(customer);
+                        }
+                    }
+                }
+            }
+            return customers;
+        }
+        #endregion
     }
 }

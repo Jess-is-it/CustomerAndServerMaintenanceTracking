@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPageMikrotik = new System.Windows.Forms.TabPage();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -39,8 +39,7 @@
             this.btnAddRouter = new System.Windows.Forms.Button();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.txtSearchRouter = new System.Windows.Forms.TextBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.tabPageUsers = new System.Windows.Forms.TabPage();
             this.tabControl3 = new System.Windows.Forms.TabControl();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabControlUserActiveInActive = new System.Windows.Forms.TabControl();
@@ -76,7 +75,7 @@
             this.flowLayoutPanel10 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel11 = new System.Windows.Forms.FlowLayoutPanel();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.tabPageServiceManagement = new System.Windows.Forms.TabPage();
             this.flowLayoutPanel9 = new System.Windows.Forms.FlowLayoutPanel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.lblNetwatchService = new System.Windows.Forms.Label();
@@ -88,30 +87,26 @@
             this.btnViewPPPoESyncService = new System.Windows.Forms.Button();
             this.btnStartStopPPPoESyncService = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
-            this.tabPage8 = new System.Windows.Forms.TabPage();
-            this.flowLayoutPanel16 = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.btnViewNotificationService = new System.Windows.Forms.Button();
+            this.btnStartStopNotificationService = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
+            this.tabPageSystemAccounts = new System.Windows.Forms.TabPage();
+            this.tabControl4 = new System.Windows.Forms.TabControl();
+            this.tabPageEmail = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel12 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel13 = new System.Windows.Forms.TableLayoutPanel();
+            this.flowLayoutPanel16 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnAddEmail = new System.Windows.Forms.Button();
             this.flowLayoutPanel17 = new System.Windows.Forms.FlowLayoutPanel();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.txtServer = new System.Windows.Forms.TextBox();
-            this.flowLayoutPanel18 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnSaveEmail = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.txtPort = new System.Windows.Forms.TextBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.txtSenderEmail = new System.Windows.Forms.TextBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.txtUser = new System.Windows.Forms.TextBox();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.chkEnableSsl = new System.Windows.Forms.CheckBox();
-            this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.txtDisplayName = new System.Windows.Forms.TextBox();
+            this.txtSearchEmail = new System.Windows.Forms.TextBox();
+            this.tabPageSMS = new System.Windows.Forms.TabPage();
+            this.tabPageTelegram = new System.Windows.Forms.TabPage();
+            this.tabPageFBMessenger = new System.Windows.Forms.TabPage();
+            this.dgvEmail = new System.Windows.Forms.DataGridView();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
+            this.tabPageMikrotik.SuspendLayout();
             this.tabControl2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -119,7 +114,7 @@
             this.tableLayoutPanel3.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
-            this.tabPage6.SuspendLayout();
+            this.tabPageUsers.SuspendLayout();
             this.tabControl3.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.tabControlUserActiveInActive.SuspendLayout();
@@ -143,32 +138,27 @@
             this.flowLayoutPanel6.SuspendLayout();
             this.tableLayoutPanel8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            this.tabPage7.SuspendLayout();
+            this.tabPageServiceManagement.SuspendLayout();
             this.flowLayoutPanel9.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.tabPage8.SuspendLayout();
-            this.flowLayoutPanel16.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tabPageSystemAccounts.SuspendLayout();
+            this.tabControl4.SuspendLayout();
+            this.tabPageEmail.SuspendLayout();
             this.tableLayoutPanel12.SuspendLayout();
+            this.tableLayoutPanel13.SuspendLayout();
+            this.flowLayoutPanel16.SuspendLayout();
             this.flowLayoutPanel17.SuspendLayout();
-            this.groupBox4.SuspendLayout();
-            this.flowLayoutPanel18.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            this.groupBox5.SuspendLayout();
-            this.groupBox6.SuspendLayout();
-            this.groupBox7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvEmail)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage6);
-            this.tabControl1.Controls.Add(this.tabPage7);
-            this.tabControl1.Controls.Add(this.tabPage8);
+            this.tabControl1.Controls.Add(this.tabPageMikrotik);
+            this.tabControl1.Controls.Add(this.tabPageUsers);
+            this.tabControl1.Controls.Add(this.tabPageServiceManagement);
+            this.tabControl1.Controls.Add(this.tabPageSystemAccounts);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
@@ -178,17 +168,17 @@
             this.tabControl1.Size = new System.Drawing.Size(1145, 591);
             this.tabControl1.TabIndex = 2;
             // 
-            // tabPage1
+            // tabPageMikrotik
             // 
-            this.tabPage1.BackColor = System.Drawing.Color.Transparent;
-            this.tabPage1.Controls.Add(this.tabControl2);
-            this.tabPage1.Location = new System.Drawing.Point(4, 29);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1137, 558);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Mikrotik";
+            this.tabPageMikrotik.BackColor = System.Drawing.Color.Transparent;
+            this.tabPageMikrotik.Controls.Add(this.tabControl2);
+            this.tabPageMikrotik.Location = new System.Drawing.Point(4, 29);
+            this.tabPageMikrotik.Margin = new System.Windows.Forms.Padding(0);
+            this.tabPageMikrotik.Name = "tabPageMikrotik";
+            this.tabPageMikrotik.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageMikrotik.Size = new System.Drawing.Size(1137, 558);
+            this.tabPageMikrotik.TabIndex = 0;
+            this.tabPageMikrotik.Text = "Mikrotik";
             // 
             // tabControl2
             // 
@@ -299,26 +289,15 @@
             this.txtSearchRouter.TabIndex = 0;
             this.txtSearchRouter.TextChanged += new System.EventHandler(this.txtSearchRouter_TextChanged);
             // 
-            // tabPage2
+            // tabPageUsers
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 29);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(0);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1137, 558);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "SMS ";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // tabPage6
-            // 
-            this.tabPage6.Controls.Add(this.tabControl3);
-            this.tabPage6.Location = new System.Drawing.Point(4, 29);
-            this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(1137, 558);
-            this.tabPage6.TabIndex = 3;
-            this.tabPage6.Text = "Users";
-            this.tabPage6.UseVisualStyleBackColor = true;
+            this.tabPageUsers.Controls.Add(this.tabControl3);
+            this.tabPageUsers.Location = new System.Drawing.Point(4, 29);
+            this.tabPageUsers.Name = "tabPageUsers";
+            this.tabPageUsers.Size = new System.Drawing.Size(1137, 558);
+            this.tabPageUsers.TabIndex = 3;
+            this.tabPageUsers.Text = "Users";
+            this.tabPageUsers.UseVisualStyleBackColor = true;
             // 
             // tabControl3
             // 
@@ -734,21 +713,22 @@
             this.dataGridView1.Size = new System.Drawing.Size(1123, 439);
             this.dataGridView1.TabIndex = 2;
             // 
-            // tabPage7
+            // tabPageServiceManagement
             // 
-            this.tabPage7.Controls.Add(this.flowLayoutPanel9);
-            this.tabPage7.Location = new System.Drawing.Point(4, 29);
-            this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Size = new System.Drawing.Size(1137, 558);
-            this.tabPage7.TabIndex = 4;
-            this.tabPage7.Text = "Service Management";
-            this.tabPage7.UseVisualStyleBackColor = true;
+            this.tabPageServiceManagement.Controls.Add(this.flowLayoutPanel9);
+            this.tabPageServiceManagement.Location = new System.Drawing.Point(4, 29);
+            this.tabPageServiceManagement.Name = "tabPageServiceManagement";
+            this.tabPageServiceManagement.Size = new System.Drawing.Size(1137, 558);
+            this.tabPageServiceManagement.TabIndex = 4;
+            this.tabPageServiceManagement.Text = "Service Management";
+            this.tabPageServiceManagement.UseVisualStyleBackColor = true;
             // 
             // flowLayoutPanel9
             // 
             this.flowLayoutPanel9.BackColor = System.Drawing.Color.Gainsboro;
             this.flowLayoutPanel9.Controls.Add(this.panel3);
             this.flowLayoutPanel9.Controls.Add(this.panel2);
+            this.flowLayoutPanel9.Controls.Add(this.panel1);
             this.flowLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel9.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel9.Name = "flowLayoutPanel9";
@@ -863,247 +843,204 @@
             this.label5.TabIndex = 0;
             this.label5.Text = "PPPoESyncService";
             // 
-            // tabPage8
-            // 
-            this.tabPage8.Controls.Add(this.flowLayoutPanel16);
-            this.tabPage8.Location = new System.Drawing.Point(4, 29);
-            this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Size = new System.Drawing.Size(1137, 558);
-            this.tabPage8.TabIndex = 5;
-            this.tabPage8.Text = "System Email";
-            this.tabPage8.UseVisualStyleBackColor = true;
-            // 
-            // flowLayoutPanel16
-            // 
-            this.flowLayoutPanel16.BackColor = System.Drawing.Color.Gainsboro;
-            this.flowLayoutPanel16.Controls.Add(this.panel1);
-            this.flowLayoutPanel16.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel16.Location = new System.Drawing.Point(0, 0);
-            this.flowLayoutPanel16.Name = "flowLayoutPanel16";
-            this.flowLayoutPanel16.Size = new System.Drawing.Size(1137, 558);
-            this.flowLayoutPanel16.TabIndex = 3;
-            // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.White;
-            this.panel1.Controls.Add(this.tableLayoutPanel12);
-            this.panel1.Location = new System.Drawing.Point(3, 3);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.btnViewNotificationService);
+            this.panel1.Controls.Add(this.btnStartStopNotificationService);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Location = new System.Drawing.Point(593, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Padding = new System.Windows.Forms.Padding(16);
-            this.panel1.Size = new System.Drawing.Size(454, 555);
-            this.panel1.TabIndex = 0;
+            this.panel1.Size = new System.Drawing.Size(289, 133);
+            this.panel1.TabIndex = 13;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(18, 44);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(65, 20);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Up tme:";
+            // 
+            // btnViewNotificationService
+            // 
+            this.btnViewNotificationService.BackColor = System.Drawing.Color.White;
+            this.btnViewNotificationService.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnViewNotificationService.Location = new System.Drawing.Point(103, 73);
+            this.btnViewNotificationService.Margin = new System.Windows.Forms.Padding(0);
+            this.btnViewNotificationService.Name = "btnViewNotificationService";
+            this.btnViewNotificationService.Size = new System.Drawing.Size(162, 26);
+            this.btnViewNotificationService.TabIndex = 10;
+            this.btnViewNotificationService.Text = "View Console Logs";
+            this.btnViewNotificationService.UseVisualStyleBackColor = false;
+            // 
+            // btnStartStopNotificationService
+            // 
+            this.btnStartStopNotificationService.BackColor = System.Drawing.Color.Turquoise;
+            this.btnStartStopNotificationService.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStartStopNotificationService.Location = new System.Drawing.Point(20, 73);
+            this.btnStartStopNotificationService.Margin = new System.Windows.Forms.Padding(0);
+            this.btnStartStopNotificationService.Name = "btnStartStopNotificationService";
+            this.btnStartStopNotificationService.Size = new System.Drawing.Size(73, 26);
+            this.btnStartStopNotificationService.TabIndex = 9;
+            this.btnStartStopNotificationService.Text = "Start";
+            this.btnStartStopNotificationService.UseVisualStyleBackColor = false;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Location = new System.Drawing.Point(18, 14);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(111, 20);
+            this.label2.Size = new System.Drawing.Size(140, 20);
             this.label2.TabIndex = 0;
-            this.label2.Text = "Email Settings";
+            this.label2.Text = "NotificationService";
+            // 
+            // tabPageSystemAccounts
+            // 
+            this.tabPageSystemAccounts.Controls.Add(this.tabControl4);
+            this.tabPageSystemAccounts.Location = new System.Drawing.Point(4, 29);
+            this.tabPageSystemAccounts.Name = "tabPageSystemAccounts";
+            this.tabPageSystemAccounts.Size = new System.Drawing.Size(1137, 558);
+            this.tabPageSystemAccounts.TabIndex = 5;
+            this.tabPageSystemAccounts.Text = "System Accounts";
+            this.tabPageSystemAccounts.UseVisualStyleBackColor = true;
+            // 
+            // tabControl4
+            // 
+            this.tabControl4.Controls.Add(this.tabPageEmail);
+            this.tabControl4.Controls.Add(this.tabPageSMS);
+            this.tabControl4.Controls.Add(this.tabPageTelegram);
+            this.tabControl4.Controls.Add(this.tabPageFBMessenger);
+            this.tabControl4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl4.Location = new System.Drawing.Point(0, 0);
+            this.tabControl4.Name = "tabControl4";
+            this.tabControl4.SelectedIndex = 0;
+            this.tabControl4.Size = new System.Drawing.Size(1137, 558);
+            this.tabControl4.TabIndex = 1;
+            // 
+            // tabPageEmail
+            // 
+            this.tabPageEmail.Controls.Add(this.tableLayoutPanel12);
+            this.tabPageEmail.Location = new System.Drawing.Point(4, 29);
+            this.tabPageEmail.Name = "tabPageEmail";
+            this.tabPageEmail.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageEmail.Size = new System.Drawing.Size(1129, 525);
+            this.tabPageEmail.TabIndex = 0;
+            this.tabPageEmail.Text = "Email";
+            this.tabPageEmail.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel12
             // 
             this.tableLayoutPanel12.ColumnCount = 1;
             this.tableLayoutPanel12.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel12.Controls.Add(this.flowLayoutPanel18, 0, 2);
-            this.tableLayoutPanel12.Controls.Add(this.label2, 0, 0);
-            this.tableLayoutPanel12.Controls.Add(this.flowLayoutPanel17, 0, 1);
+            this.tableLayoutPanel12.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel12.Controls.Add(this.dgvEmail, 0, 1);
+            this.tableLayoutPanel12.Controls.Add(this.tableLayoutPanel13, 0, 0);
             this.tableLayoutPanel12.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel12.Location = new System.Drawing.Point(16, 16);
+            this.tableLayoutPanel12.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel12.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel12.Name = "tableLayoutPanel12";
-            this.tableLayoutPanel12.RowCount = 3;
-            this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel12.RowCount = 2;
+            this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
-            this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel12.Size = new System.Drawing.Size(422, 523);
+            this.tableLayoutPanel12.Size = new System.Drawing.Size(1123, 519);
             this.tableLayoutPanel12.TabIndex = 1;
+            // 
+            // tableLayoutPanel13
+            // 
+            this.tableLayoutPanel13.ColumnCount = 2;
+            this.tableLayoutPanel13.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel13.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel13.Controls.Add(this.flowLayoutPanel16, 1, 0);
+            this.tableLayoutPanel13.Controls.Add(this.flowLayoutPanel17, 0, 0);
+            this.tableLayoutPanel13.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel13.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel13.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel13.Name = "tableLayoutPanel13";
+            this.tableLayoutPanel13.RowCount = 1;
+            this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel13.Size = new System.Drawing.Size(1123, 40);
+            this.tableLayoutPanel13.TabIndex = 1;
+            // 
+            // flowLayoutPanel16
+            // 
+            this.flowLayoutPanel16.Controls.Add(this.btnAddEmail);
+            this.flowLayoutPanel16.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel16.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+            this.flowLayoutPanel16.Location = new System.Drawing.Point(561, 0);
+            this.flowLayoutPanel16.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel16.Name = "flowLayoutPanel16";
+            this.flowLayoutPanel16.Size = new System.Drawing.Size(562, 40);
+            this.flowLayoutPanel16.TabIndex = 2;
+            // 
+            // btnAddEmail
+            // 
+            this.btnAddEmail.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAddEmail.Location = new System.Drawing.Point(461, 0);
+            this.btnAddEmail.Margin = new System.Windows.Forms.Padding(0);
+            this.btnAddEmail.Name = "btnAddEmail";
+            this.btnAddEmail.Size = new System.Drawing.Size(101, 26);
+            this.btnAddEmail.TabIndex = 2;
+            this.btnAddEmail.Text = "Add Email";
+            this.btnAddEmail.UseVisualStyleBackColor = true;
             // 
             // flowLayoutPanel17
             // 
-            this.flowLayoutPanel17.Controls.Add(this.groupBox4);
-            this.flowLayoutPanel17.Controls.Add(this.groupBox1);
-            this.flowLayoutPanel17.Controls.Add(this.groupBox2);
-            this.flowLayoutPanel17.Controls.Add(this.groupBox3);
-            this.flowLayoutPanel17.Controls.Add(this.groupBox5);
-            this.flowLayoutPanel17.Controls.Add(this.groupBox6);
-            this.flowLayoutPanel17.Controls.Add(this.groupBox7);
+            this.flowLayoutPanel17.Controls.Add(this.txtSearchEmail);
             this.flowLayoutPanel17.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel17.Location = new System.Drawing.Point(3, 23);
+            this.flowLayoutPanel17.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel17.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel17.Name = "flowLayoutPanel17";
-            this.flowLayoutPanel17.Size = new System.Drawing.Size(416, 437);
+            this.flowLayoutPanel17.Size = new System.Drawing.Size(561, 40);
             this.flowLayoutPanel17.TabIndex = 1;
             // 
-            // groupBox4
+            // txtSearchEmail
             // 
-            this.groupBox4.BackColor = System.Drawing.Color.White;
-            this.groupBox4.Controls.Add(this.txtServer);
-            this.groupBox4.Location = new System.Drawing.Point(3, 3);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(410, 61);
-            this.groupBox4.TabIndex = 2;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Server";
+            this.txtSearchEmail.Location = new System.Drawing.Point(0, 0);
+            this.txtSearchEmail.Margin = new System.Windows.Forms.Padding(0);
+            this.txtSearchEmail.Name = "txtSearchEmail";
+            this.txtSearchEmail.Size = new System.Drawing.Size(344, 26);
+            this.txtSearchEmail.TabIndex = 0;
             // 
-            // txtServer
+            // tabPageSMS
             // 
-            this.txtServer.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtServer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtServer.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtServer.Location = new System.Drawing.Point(3, 22);
-            this.txtServer.Name = "txtServer";
-            this.txtServer.Size = new System.Drawing.Size(404, 24);
-            this.txtServer.TabIndex = 0;
+            this.tabPageSMS.Location = new System.Drawing.Point(4, 29);
+            this.tabPageSMS.Name = "tabPageSMS";
+            this.tabPageSMS.Size = new System.Drawing.Size(1129, 525);
+            this.tabPageSMS.TabIndex = 1;
+            this.tabPageSMS.Text = "SMS (Smart A2P)";
+            this.tabPageSMS.UseVisualStyleBackColor = true;
             // 
-            // flowLayoutPanel18
+            // tabPageTelegram
             // 
-            this.flowLayoutPanel18.Controls.Add(this.btnSaveEmail);
-            this.flowLayoutPanel18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel18.Location = new System.Drawing.Point(0, 463);
-            this.flowLayoutPanel18.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel18.Name = "flowLayoutPanel18";
-            this.flowLayoutPanel18.Size = new System.Drawing.Size(422, 60);
-            this.flowLayoutPanel18.TabIndex = 3;
+            this.tabPageTelegram.Location = new System.Drawing.Point(4, 29);
+            this.tabPageTelegram.Name = "tabPageTelegram";
+            this.tabPageTelegram.Size = new System.Drawing.Size(1129, 525);
+            this.tabPageTelegram.TabIndex = 2;
+            this.tabPageTelegram.Text = "Telegram";
+            this.tabPageTelegram.UseVisualStyleBackColor = true;
             // 
-            // btnSaveEmail
+            // tabPageFBMessenger
             // 
-            this.btnSaveEmail.BackColor = System.Drawing.Color.DodgerBlue;
-            this.btnSaveEmail.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSaveEmail.ForeColor = System.Drawing.Color.White;
-            this.btnSaveEmail.Location = new System.Drawing.Point(3, 3);
-            this.btnSaveEmail.Name = "btnSaveEmail";
-            this.btnSaveEmail.Size = new System.Drawing.Size(130, 40);
-            this.btnSaveEmail.TabIndex = 1;
-            this.btnSaveEmail.Text = "Save Email";
-            this.btnSaveEmail.UseVisualStyleBackColor = false;
-            this.btnSaveEmail.Click += new System.EventHandler(this.btnSaveEmail_Click);
+            this.tabPageFBMessenger.Location = new System.Drawing.Point(4, 29);
+            this.tabPageFBMessenger.Name = "tabPageFBMessenger";
+            this.tabPageFBMessenger.Size = new System.Drawing.Size(1129, 525);
+            this.tabPageFBMessenger.TabIndex = 3;
+            this.tabPageFBMessenger.Text = "FB Messenger";
+            this.tabPageFBMessenger.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
+            // dgvEmail
             // 
-            this.groupBox1.BackColor = System.Drawing.Color.White;
-            this.groupBox1.Controls.Add(this.txtPort);
-            this.groupBox1.Location = new System.Drawing.Point(3, 70);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(141, 61);
-            this.groupBox1.TabIndex = 3;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Port";
-            // 
-            // txtPort
-            // 
-            this.txtPort.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtPort.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPort.Location = new System.Drawing.Point(3, 22);
-            this.txtPort.Name = "txtPort";
-            this.txtPort.Size = new System.Drawing.Size(135, 24);
-            this.txtPort.TabIndex = 0;
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.BackColor = System.Drawing.Color.White;
-            this.groupBox2.Controls.Add(this.chkEnableSsl);
-            this.groupBox2.Location = new System.Drawing.Point(150, 70);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(199, 61);
-            this.groupBox2.TabIndex = 4;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Secure Connection";
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.BackColor = System.Drawing.Color.White;
-            this.groupBox3.Controls.Add(this.txtSenderEmail);
-            this.groupBox3.Location = new System.Drawing.Point(3, 137);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(410, 61);
-            this.groupBox3.TabIndex = 3;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "From";
-            // 
-            // txtSenderEmail
-            // 
-            this.txtSenderEmail.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtSenderEmail.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtSenderEmail.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSenderEmail.Location = new System.Drawing.Point(3, 22);
-            this.txtSenderEmail.Name = "txtSenderEmail";
-            this.txtSenderEmail.Size = new System.Drawing.Size(404, 24);
-            this.txtSenderEmail.TabIndex = 0;
-            // 
-            // groupBox5
-            // 
-            this.groupBox5.BackColor = System.Drawing.Color.White;
-            this.groupBox5.Controls.Add(this.txtUser);
-            this.groupBox5.Location = new System.Drawing.Point(3, 204);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(410, 61);
-            this.groupBox5.TabIndex = 4;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "User";
-            // 
-            // txtUser
-            // 
-            this.txtUser.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtUser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtUser.Location = new System.Drawing.Point(3, 22);
-            this.txtUser.Name = "txtUser";
-            this.txtUser.Size = new System.Drawing.Size(404, 24);
-            this.txtUser.TabIndex = 0;
-            // 
-            // groupBox6
-            // 
-            this.groupBox6.BackColor = System.Drawing.Color.White;
-            this.groupBox6.Controls.Add(this.txtPassword);
-            this.groupBox6.Location = new System.Drawing.Point(3, 271);
-            this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(410, 61);
-            this.groupBox6.TabIndex = 5;
-            this.groupBox6.TabStop = false;
-            this.groupBox6.Text = "Password";
-            // 
-            // txtPassword
-            // 
-            this.txtPassword.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtPassword.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPassword.Location = new System.Drawing.Point(3, 22);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(404, 24);
-            this.txtPassword.TabIndex = 0;
-            // 
-            // chkEnableSsl
-            // 
-            this.chkEnableSsl.AutoSize = true;
-            this.chkEnableSsl.Location = new System.Drawing.Point(11, 22);
-            this.chkEnableSsl.Name = "chkEnableSsl";
-            this.chkEnableSsl.Size = new System.Drawing.Size(146, 24);
-            this.chkEnableSsl.TabIndex = 1;
-            this.chkEnableSsl.Text = "Enable SSL/TLS";
-            this.chkEnableSsl.UseVisualStyleBackColor = true;
-            // 
-            // groupBox7
-            // 
-            this.groupBox7.BackColor = System.Drawing.Color.White;
-            this.groupBox7.Controls.Add(this.txtDisplayName);
-            this.groupBox7.Location = new System.Drawing.Point(3, 338);
-            this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(410, 61);
-            this.groupBox7.TabIndex = 4;
-            this.groupBox7.TabStop = false;
-            this.groupBox7.Text = "Display Name";
-            // 
-            // txtDisplayName
-            // 
-            this.txtDisplayName.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtDisplayName.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtDisplayName.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDisplayName.Location = new System.Drawing.Point(3, 22);
-            this.txtDisplayName.Name = "txtDisplayName";
-            this.txtDisplayName.Size = new System.Drawing.Size(404, 24);
-            this.txtDisplayName.TabIndex = 0;
+            this.dgvEmail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvEmail.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvEmail.Location = new System.Drawing.Point(0, 40);
+            this.dgvEmail.Margin = new System.Windows.Forms.Padding(0);
+            this.dgvEmail.Name = "dgvEmail";
+            this.dgvEmail.Size = new System.Drawing.Size(1123, 479);
+            this.dgvEmail.TabIndex = 2;
             // 
             // Settings
             // 
@@ -1115,7 +1052,7 @@
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.Settings_Load);
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
+            this.tabPageMikrotik.ResumeLayout(false);
             this.tabControl2.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -1124,7 +1061,7 @@
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
-            this.tabPage6.ResumeLayout(false);
+            this.tabPageUsers.ResumeLayout(false);
             this.tabControl3.ResumeLayout(false);
             this.tabPage4.ResumeLayout(false);
             this.tabControlUserActiveInActive.ResumeLayout(false);
@@ -1151,33 +1088,23 @@
             this.flowLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel8.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            this.tabPage7.ResumeLayout(false);
+            this.tabPageServiceManagement.ResumeLayout(false);
             this.flowLayoutPanel9.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            this.tabPage8.ResumeLayout(false);
-            this.flowLayoutPanel16.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.tabPageSystemAccounts.ResumeLayout(false);
+            this.tabControl4.ResumeLayout(false);
+            this.tabPageEmail.ResumeLayout(false);
             this.tableLayoutPanel12.ResumeLayout(false);
-            this.tableLayoutPanel12.PerformLayout();
+            this.tableLayoutPanel13.ResumeLayout(false);
+            this.flowLayoutPanel16.ResumeLayout(false);
             this.flowLayoutPanel17.ResumeLayout(false);
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
-            this.flowLayoutPanel18.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
-            this.groupBox6.ResumeLayout(false);
-            this.groupBox6.PerformLayout();
-            this.groupBox7.ResumeLayout(false);
-            this.groupBox7.PerformLayout();
+            this.flowLayoutPanel17.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvEmail)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1185,10 +1112,9 @@
         #endregion
 
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.TabPage tabPage6;
-        private System.Windows.Forms.TabPage tabPage7;
+        private System.Windows.Forms.TabPage tabPageMikrotik;
+        private System.Windows.Forms.TabPage tabPageUsers;
+        private System.Windows.Forms.TabPage tabPageServiceManagement;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel9;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label label3;
@@ -1244,27 +1170,23 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel14;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel15;
         private System.Windows.Forms.DataGridView dataGridViewUsersInactive;
-        private System.Windows.Forms.TabPage tabPage8;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel16;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TabPage tabPageSystemAccounts;
+        private System.Windows.Forms.TabControl tabControl4;
+        private System.Windows.Forms.TabPage tabPageEmail;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel12;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel13;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel16;
+        private System.Windows.Forms.Button btnAddEmail;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel17;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.TextBox txtServer;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel18;
-        private System.Windows.Forms.Button btnSaveEmail;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.TextBox txtPort;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TextBox txtSenderEmail;
-        private System.Windows.Forms.CheckBox chkEnableSsl;
-        private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.TextBox txtUser;
-        private System.Windows.Forms.GroupBox groupBox6;
-        private System.Windows.Forms.TextBox txtPassword;
-        private System.Windows.Forms.GroupBox groupBox7;
-        private System.Windows.Forms.TextBox txtDisplayName;
+        private System.Windows.Forms.TextBox txtSearchEmail;
+        private System.Windows.Forms.TabPage tabPageSMS;
+        private System.Windows.Forms.TabPage tabPageTelegram;
+        private System.Windows.Forms.TabPage tabPageFBMessenger;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnViewNotificationService;
+        private System.Windows.Forms.Button btnStartStopNotificationService;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.DataGridView dgvEmail;
     }
 }

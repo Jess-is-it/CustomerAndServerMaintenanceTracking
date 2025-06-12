@@ -38,20 +38,20 @@
             this.txtRouterName = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.txtHostIPAddress = new System.Windows.Forms.TextBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.txtApiPort = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.txtUsername = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.txtPassword = new System.Windows.Forms.TextBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.txtApiPort = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -175,6 +175,26 @@
             this.txtHostIPAddress.Size = new System.Drawing.Size(365, 24);
             this.txtHostIPAddress.TabIndex = 0;
             // 
+            // groupBox5
+            // 
+            this.groupBox5.BackColor = System.Drawing.Color.White;
+            this.groupBox5.Controls.Add(this.txtApiPort);
+            this.groupBox5.Location = new System.Drawing.Point(3, 137);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(377, 61);
+            this.groupBox5.TabIndex = 2;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "API";
+            // 
+            // txtApiPort
+            // 
+            this.txtApiPort.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtApiPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtApiPort.Location = new System.Drawing.Point(6, 19);
+            this.txtApiPort.Name = "txtApiPort";
+            this.txtApiPort.Size = new System.Drawing.Size(365, 24);
+            this.txtApiPort.TabIndex = 0;
+            // 
             // groupBox3
             // 
             this.groupBox3.BackColor = System.Drawing.Color.White;
@@ -215,26 +235,6 @@
             this.txtPassword.Size = new System.Drawing.Size(365, 24);
             this.txtPassword.TabIndex = 0;
             // 
-            // groupBox5
-            // 
-            this.groupBox5.BackColor = System.Drawing.Color.White;
-            this.groupBox5.Controls.Add(this.txtApiPort);
-            this.groupBox5.Location = new System.Drawing.Point(3, 137);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(377, 61);
-            this.groupBox5.TabIndex = 2;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "API";
-            // 
-            // txtApiPort
-            // 
-            this.txtApiPort.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtApiPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtApiPort.Location = new System.Drawing.Point(6, 19);
-            this.txtApiPort.Name = "txtApiPort";
-            this.txtApiPort.Size = new System.Drawing.Size(365, 24);
-            this.txtApiPort.TabIndex = 0;
-            // 
             // AddRouter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -252,12 +252,12 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
 
         }

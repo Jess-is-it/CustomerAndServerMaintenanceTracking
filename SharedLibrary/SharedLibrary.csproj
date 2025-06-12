@@ -50,9 +50,12 @@
     <Compile Include="DataAccess\AppSettingsManager.cs" />
     <Compile Include="DataAccess\CustomerRepository.cs" />
     <Compile Include="DataAccess\DatabaseHelper.cs" />
+    <Compile Include="DataAccess\EmailSettingsRepository.cs" />
     <Compile Include="DataAccess\LocationRepository.cs" />
     <Compile Include="DataAccess\MikrotikRouterRepository.cs" />
     <Compile Include="DataAccess\NetwatchConfigRepository.cs" />
+    <Compile Include="DataAccess\NotificationHistoryRepository.cs" />
+    <Compile Include="DataAccess\NotificationRuleRepository.cs" />
     <Compile Include="DataAccess\ServiceLogRepository.cs" />
     <Compile Include="DataAccess\TagRepository.cs" />
     <Compile Include="DataAccess\UserAccountRepository.cs" />
@@ -68,6 +71,8 @@
     <Compile Include="Models\NetwatchConfig.cs" />
     <Compile Include="Models\NetwatchConfigDisplay.cs" />
     <Compile Include="Models\NetworkCluster.cs" />
+    <Compile Include="Models\NotificationHistoryLog.cs" />
+    <Compile Include="Models\NotificationRule.cs" />
     <Compile Include="Models\RolePermission.cs" />
     <Compile Include="Models\ServiceLogEntry.cs" />
     <Compile Include="Models\TagAssignment.cs" />

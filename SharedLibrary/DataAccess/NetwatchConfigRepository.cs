@@ -965,6 +965,12 @@ namespace SharedLibrary.DataAccess
             return lastSyncTimestamp;
         }
 
-
+        public NetwatchConfigDisplay GetNetwatchConfigStatus(int configId)
+        {
+            // We can reuse the existing method and just find the specific one we need.
+            // This is efficient enough for now.
+            var allConfigs = GetNetwatchConfigsForDisplay();
+            return allConfigs.FirstOrDefault(c => c.Id == configId);
+        }
     }
 }

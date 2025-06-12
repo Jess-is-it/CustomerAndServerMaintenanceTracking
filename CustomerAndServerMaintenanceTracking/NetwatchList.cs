@@ -45,7 +45,7 @@ namespace CustomerAndServerMaintenanceTracking
 
             _allNetwatchConfigsMasterList = new List<NetwatchConfigDisplay>();
             _allNetwatchConfigsBindingList = new BindingList<NetwatchConfigDisplay>();
-            addNotificationToolStripMenuItem.Click += addNotificationToolStripMenuItem_Click;
+
 
             if (this.dgvNetwatchConfigs != null)
             {
@@ -58,27 +58,6 @@ namespace CustomerAndServerMaintenanceTracking
             {
                 MessageBox.Show("Error: dgvNetwatchConfigs is not found on tabPage1. Please check the designer.", "UI Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            //Add Notification
-            var ctx = new ContextMenuStrip();
-            var ctxAddNotif = new ToolStripMenuItem("Add Notification");
-            ctxAddNotif.Name = "ctxAddNotification";
-            ctxAddNotif.Click += addNotificationToolStripMenuItem_Click;
-            // Re‐use the same click handler (it already checks for the selected row)
-            ctx.Items.Add(ctxAddNotif);
-
-            // 2) Assign it to the DataGridView
-            dgvNetwatchConfigs.ContextMenuStrip = ctx;
-
-            // 3) Optional: Only show the menu when right‐clicking on a valid row
-            dgvNetwatchConfigs.CellMouseDown += (s, e) =>
-            {
-                if (e.Button == MouseButtons.Right && e.RowIndex >= 0)
-                {
-                    dgvNetwatchConfigs.ClearSelection();
-                    dgvNetwatchConfigs.Rows[e.RowIndex].Selected = true;
-                }
-            };
 
         }
 
@@ -100,7 +79,15 @@ namespace CustomerAndServerMaintenanceTracking
                     this.txtSearch.TextChanged -= TxtSearch_TextChanged;
                     this.txtSearch.TextChanged += TxtSearch_TextChanged;
                 }
+
             }
+            if (this.dgvNetwatchConfigs != null)
+            {
+                // ... your existing code ...
+                this.dgvNetwatchConfigs.MouseDown -= dgvNetwatchConfigs_MouseDown;
+                this.dgvNetwatchConfigs.MouseDown += dgvNetwatchConfigs_MouseDown;
+            }
+
         }
 
         private void SetupAllNetwatchDataGridView()
@@ -420,7 +407,7 @@ namespace CustomerAndServerMaintenanceTracking
 
                     string lowerStatus = originalStatusText.ToLowerInvariant();
 
-                    if (lowerStatus.Contains("all") && lowerStatus.Contains("up"))
+                    if (lowerStatus.Contains("all") && lowerStatus.Contains("  "))
                     {
                         e.CellStyle.ForeColor = Color.White;
                         e.CellStyle.BackColor = Color.FromArgb(40, 167, 69); // Green
@@ -550,29 +537,75 @@ namespace CustomerAndServerMaintenanceTracking
             }
 
         }
-        private void addNotificationToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenAddNotificationRuleForm(NetwatchConfigDisplay selectedConfig)
         {
-            if (dgvNetwatchConfigs.SelectedRows.Count == 0)
+            if (selectedConfig == null)
             {
-                MessageBox.Show("Please select a Netwatch entry first.", "No Netwatch Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select a Netwatch configuration first.", "No Netwatch Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // Cast to the display model instead of NetwatchConfig
-            var netwatchDisplay = (NetwatchConfigDisplay)dgvNetwatchConfigs.SelectedRows[0].DataBoundItem;
+            // We'll enhance this later to pass more info to AddNotificationRule
+            // For now, it just opens the form.
+            // The AddNotificationRule constructor will need to be adapted in the next step.
+            AddNotificationRule addNotificationRuleForm = new AddNotificationRule(selectedConfig.NetwatchName, selectedConfig.Id, "Netwatch"); // Example: Passing Name, ID and SourceType
 
-            // If you need to fetch the full NetwatchConfig from the repository, you can use the Id:
-            int netwatchId = netwatchDisplay.Id;
-            string netwatchName = netwatchDisplay.NetwatchName;
-
-            // Now open AddNotificationRule with these values
-            var addForm = new AddNotificationRule(netwatchId, netwatchName);
-            addForm.StartPosition = FormStartPosition.CenterParent;
-            addForm.Owner = this;
-            addForm.ShowDialog();
+            // ShowOverlay(); // If you have ShowOverlay/CloseOverlay methods and want to use them
+            addNotificationRuleForm.Owner = this.MdiParent ?? this; // Set owner to MDI parent or self
+            addNotificationRuleForm.StartPosition = FormStartPosition.CenterParent;
+            addNotificationRuleForm.ShowDialog();
+            // CloseOverlay();
         }
-
+        private void addNotificationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dgvNetwatchConfigs.CurrentRow != null && dgvNetwatchConfigs.CurrentRow.DataBoundItem is NetwatchConfigDisplay selectedConfig)
+            {
+                OpenAddNotificationRuleForm(selectedConfig);
+            }
+            else
+            {
+                MessageBox.Show("Please select a Netwatch configuration from the list first.", "No Netwatch Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+        private void dgvNetwatchConfigs_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var hitTestInfo = dgvNetwatchConfigs.HitTest(e.X, e.Y);
+                if (hitTestInfo.Type == DataGridViewHitTestType.Cell && hitTestInfo.RowIndex >= 0) // Ensure it's a cell click
+                {
+                    // If the row right-clicked is not already the current row, make it current.
+                    if (dgvNetwatchConfigs.CurrentRow == null || dgvNetwatchConfigs.CurrentRow.Index != hitTestInfo.RowIndex)
+                    {
+                        dgvNetwatchConfigs.CurrentCell = dgvNetwatchConfigs[hitTestInfo.ColumnIndex, hitTestInfo.RowIndex];
+                    }
+                    // Ensure the row is selected (useful if SelectionMode is FullRowSelect)
+                    dgvNetwatchConfigs.Rows[hitTestInfo.RowIndex].Selected = true;
+                }
+            }
+        }
+        private void addNotificationContextMenuItem_Click(object sender, EventArgs e)
+        {
+            // The MouseDown event should have already set the CurrentRow.
+            // If dgvNetwatchConfigs.CurrentRow is null here, it means the MouseDown logic
+            // might not be working as expected or the context menu is appearing without a row selection.
+            if (dgvNetwatchConfigs.CurrentRow != null &&
+                dgvNetwatchConfigs.CurrentRow.DataBoundItem is NetwatchConfigDisplay selectedConfig)
+            {
+                OpenAddNotificationRuleForm(selectedConfig); // Call the same helper method
+            }
+            else
+            {
+                // This message might appear if the MouseDown event isn't correctly selecting the row
+                // before the context menu shows, or if the DGV is empty.
+                MessageBox.Show("Please ensure a Netwatch configuration is properly selected in the grid.",
+                                "No Netwatch Selected",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+            }
+        }
 
     }
 
 }
+

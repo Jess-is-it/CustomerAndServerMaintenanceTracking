@@ -13,6 +13,7 @@ namespace SharedLibrary.Models
         public string LastPingStatus { get; set; } // e.g., "Success", "TimedOut", "HostUnreachable"
         public long? RoundtripTimeMs { get; set; } // Nullable for non-success
         public DateTime LastPingAttemptDateTime { get; set; }
+        public string Status { get; set; }
 
         // Read-only property for display in DataGridView if RTT is null
         public string RoundtripTimeDisplay

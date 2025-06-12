@@ -155,5 +155,46 @@ namespace SharedLibrary.DataAccess
             }
             return rowsAffected;
         }
+        public List<ServiceLogEntry> GetLogsForRule(int ruleId)
+        {
+            var entries = new List<ServiceLogEntry>();
+            // The filter looks for the specific pattern "[ID=<ruleId>]" in the message.
+            string ruleIdFilter = $"[ID={ruleId}]";
+
+            using (var conn = _dbHelper.GetConnection())
+            {
+                // Corrected to use 'ApplicationLogs' table
+                string query = "SELECT * FROM ApplicationLogs WHERE Message LIKE '%' + @Filter + '%' ORDER BY LogTimestamp DESC";
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Filter", ruleIdFilter);
+                    try
+                    {
+                        conn.Open();
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                entries.Add(new ServiceLogEntry
+                                {
+                                    // Corrected to use LogId and LogTimestamp
+                                    LogId = Convert.ToInt32(reader["LogId"]),
+                                    LogTimestamp = Convert.ToDateTime(reader["LogTimestamp"]),
+                                    ServiceName = reader["ServiceName"].ToString(),
+                                    LogLevel = reader["LogLevel"].ToString(),
+                                    Message = reader["Message"].ToString(),
+                                    ExceptionDetails = reader["ExceptionDetails"] == DBNull.Value ? null : reader["ExceptionDetails"].ToString()
+                                });
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] DB ERROR GetLogsForRule: {ex.Message}");
+                    }
+                }
+            }
+            return entries;
+        }
     }
 }

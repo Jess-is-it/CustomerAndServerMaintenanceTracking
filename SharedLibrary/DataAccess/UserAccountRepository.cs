@@ -279,5 +279,11 @@ namespace SharedLibrary.DataAccess
                 }
             }
         }
+
+        public IEnumerable<UserAccount> GetUsersByRoleId(int roleId)
+        {
+            // We can reuse the existing method for simplicity
+            return GetUserAccountsWithRoles().Where(u => u.RoleId == roleId && u.IsActive);
+        }
     }
 }

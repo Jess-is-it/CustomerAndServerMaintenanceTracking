@@ -36,7 +36,8 @@ namespace CustomerAndServerMaintenanceTracking.Profiles
             this.dataGridLocations.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.dataGridLocations_CellPainting);
         }
 
-        // ... (InitializeDataGridView, LoadLocationsData, RefreshDataViews, ShowOverlay, CloseOverlay methods remain the same as before) ...
+        // ... (InitializeDataGridView, LoadLocationsData, RefreshDataViews,
+        // , CloseOverlay methods remain the same as before) ...
         // Make sure LoadLocationsData calls _locationRepository.GetMunicipalities(includeBarangays: true);
 
         private void InitializeDataGridView() // Ensure this matches what you have
