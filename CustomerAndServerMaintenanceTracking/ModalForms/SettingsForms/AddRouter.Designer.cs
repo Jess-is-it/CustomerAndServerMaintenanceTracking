@@ -108,7 +108,6 @@
             this.btnAddRouter.TabIndex = 1;
             this.btnAddRouter.Text = "Add Router";
             this.btnAddRouter.UseVisualStyleBackColor = false;
-            this.btnAddRouter.Click += new System.EventHandler(this.btnAddRouter_Click);
             // 
             // btnCancel
             // 

@@ -298,9 +298,7 @@
     <Compile Include="ModalForms\EditRouter.Designer.cs">
       <DependentUpon>EditRouter.cs</DependentUpon>
     </Compile>
-    <Compile Include="ModalForms\SettingsForms\AddRouter.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ModalForms\SettingsForms\AddRouter.cs" />
     <Compile Include="ModalForms\SettingsForms\AddRouter.Designer.cs">
       <DependentUpon>AddRouter.cs</DependentUpon>
     </Compile>
