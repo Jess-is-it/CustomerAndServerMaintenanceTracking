@@ -45,6 +45,10 @@
             this.IP = new System.Windows.Forms.ToolStripMenuItem();
             this.DeviceIPtoolStripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.Settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.mikrotikRouterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.usersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serviceManagerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.systemAccountsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Profiles = new System.Windows.Forms.ToolStripMenuItem();
             this.LocationstoolStripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
@@ -52,17 +56,17 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.lblSyncStatusPPPoe = new System.Windows.Forms.Label();
             this.lblMikrotikStatus = new System.Windows.Forms.Label();
             this.autoRefreshTimer = new System.Windows.Forms.Timer(this.components);
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStripSystemTray.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.flowLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -211,12 +215,44 @@
             // 
             // Settings
             // 
+            this.Settings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mikrotikRouterToolStripMenuItem,
+            this.usersToolStripMenuItem,
+            this.serviceManagerToolStripMenuItem,
+            this.systemAccountsToolStripMenuItem});
             this.Settings.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Settings.Name = "Settings";
             this.Settings.Size = new System.Drawing.Size(175, 25);
             this.Settings.Text = "Settings";
             this.Settings.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.Settings.Click += new System.EventHandler(this.Settings_Click);
+            // 
+            // mikrotikRouterToolStripMenuItem
+            // 
+            this.mikrotikRouterToolStripMenuItem.Name = "mikrotikRouterToolStripMenuItem";
+            this.mikrotikRouterToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.mikrotikRouterToolStripMenuItem.Text = "Mikrotik Router";
+            this.mikrotikRouterToolStripMenuItem.Click += new System.EventHandler(this.mikrotikRouterToolStripMenuItem_Click);
+            // 
+            // usersToolStripMenuItem
+            // 
+            this.usersToolStripMenuItem.Name = "usersToolStripMenuItem";
+            this.usersToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.usersToolStripMenuItem.Text = "Users";
+            this.usersToolStripMenuItem.Click += new System.EventHandler(this.usersToolStripMenuItem_Click);
+            // 
+            // serviceManagerToolStripMenuItem
+            // 
+            this.serviceManagerToolStripMenuItem.Name = "serviceManagerToolStripMenuItem";
+            this.serviceManagerToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.serviceManagerToolStripMenuItem.Text = "Service Manager";
+            this.serviceManagerToolStripMenuItem.Click += new System.EventHandler(this.serviceManagerToolStripMenuItem_Click);
+            // 
+            // systemAccountsToolStripMenuItem
+            // 
+            this.systemAccountsToolStripMenuItem.Name = "systemAccountsToolStripMenuItem";
+            this.systemAccountsToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.systemAccountsToolStripMenuItem.Text = "System Accounts";
+            this.systemAccountsToolStripMenuItem.Click += new System.EventHandler(this.systemAccountsToolStripMenuItem_Click);
             // 
             // Profiles
             // 
@@ -232,7 +268,7 @@
             // LocationstoolStripMenu
             // 
             this.LocationstoolStripMenu.Name = "LocationstoolStripMenu";
-            this.LocationstoolStripMenu.Size = new System.Drawing.Size(180, 26);
+            this.LocationstoolStripMenu.Size = new System.Drawing.Size(146, 26);
             this.LocationstoolStripMenu.Text = "Locations";
             this.LocationstoolStripMenu.Click += new System.EventHandler(this.LocationstoolStripMenu_Click);
             // 
@@ -285,17 +321,6 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(194, 74);
             this.flowLayoutPanel1.TabIndex = 3;
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(24, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(58, 80);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 4;
-            this.pictureBox1.TabStop = false;
-            // 
             // flowLayoutPanel2
             // 
             this.flowLayoutPanel2.Controls.Add(this.lblSyncStatusPPPoe);
@@ -333,6 +358,17 @@
             this.autoRefreshTimer.Interval = 1000;
             this.autoRefreshTimer.Tick += new System.EventHandler(this.autoRefreshTimer_Tick);
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(24, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(58, 80);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 4;
+            this.pictureBox1.TabStop = false;
+            // 
             // Dashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -352,9 +388,9 @@
             this.contextMenuStripSystemTray.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -388,5 +424,9 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemNotifRules;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem mikrotikRouterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem usersToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serviceManagerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem systemAccountsToolStripMenuItem;
     }
 }

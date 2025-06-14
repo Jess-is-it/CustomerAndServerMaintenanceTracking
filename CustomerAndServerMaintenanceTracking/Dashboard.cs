@@ -211,22 +211,6 @@ namespace CustomerAndServerMaintenanceTracking
             Application.Exit();
         }
 
-        private void Settings_Click(object sender, EventArgs e)
-        {
-            foreach (Form child in this.MdiChildren)
-            {
-                if (child is Settings)
-                {
-                    child.Activate();
-                    return;
-                }
-            }
-            // Pass repositories if Settings form's constructor needs them
-            Settings settings = new Settings();
-            settings.MdiParent = this;
-            settings.Show();
-        }
-
         private void LocationstoolStripMenu_Click(object sender, EventArgs e)
         {
             foreach (Form child in this.MdiChildren)
@@ -259,7 +243,67 @@ namespace CustomerAndServerMaintenanceTracking
             nmf.Show();
         }
 
-    
+        private void mikrotikRouterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is SettingsMikrotikRouter)
+                {
+                    child.Activate();
+                    return;
+                }
+            }
+            // Pass repositories if Settings form's constructor needs them
+            SettingsMikrotikRouter smr = new SettingsMikrotikRouter();
+            smr.MdiParent = this;
+            smr.Show();
+        }
+        private void usersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is SettingsUsers)
+                {
+                    child.Activate();
+                    return;
+                }
+            }
+            // Pass repositories if Settings form's constructor needs them
+            SettingsUsers su = new SettingsUsers();
+            su.MdiParent = this;
+            su.Show();
+        }
+        private void serviceManagerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is SettingsServiceManagement)
+                {
+                    child.Activate();
+                    return;
+                }
+            }
+            // Pass repositories if Settings form's constructor needs them
+            SettingsServiceManagement ssm = new SettingsServiceManagement();
+            ssm.MdiParent = this;
+            ssm.Show();
+        }
+        private void systemAccountsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child is SettingsSystemAccounts)
+                {
+                    child.Activate();
+                    return;
+                }
+            }
+            // Pass repositories if Settings form's constructor needs them
+            SettingsSystemAccounts ssa = new SettingsSystemAccounts();
+            ssa.MdiParent = this;
+            ssa.Show();
+        }
+
         #endregion
 
         #region Right Side Panel
@@ -306,8 +350,12 @@ namespace CustomerAndServerMaintenanceTracking
         }
 
 
+
+
+
+
         #endregion
 
-       
+
     }
 }
