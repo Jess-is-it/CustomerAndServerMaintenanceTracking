@@ -453,6 +453,7 @@ namespace CustomerAndServerMaintenanceTracking.ModalForms
 
                 // Force the root (cluster) node to expand.
                 if (treeViewHierarchy.Nodes.Count > 0)
+
                 {
                     treeViewHierarchy.Nodes[0].Expand();
                 }
